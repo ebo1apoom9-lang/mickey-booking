@@ -14,7 +14,11 @@ const bangkokDate = (date) => {
   }).formatToParts(date)
 
   const get = (type) => parts.find((p) => p.type === type)?.value
-  return `${get('year')}-${get('month')}-${get('day')}`
+ 
+  }, [])
+
+useEffect(() => {
+  let active = true return `${get('year')}-${get('month')}-${get('day')}`
 }
 
 const today = () => bangkokDate(new Date())
@@ -22,6 +26,7 @@ const today = () => bangkokDate(new Date())
 function App() {
   const [user, setUser] = useState(null)
   const [customer, setCustomer] = useState(null)
+  const [staffProfile, setStaffProfile] = useState(null)
   const [profileLoading, setProfileLoading] = useState(true)
   const [authInitialized, setAuthInitialized] = useState(false)
 const [route, setRoute] = useState(window.location.pathname)
@@ -86,59 +91,95 @@ useEffect(() => {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [])
 
-  useEffect(() => {
-    let active = true
-
-    async function loadCustomer() {
-      if (!user) {
-        setCustomer(null)
-        setProfileLoading(false)
-        return
-      }
-
-      setProfileLoading(true)
-
-      const { data, error } = await supabase
-        .from('customers')
-        .select('id, full_name, phone, email')
-        .eq('auth_user_id', user.id)
-        .maybeSingle()
-
-      if (!active) return
-
-      if (error) {
-        setMessage('ตรวจสอบสมาชิกไม่สำเร็จ: ' + error.message)
-        setCustomer(null)
-      } else {
-        setCustomer(data)
-
-        if (!data) {
-          setFullName(
-            user.user_metadata?.full_name ||
-            user.user_metadata?.name ||
-            ''
-          )
-          setPhone(user.user_metadata?.phone || '')
-        }
-      }
-
+  async function loadCustomer() {
+    if (!user) {
+      setCustomer(null)
+      setStaffProfile(null)
       setProfileLoading(false)
+      return
     }
 
-    loadCustomer()
+    setProfileLoading(true)
 
-    return () => {
-      active = false
+    // ตรวจสอบตำแหน่งจากฐานข้อมูลจริง
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, full_name, role, is_active')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (!active) return
+
+    if (profileError) {
+      setMessage('ตรวจสอบตำแหน่งไม่สำเร็จ: ' + profileError.message)
+      setProfileLoading(false)
+      return
     }
-  }, [user])
+
+    setStaffProfile(profile)
+
+    // บัญชีเจ้าของร้านไม่ต้องโหลดข้อมูลสมาชิก
+    if (profile?.role === 'owner') {
+      setCustomer(null)
+      setProfileLoading(false)
+      return
+    }
+
+    // บัญชีที่ไม่ใช่เจ้าของร้าน ให้ตรวจสอบข้อมูลสมาชิก
+    const { data, error } = await supabase
+      .from('customers')
+      .select('id, full_name, phone, email')
+      .eq('auth_user_id', user.id)
+      .maybeSingle()
+
+    if (!active) return
+
+    if (error) {
+      setMessage('ตรวจสอบสมาชิกไม่สำเร็จ: ' + error.message)
+      setCustomer(null)
+    } else {
+      setCustomer(data)
+
+      if (!data) {
+        setFullName(
+          user.user_metadata?.full_name ||
+          user.user_metadata?.name ||
+          ''
+        )
+        setPhone(user.user_metadata?.phone || '')
+      }
+    }
+
+    setProfileLoading(false)
+  }
+
+  loadCustomer()
+
+  return () => {
+    active = false
+  }
+}, [user])    
   useEffect(() => {
   if (!authInitialized || profileLoading) return
 
-  if (user && route !== '/booking') {
+  useEffect(() => {
+  if (!authInitialized || profileLoading) return
+
+  if (!user) {
+    if (route !== '/login') navigate('/login')
+    return
+  }
+
+  if (staffProfile?.role === 'owner') {
+    if (route !== '/owner') navigate('/owner')
+    return
+  }
+
+  if (route !== '/booking') {
     navigate('/booking')
   }
+}, [authInitialized, profileLoading, user, staffProfile, route])
 
   if (!user && route !== '/login') {
     navigate('/login')
