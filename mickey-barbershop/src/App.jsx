@@ -522,10 +522,12 @@ navigate('/booking')
   }
 
   return (
-eARBER EXPERIENCE</p>
-      </header>
+  <div className="app-shell">
+    <header>
+      <p>MICKEY BARBERSHOP EXPERIENCE</p>
+    </header>
 
-      <main className="main">
+    <main className="main">
         {user && route === '/booking' && profileLoading && (
           <section className="hero">
             <p>กำลังตรวจสอบข้อมูลสมาชิก...</p>
