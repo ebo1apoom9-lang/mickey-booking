@@ -136,15 +136,14 @@ useEffect(() => {
   useEffect(() => {
   if (!authInitialized || profileLoading) return
 
+  if (user && route !== '/booking') {
+    navigate('/booking')
+  }
+
   if (!user && route !== '/login') {
     navigate('/login')
   }
-
-  if (user && route === '/login') {
-    navigate('/booking')
-  }
 }, [authInitialized, profileLoading, user, customer, route])
-
   async function loadBookingData() {
     const [serviceResult, barberResult] = await Promise.all([
       supabase
