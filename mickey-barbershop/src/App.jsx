@@ -140,7 +140,7 @@ useEffect(() => {
     navigate('/login')
   }
 
-  if (user && route === '/login' && customer) {
+  if (user && route === '/login') {
     navigate('/booking')
   }
 }, [authInitialized, profileLoading, user, customer, route])
@@ -526,13 +526,13 @@ eARBER EXPERIENCE</p>
       </header>
 
       <main className="main">
-        {user && profileLoading && (
+        {user && route === '/booking' && profileLoading && (
           <section className="hero">
             <p>กำลังตรวจสอบข้อมูลสมาชิก...</p>
           </section>
         )}
 
-        {user && !profileLoading && !customer && (
+        {user && route === '/booking' && !profileLoading && !customer && (
           <section className="auth-card">
             <span className="gold-text">MICKEY MEMBERSHIP</span>
             <h2>กรอกข้อมูลสมาชิก</h2>
@@ -570,7 +570,7 @@ eARBER EXPERIENCE</p>
           </section>
         )}
 
-        {!user && (
+        {!user && route === '/login' && (
           <section className="auth-card">
             <span className="gold-text">MICKEY MEMBERSHIP</span>
 
@@ -658,16 +658,16 @@ eARBER EXPERIENCE</p>
           </section>
         )}
 
-        {user && !profileLoading && customer && (
-          <>
-            <section className="hero">
-              <span className="gold-text">MICKEY MEMBERSHIP</span>
-              <h2>ยินดีต้อนรับ</h2>
-              <p>{customer.full_name}</p>
-              <p>เบอร์โทรศัพท์: {customer.phone}</p>
-              <p>{customer.email}</p>
-              <p>เข้าสู่ระบบเรียบร้อยแล้ว</p>
-              <button onClick={handleLogout} disabled={loading}>
+        {user && route === '/booking' && !profileLoading && customer && (
+  <>
+    <section className="hero">
+      <span className="gold-text">MICKEY MEMBERSHIP</span>
+      <h2>ยินดีต้อนรับ</h2>
+      <p>{customer.full_name}</p>
+      <p>เบอร์โทรศัพท์: {customer.phone}</p>
+      <p>{customer.email}</p>
+      <p>เข้าสู่ระบบเรียบร้อยแล้ว</p>
+      <button onClick={handleLogout} disabled={loading}>
                 {loading ? 'กำลังดำเนินการ...' : 'ออกจากระบบ'}
               </button>
             </section>
