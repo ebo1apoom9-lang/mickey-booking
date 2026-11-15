@@ -23,6 +23,27 @@ function App() {
   const [user, setUser] = useState(null)
   const [customer, setCustomer] = useState(null)
   const [profileLoading, setProfileLoading] = useState(true)
+  const [authInitialized, setAuthInitialized] = useState(false)
+const [route, setRoute] = useState(window.location.pathname)
+
+function navigate(path) {
+  if (window.location.pathname !== path) {
+    window.history.pushState({}, '', path)
+  }
+  setRoute(path)
+}
+
+useEffect(() => {
+  const handlePopState = () => {
+    setRoute(window.location.pathname)
+  }
+
+  window.addEventListener('popstate', handlePopState)
+
+  return () => {
+    window.removeEventListener('popstate', handlePopState)
+  }
+}, [])
 
   const [mode, setMode] = useState('login')
   const [loading, setLoading] = useState(false)
@@ -51,13 +72,15 @@ function App() {
       if (!mounted) return
       if (error) setMessage(error.message)
       setUser(data?.session?.user ?? null)
+      setAuthInitialized(true)
     })
 
     const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
+  data: { subscription },
+} = supabase.auth.onAuthStateChange((_event, session) => {
+  setUser(session?.user ?? null)
+  setAuthInitialized(true)
+})
 
     return () => {
       mounted = false
@@ -110,6 +133,17 @@ function App() {
       active = false
     }
   }, [user])
+  useEffect(() => {
+  if (!authInitialized || profileLoading) return
+
+  if (!user && route !== '/login') {
+    navigate('/login')
+  }
+
+  if (user && route === '/login' && customer) {
+    navigate('/booking')
+  }
+}, [authInitialized, profileLoading, user, customer, route])
 
   async function loadBookingData() {
     const [serviceResult, barberResult] = await Promise.all([
@@ -218,7 +252,8 @@ function App() {
         })
 
         if (error) throw error
-        setMessage('เข้าสู่ระบบสำเร็จ')
+setMessage('เข้าสู่ระบบสำเร็จ')
+navigate('/booking')
       }
     } catch (error) {
       setMessage(error.message)
@@ -235,7 +270,7 @@ function App() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: `${window.location.origin}/booking`,
         },
       })
 
@@ -299,6 +334,7 @@ function App() {
 
       setCustomer(data)
       setMessage('บันทึกข้อมูลสมาชิกเรียบร้อยแล้ว')
+      navigate('/booking')
     } catch (error) {
       setMessage(error.message)
     } finally {
@@ -405,6 +441,7 @@ function App() {
       setCustomer(null)
       setBookingResult(null)
       setMessage('ออกจากระบบเรียบร้อยแล้ว')
+      navigate('/login')
     }
 
     setLoading(false)
@@ -421,7 +458,7 @@ function App() {
 
     const { error } = await supabase.auth.resetPasswordForEmail(
       email.trim(),
-      { redirectTo: window.location.origin }
+      { redirectTo: `${window.location.origin}/login` }
     )
 
     setMessage(
@@ -485,10 +522,7 @@ function App() {
   }
 
   return (
-    <div className="app">
-      <header className="header">
-        <h1>MICKEY BARBERSHOP</h1>
-        <p>PREMIUM BARBER EXPERIENCE</p>
+eARBER EXPERIENCE</p>
       </header>
 
       <main className="main">
