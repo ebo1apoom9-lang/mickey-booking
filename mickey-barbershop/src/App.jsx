@@ -120,10 +120,10 @@ function App() {
         .order('name'),
 
       supabase
-        .from('profiles')
+        .from('active_barbers')
         .select('id, full_name')
-        .eq('role', 'barber')
-        .eq('is_active', true)
+        
+        
         .order('full_name'),
     ])
 
