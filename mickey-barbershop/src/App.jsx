@@ -46,6 +46,13 @@ function App() {
   const [profileLoading, setProfileLoading] = useState(true)
 
   const [route, setRoute] = useState(window.location.pathname || '/login')
+  const [language, setLanguage] = useState(() => {
+  return localStorage.getItem('mickey-language') || 'th'
+})
+
+useEffect(() => {
+  localStorage.setItem('mickey-language', language)
+}, [language])
   const [mode, setMode] = useState('login')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -286,9 +293,9 @@ const loadBookings = useCallback(async () => {
     .limit(50)
 
   if (error) {
-    setMessage('โหลดประวัติการจองไม่สำเร็จ: ' + error.message)
+    etMessage('โหลดประวัติการจองไม่สำเร็จ: ' + error.message)
     return
-  }
+  }s
 
   setBookings(data || [])
 }, [])
@@ -743,10 +750,29 @@ const getScheduleBooking = (barberName, hour) => {
 
   return (
     <div className="app-shell">
-      <header>
-        <p>MICKEY BARBERSHOP EXPERIENCE</p>
-      </header>
+<header className="app-header">
+  <p>MICKEY BARBERSHOP EXPERIENCE</p>
 
+  {route === '/booking' && (
+    <div className="language-switch">
+      <button
+        type="button"
+        className={language === 'th' ? 'active' : ''}
+        onClick={() => setLanguage('th')}
+      >
+        TH
+      </button>
+
+      <button
+        type="button"
+        className={language === 'en' ? 'active' : ''}
+        onClick={() => setLanguage('en')}
+      >
+        EN
+      </button>
+    </div>
+  )}
+</header>
       <main className="main">
         {route === '/reset-password' && recoveryReady && (
           <section className="auth-card">
