@@ -959,6 +959,87 @@ const getScheduleBooking = (barberName, hour) => {
 </div>
 
             </section>
+
+                        {/* CUSTOMER MANAGEMENT */}
+            <section className="auth-card customer-management">
+              <span className="gold-text">CUSTOMER MANAGEMENT</span>
+              <h2>จัดการข้อมูลลูกค้า</h2>
+
+              <p>ลูกค้าทั้งหมด {ownerCustomers.length} คน</p>
+
+              <input
+                type="search"
+                placeholder="ค้นหาชื่อหรือเบอร์โทรศัพท์..."
+                value={customerSearch}
+                onChange={(event) =>
+                  setCustomerSearch(event.target.value)
+                }
+              />
+
+              <div className="owner-table-wrap">
+                <table className="owner-booking-table">
+                  <thead>
+                    <tr>
+                      <th>ชื่อลูกค้า</th>
+                      <th>เบอร์โทรศัพท์</th>
+                      <th>อีเมล</th>
+                      <th>รายละเอียด</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {ownerCustomers
+                      .filter((item) => {
+                        const search = customerSearch.toLowerCase()
+                        return (
+                          (item.full_name || '').toLowerCase().includes(search) ||
+                          (item.phone || '').includes(customerSearch)
+                        )
+                      })
+                      .map((item) => (
+                        <tr key={item.id}>
+                          <td>{item.full_name || '-'}</td>
+                          <td>{item.phone || '-'}</td>
+                          <td>{item.email || '-'}</td>
+                          <td>
+                            <button
+                              type="button"
+                              className="refresh-button"
+                              onClick={() => setSelectedCustomer(item)}
+                            >
+                              ดูข้อมูล
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {ownerCustomers.length === 0 && (
+                <p className="booking-note">
+                  ยังไม่พบข้อมูลลูกค้า
+                </p>
+              )}
+
+              {selectedCustomer && (
+                <div className="booking-summary">
+                  <h3>ข้อมูลลูกค้า</h3>
+                  <p>ชื่อ: {selectedCustomer.full_name}</p>
+                  <p>เบอร์โทรศัพท์: {selectedCustomer.phone}</p>
+                  <p>อีเมล: {selectedCustomer.email || '-'}</p>
+                  <p>บันทึกเพิ่มเติม: {selectedCustomer.notes || '-'}</p>
+
+                  <button
+                    type="button"
+                    className="refresh-button"
+                    onClick={() => setSelectedCustomer(null)}
+                  >
+                    ปิดรายละเอียด
+                  </button>
+                </div>
+              )}
+            </section>
           </>
         )}
 
@@ -1188,87 +1269,7 @@ const getScheduleBooking = (barberName, hour) => {
   </table>
 </div>
 )}                            
-            </section>
-                        {/* CUSTOMER MANAGEMENT */}
-            <section className="auth-card customer-management">
-              <span className="gold-text">CUSTOMER MANAGEMENT</span>
-              <h2>จัดการข้อมูลลูกค้า</h2>
-
-              <p>ลูกค้าทั้งหมด {ownerCustomers.length} คน</p>
-
-              <input
-                type="search"
-                placeholder="ค้นหาชื่อหรือเบอร์โทรศัพท์..."
-                value={customerSearch}
-                onChange={(event) =>
-                  setCustomerSearch(event.target.value)
-                }
-              />
-
-              <div className="owner-table-wrap">
-                <table className="owner-booking-table">
-                  <thead>
-                    <tr>
-                      <th>ชื่อลูกค้า</th>
-                      <th>เบอร์โทรศัพท์</th>
-                      <th>อีเมล</th>
-                      <th>รายละเอียด</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {ownerCustomers
-                      .filter((item) => {
-                        const search = customerSearch.toLowerCase()
-                        return (
-                          (item.full_name || '').toLowerCase().includes(search) ||
-                          (item.phone || '').includes(customerSearch)
-                        )
-                      })
-                      .map((item) => (
-                        <tr key={item.id}>
-                          <td>{item.full_name || '-'}</td>
-                          <td>{item.phone || '-'}</td>
-                          <td>{item.email || '-'}</td>
-                          <td>
-                            <button
-                              type="button"
-                              className="refresh-button"
-                              onClick={() => setSelectedCustomer(item)}
-                            >
-                              ดูข้อมูล
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {ownerCustomers.length === 0 && (
-                <p className="booking-note">
-                  ยังไม่พบข้อมูลลูกค้า
-                </p>
-              )}
-
-              {selectedCustomer && (
-                <div className="booking-summary">
-                  <h3>ข้อมูลลูกค้า</h3>
-                  <p>ชื่อ: {selectedCustomer.full_name}</p>
-                  <p>เบอร์โทรศัพท์: {selectedCustomer.phone}</p>
-                  <p>อีเมล: {selectedCustomer.email || '-'}</p>
-                  <p>บันทึกเพิ่มเติม: {selectedCustomer.notes || '-'}</p>
-
-                  <button
-                    type="button"
-                    className="refresh-button"
-                    onClick={() => setSelectedCustomer(null)}
-                  >
-                    ปิดรายละเอียด
-                  </button>
-                </div>
-              )}
-            </section>
+                         
           </>
         )}
 
