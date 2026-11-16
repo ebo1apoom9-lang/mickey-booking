@@ -565,3 +565,43 @@ footer {
     transition: none;
   }
 }
+
+/* TODAY OVERVIEW REFRESH BUTTON */
+
+.today-overview .refresh-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 180px;
+  margin-top: 12px;
+  padding: 13px 26px;
+  border: 1px solid var(--gold);
+  border-radius: 7px;
+  background: linear-gradient(135deg, #f5d779, #b68b20);
+  color: #111;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+}
+
+.today-overview .refresh-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.12);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, .3);
+}
+
+.today-overview .refresh-button:active:not(:disabled) {
+  transform: translateY(0) scale(.97);
+}
+
+.today-overview .refresh-button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.today-overview .refresh-button:focus-visible {
+  outline: 2px solid var(--gold-light);
+  outline-offset: 3px;
+}
