@@ -69,7 +69,9 @@ const [recoveryReady, setRecoveryReady] = useState(false)
   const [selectedTime, setSelectedTime] = useState('10:00')
   const [bookingResult, setBookingResult] = useState(null)
 
-  const isOwner = staffProfile?.role === 'owner'
+ const isOwner = staffProfile?.role === 'owner'
+const isBarber = staffProfile?.role === 'baber'
+const isStaffDashboard = isOwner || isBarber
 
   const navigate = useCallback((path, replace = false) => {
     if (window.location.pathname !== path) {
@@ -150,11 +152,11 @@ const [recoveryReady, setRecoveryReady] = useState(false)
 
       setStaffProfile(profile)
 
-      // Owner accounts do not need a customer record.
-      if (profile?.role === 'owner') {
-        setProfileLoading(false)
-        return
-      }
+     // Owner and barber accounts do not need a customer record.
+if (profile?.role === 'owner' || profile?.role === 'baber') {
+  setProfileLoading(false)
+  return
+}
 
       const { data: customerData, error: customerError } = await supabase
         .from('customers')
@@ -199,12 +201,17 @@ const [recoveryReady, setRecoveryReady] = useState(false)
       return
     }
 
-    if (isOwner) {
-      if (route !== '/owner') navigate('/owner', true)
-      return
-    }
+  if (isOwner) {
+  if (route !== '/owner') navigate('/owner', true)
+  return
+}
 
-    if (route !== '/booking') navigate('/booking', true)
+if (isBarber) {
+  if (route !== '/barber') navigate('/barber', true)
+  return
+}
+
+if (route !== '/booking') navigate('/booking', true)
   }, [authInitialized, profileLoading, user, isOwner, route, navigate])
 
   const loadBookingData = useCallback(async () => {
@@ -294,12 +301,13 @@ const [recoveryReady, setRecoveryReady] = useState(false)
       return
     }
 
-    if (isOwner) {
-      loadOwnerBookings()
-    } else if (customer) {
-      loadBookingData()
-      loadBookings()
-    }
+    if (isStaffDashboard) {
+  loadBookingData()
+  loadOwnerBookings()
+} else if (customer) {
+  loadBookingData()
+  loadBookings()
+}
   }, [
     authInitialized,
     profileLoading,
