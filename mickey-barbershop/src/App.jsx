@@ -54,6 +54,9 @@ function App() {
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+const [confirmPassword, setConfirmPassword] = useState('')
+const [recoveryReady, setRecoveryReady] = useState(false)
 
   const [services, setServices] = useState([])
   const [barbers, setBarbers] = useState([])
