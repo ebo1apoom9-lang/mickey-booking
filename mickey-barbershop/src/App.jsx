@@ -897,26 +897,46 @@ const getScheduleBooking = (barberName, hour) => {
               </button>
             </section>
 
-            <section className="auth-card">
-              <span className="gold-text">TODAY OVERVIEW</span>
-              <h2>ภาพรวมวันนี้</h2>
-              <div className="booking-summary">
-                <p>คิวทั้งหมดที่โหลดมา: {ownerBookings.length} รายการ</p>
-                <p>คิววันนี้: {todayOwnerBookings.length} รายการ</p>
-                <p>คิวที่ยืนยันแล้ว: {confirmedOwnerBookings.length} รายการ</p>
-                <p>คิวที่เสร็จสิ้น: {completedOwnerBookings.length} รายการ</p>
-                <p>ยอดบริการที่เสร็จสิ้นวันนี้: {money(todayRevenue)}</p>
-              </div>
-              <button
-                type="button"
-                className="refresh-button"
-                onClick={loadOwnerBookings}
-                disabled={loading}
-              >
-                รีเฟรชข้อมูล
-              </button>
-            </section>
+           <section className="auth-card today-overview">
+  <span className="gold-text">TODAY OVERVIEW</span>
+  <h2>ภาพรวมวันนี้</h2>
 
+  <div className="booking-summary">
+    <div className="summary-row">
+      <span>คิวทั้งหมดที่โหลดมา</span>
+      <strong>{ownerBookings.length} รายการ</strong>
+    </div>
+
+    <div className="summary-row">
+      <span>คิววันนี้</span>
+      <strong>{todayOwnerBookings.length} รายการ</strong>
+    </div>
+
+    <div className="summary-row">
+      <span>คิวที่ยืนยันแล้ว</span>
+      <strong>{confirmedOwnerBookings.length} รายการ</strong>
+    </div>
+
+    <div className="summary-row">
+      <span>คิวที่เสร็จสิ้น</span>
+      <strong>{completedOwnerBookings.length} รายการ</strong>
+    </div>
+
+    <div className="summary-row summary-revenue">
+      <span>ยอดบริการที่เสร็จสิ้นวันนี้</span>
+      <strong>{money(todayRevenue)}</strong>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    className="refresh-button"
+    onClick={loadOwnerBookings}
+    disabled={loading}
+  >
+    รีเฟรชข้อมูล
+  </button>
+</section>
             <section className="auth-card booking-history">
               <span className="gold-text">ALL BOOKINGS</span>
               <h2>รายการจองของร้าน</h2>
