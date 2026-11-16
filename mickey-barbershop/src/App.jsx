@@ -1023,25 +1023,51 @@ const getScheduleBooking = (barberName, hour) => {
               )}
 
               {selectedCustomer && (
-                <div className="booking-summary">
-                  <h3>ข้อมูลลูกค้า</h3>
-                  <p>ชื่อ: {selectedCustomer.full_name}</p>
-                  <p>เบอร์โทรศัพท์: {selectedCustomer.phone}</p>
-                  <p>อีเมล: {selectedCustomer.email || '-'}</p>
-                  <p>บันทึกเพิ่มเติม: {selectedCustomer.notes || '-'}</p>
+  <div className="customer-details-panel">
+    <div className="customer-details-header">
+      <span className="gold-text">CUSTOMER PROFILE</span>
+      <h3>รายละเอียดข้อมูลลูกค้า</h3>
+    </div>
 
-                  <button
-                    type="button"
-                    className="refresh-button"
-                    onClick={() => setSelectedCustomer(null)}
-                  >
-                    ปิดรายละเอียด
-                  </button>
-                </div>
-              )}
-            </section>
-          </>
-        )}
+    <div className="customer-details-list">
+      <div className="customer-detail-item">
+        <span className="customer-detail-label">ชื่อลูกค้า</span>
+        <span className="customer-detail-value">
+          {selectedCustomer.full_name || '-'}
+        </span>
+      </div>
+
+      <div className="customer-detail-item">
+        <span className="customer-detail-label">เบอร์โทรศัพท์</span>
+        <span className="customer-detail-value">
+          {selectedCustomer.phone || '-'}
+        </span>
+      </div>
+
+      <div className="customer-detail-item">
+        <span className="customer-detail-label">อีเมล</span>
+        <span className="customer-detail-value">
+          {selectedCustomer.email || '-'}
+        </span>
+      </div>
+
+      <div className="customer-detail-item">
+        <span className="customer-detail-label">บันทึกเพิ่มเติม</span>
+        <span className="customer-detail-value">
+          {selectedCustomer.notes || '-'}
+        </span>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      className="customer-close-button"
+      onClick={() => setSelectedCustomer(null)}
+    >
+      ปิดรายละเอียด
+    </button>
+  </div>
+)}
 
         {user && !isOwner && route === '/booking' && !customer && (
           <section className="auth-card">
