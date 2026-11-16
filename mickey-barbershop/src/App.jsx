@@ -1059,15 +1059,18 @@ const getScheduleBooking = (barberName, hour) => {
       </div>
     </div>
 
-    <button
-      type="button"
-      className="customer-close-button"
-      onClick={() => setSelectedCustomer(null)}
-    >
-      ปิดรายละเอียด
-    </button>
-  </div>
-)}
+         <button
+        type="button"
+        className="customer-close-button"
+        onClick={() => setSelectedCustomer(null)}
+      >
+        ปิดรายละเอียด
+      </button>
+    </div>
+  )}
+              </section>
+            </>
+          )}
 
         {user && !isOwner && route === '/booking' && !customer && (
           <section className="auth-card">
