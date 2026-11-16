@@ -490,3 +490,78 @@ footer {
     transition: none;
   }
 }
+
+/* TODAY OVERVIEW - LUXURY TWO COLUMN */
+
+.today-overview {
+  width: 100%;
+  max-width: 1200px;
+  margin: 30px auto;
+  background: linear-gradient(145deg, #191919, #101010);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+}
+
+.booking-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 24px;
+  margin: 24px 0;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 16px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 6px;
+  transition: background 0.25s ease, padding 0.25s ease;
+}
+
+.summary-row:hover {
+  background: rgba(212, 175, 55, 0.07);
+  padding-left: 22px;
+}
+
+.summary-row span {
+  color: #c9c2b3;
+  font-size: 14px;
+}
+
+.summary-row strong {
+  color: var(--gold-light);
+  font-size: 19px;
+  white-space: nowrap;
+}
+
+.summary-revenue {
+  grid-column: 1 / -1;
+  background: rgba(212, 175, 55, 0.06);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  margin-top: 12px;
+}
+
+.summary-revenue strong {
+  font-size: 23px;
+}
+
+@media (max-width: 600px) {
+  .booking-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-row {
+    padding: 16px 12px;
+  }
+
+  .summary-revenue {
+    grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .summary-row {
+    transition: none;
+  }
+}
