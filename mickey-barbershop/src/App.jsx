@@ -62,7 +62,9 @@ const [recoveryReady, setRecoveryReady] = useState(false)
   const [barbers, setBarbers] = useState([])
   const [bookings, setBookings] = useState([])
   const [ownerBookings, setOwnerBookings] = useState([])
-
+const [ownerCustomers, setOwnerCustomers] = useState([])
+const [customerSearch, setCustomerSearch] = useState('')
+const [selectedCustomer, setSelectedCustomer] = useState(null)
   const [selectedService, setSelectedService] = useState('')
   const [selectedBarber, setSelectedBarber] = useState('')
   const [selectedDate, setSelectedDate] = useState(bangkokDate())
@@ -316,6 +318,29 @@ const loadBookings = useCallback(async () => {
 
     setOwnerBookings(data || [])
   }, [])
+  // Load customer list for owner management.
+const loadOwnerCustomers = useCallback(async () => {
+  const { data, error } = await supabase
+    .from('customers')
+    .select(`
+      id,
+      full_name,
+      phone,
+      email,
+      notes,
+      favorite_barber_id,
+      created_at
+    `)
+    .order('created_at', { ascending: false })
+    .limit(500)
+
+  if (error) {
+    setMessage('โหลดรายชื่อลูกค้าไม่สำเร็จ: ' + error.message)
+    return
+  }
+
+  setOwnerCustomers(data || [])
+}, [])
 
   useEffect(() => {
     if (!authInitialized || profileLoading || !user) {
@@ -323,12 +348,14 @@ const loadBookings = useCallback(async () => {
       setBarbers([])
       setBookings([])
       setOwnerBookings([])
+      setOwnerCustomers([])
       return
     }
 
     if (isStaffDashboard) {
   loadBookingData()
   loadOwnerBookings()
+  loadOwnerCustomers()
 } else if (customer) {
   loadBookingData()
   loadBookings()
@@ -342,6 +369,7 @@ const loadBookings = useCallback(async () => {
     loadBookingData,
     loadBookings,
     loadOwnerBookings,
+    loadOwnerCustomers,
   ])
 
   async function handleSubmit(event) {
@@ -349,7 +377,7 @@ const loadBookings = useCallback(async () => {
     setLoading(true)
     setMessage('')
 
-    try {
+    try  
       if (mode === 'register') {
         const normalizedPhone = phone.replace(/[^0-9]/g, '')
 
@@ -1160,6 +1188,86 @@ const getScheduleBooking = (barberName, hour) => {
   </table>
 </div>
 )}                            
+            </section>
+                        {/* CUSTOMER MANAGEMENT */}
+            <section className="auth-card customer-management">
+              <span className="gold-text">CUSTOMER MANAGEMENT</span>
+              <h2>จัดการข้อมูลลูกค้า</h2>
+
+              <p>ลูกค้าทั้งหมด {ownerCustomers.length} คน</p>
+
+              <input
+                type="search"
+                placeholder="ค้นหาชื่อหรือเบอร์โทรศัพท์..."
+                value={customerSearch}
+                onChange={(event) =>
+                  setCustomerSearch(event.target.value)
+                }
+              />
+
+              <div className="owner-table-wrap">
+                <table className="owner-booking-table">
+                  <thead>
+                    <tr>
+                      <th>ชื่อลูกค้า</th>
+                      <th>เบอร์โทรศัพท์</th>
+                      <th>อีเมล</th>
+                      <th>รายละเอียด</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {ownerCustomers
+                      .filter((item) => {
+                        const search = customerSearch.toLowerCase()
+                        return (
+                          (item.full_name || '').toLowerCase().includes(search) ||
+                          (item.phone || '').includes(customerSearch)
+                        )
+                      })
+                      .map((item) => (
+                        <tr key={item.id}>
+                          <td>{item.full_name || '-'}</td>
+                          <td>{item.phone || '-'}</td>
+                          <td>{item.email || '-'}</td>
+                          <td>
+                            <button
+                              type="button"
+                              className="refresh-button"
+                              onClick={() => setSelectedCustomer(item)}
+                            >
+                              ดูข้อมูล
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {ownerCustomers.length === 0 && (
+                <p className="booking-note">
+                  ยังไม่พบข้อมูลลูกค้า
+                </p>
+              )}
+
+              {selectedCustomer && (
+                <div className="booking-summary">
+                  <h3>ข้อมูลลูกค้า</h3>
+                  <p>ชื่อ: {selectedCustomer.full_name}</p>
+                  <p>เบอร์โทรศัพท์: {selectedCustomer.phone}</p>
+                  <p>อีเมล: {selectedCustomer.email || '-'}</p>
+                  <p>บันทึกเพิ่มเติม: {selectedCustomer.notes || '-'}</p>
+
+                  <button
+                    type="button"
+                    className="refresh-button"
+                    onClick={() => setSelectedCustomer(null)}
+                  >
+                    ปิดรายละเอียด
+                  </button>
+                </div>
+              )}
             </section>
           </>
         )}
