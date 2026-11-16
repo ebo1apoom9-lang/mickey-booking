@@ -520,27 +520,28 @@ const [recoveryReady, setRecoveryReady] = useState(false)
     setLoading(false)
   }
 
-  async function handleForgotPassword() {
-    if (!email.trim()) {
-      setMessage('กรุณากรอกอีเมลก่อน')
-      return
-    }
-
-    setLoading(true)
-    setMessage('')
-
-    const { error } = await supabase.auth.resetPasswordForEmail(
-      email.trim(),
-      { redirectTo: `${window.location.origin}/login` }
-    )
-
-    setMessage(
-      error
-        ? error.message
-        : 'ส่งลิงก์ตั้งรหัสผ่านใหม่ไปยังอีเมลแล้ว'
-    )
-    setLoading(false)
+ async function handleForgotPassword() {
+  if (!email.trim()) {
+    setMessage('กรุณากรอกอีเมลก่อน')
+    return
   }
+
+  setLoading(true)
+  setMessage('')
+
+  const { error } = await supabase.auth.resetPasswordForEmail(
+    email.trim(),
+    { redirectTo: `${window.location.origin}/reset-password` }
+  )
+
+  setMessage(
+    error
+      ? error.message
+      : 'ส่งลิงก์ตั้งรหัสผ่านใหม่ไปยังอีเมลแล้ว'
+  )
+
+  setLoading(false)
+}
 
   const chosenService = useMemo(
     () => services.find((service) => service.id === selectedService),
