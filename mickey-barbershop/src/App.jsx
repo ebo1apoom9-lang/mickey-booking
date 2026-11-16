@@ -53,6 +53,10 @@ function App() {
 useEffect(() => {
   localStorage.setItem('mickey-language', language)
 }, [language])
+  
+  const tr = (thai, english) => {
+  return language === 'en' ? english : thai
+}
   const [mode, setMode] = useState('login')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -551,7 +555,7 @@ const loadOwnerCustomers = useCallback(async () => {
   }
 
   async function handleCancelBooking(bookingId) {
-    if (!window.confirm('ต้องการยกเลิกการจองคิวนี้ใช่หรือไม่?')) return
+    if (!window.confirm('ต้องการ{tr('ยกเลิกการจอง', 'Cancel Booking')}คิวนี้ใช่หรือไม่?')) return
 
     setLoading(true)
     setMessage('')
@@ -1161,40 +1165,47 @@ const getScheduleBooking = (barberName, hour) => {
 
             <section className="auth-card booking-card">
               <span className="gold-text">ONLINE BOOKING</span>
-              <h2>จองคิวตัดผม</h2>
-              <p className="auth-description">
-                เลือกบริการ ช่าง วันที่ และเวลาที่ต้องการ
-              </p>
+<h2>{tr('จองคิวตัดผม', 'Book an Appointment')}</h2>
+<p className="auth-description">
+  {tr(
+    'เลือกบริการ ช่าง วันที่ และเวลาที่ต้องการ',
+    'Choose your service, barber, date and time.'
+  )}
+</p>
 
               <form onSubmit={handleBooking}>
-                <label>เลือกบริการ</label>
+                <label>{tr('เลือกบริการ', 'Select Service')}</label>
                 <select
                   value={selectedService}
                   onChange={(event) => setSelectedService(event.target.value)}
                   required
                 >
-                  <option value="">-- เลือกบริการ --</option>
+                  <option value="">
+                    {tr('-- เลือกบริการ --', '-- Select Service --')}
+                  </option>
                   {services.map((service) => (
                     <option key={service.id} value={service.id}>
-                      {service.name} — {money(service.price_thb)} ({service.duration_minutes} นาที)
+                     {service.name} — {money(service.price_thb)} ({service.duration_minutes} {tr('นาที', 'min')})
                     </option>
                   ))}
                 </select>
 
                 {chosenService && (
                   <div className="booking-summary">
-                    <p>บริการ: {chosenService.name}</p>
-                    <p>ราคา: {money(chosenService.price_thb)}</p>
-                    <p>ระยะเวลา: {chosenService.duration_minutes} นาที</p>
-                  </div>
+  <p>{tr('บริการ:', 'Service:')} {chosenService.name}</p>
+  <p>{tr('ราคา:', 'Price:')} {money(chosenService.price_thb)}</p>
+  <p>{tr('ระยะเวลา:', 'Duration:')} {chosenService.duration_minutes} {tr('นาที', 'min')}</p>
+</div>
                 )}
 
-                <label>เลือกช่าง</label>
+                <label>{tr('เลือกช่าง', 'Select Barber')}</label>
                 <select
                   value={selectedBarber}
                   onChange={(event) => setSelectedBarber(event.target.value)}
                 >
-                  <option value="">ให้ระบบจัดสรรช่างอัตโนมัติ</option>
+                 <option value="">
+  {tr('ให้ระบบจัดสรรช่างอัตโนมัติ', 'Assign Any Barber')}
+</option>
                   {barbers.map((barber) => (
                     <option key={barber.id} value={barber.id}>
                       {barber.full_name}
@@ -1208,7 +1219,7 @@ const getScheduleBooking = (barberName, hour) => {
                   </p>
                 )}
 
-                <label>เลือกวันที่</label>
+                <label>{tr('เลือกวันที่', 'Select Date')}</label>
                 <input
                   type="date"
                   value={selectedDate}
@@ -1218,14 +1229,16 @@ const getScheduleBooking = (barberName, hour) => {
                   required
                 />
 
-                <label>เลือกเวลา</label>
+                <label>{tr('เลือกเวลา', 'Select Time')}</label>
                 <select
                   value={selectedTime}
                   onChange={(event) => setSelectedTime(event.target.value)}
                   required
                 >
                   {!availableTimes.length && (
-                    <option value="">ไม่มีเวลาที่เลือกได้</option>
+                  <option value="">
+  {tr('ไม่มีเวลาที่เลือกได้', 'No available time slots')}
+</option>
                   )}
                   {availableTimes.map((time) => (
                     <option key={time} value={time}>
@@ -1244,34 +1257,38 @@ const getScheduleBooking = (barberName, hour) => {
                     barbers.length === 0
                   }
                 >
-                  {loading ? 'กำลังจองคิว...' : 'ยืนยันการจอง'}
+                 {loading
+  ? tr('กำลังจองคิว...', 'Booking...')
+  : tr('ยืนยันการจอง', 'Confirm Booking')}
                 </button>
               </form>
 
               {bookingResult && (
-                <div className="booking-success">
-                  <h3>จองคิวสำเร็จ!</h3>
-                  <p>รหัสจอง: {bookingResult.booking_code || '-'}</p>
-                  <p>เวลา: {formatDateTime(bookingResult.starts_at)}</p>
-                  <p>ระบบจัดการคำขอจองเรียบร้อยแล้ว</p>
-                </div>
-              )}
+  <div className="booking-success">
+    <h3>{tr('จองคิวสำเร็จ!', 'Booking Successful!')}</h3>
+    <p>{tr('รหัสจอง:', 'Booking ID:')} {bookingResult.booking_code || '-'}</p>
+    <p>{tr('เวลา:', 'Time:')} {formatDateTime(bookingResult.starts_at)}</p>
+    <p>{tr('ระบบจัดการคำขอจองเรียบร้อยแล้ว', 'Your booking has been processed successfully.')}</p>
+  </div>
+)}
             </section>
 
             <section className="auth-card booking-history customer-booking-history">
               <span className="gold-text">MY BOOKINGS</span>
-              <h2>ประวัติการจอง</h2>
+              <h2>{tr('ประวัติการจอง', 'Booking History')}</h2>
               <button
                 type="button"
                 className="refresh-button"
                 onClick={loadBookings}
                 disabled={loading}
               >
-                รีเฟรชรายการ
+                {tr('รีเฟรชรายการ', 'Refresh Bookings')}
               </button>
 
               {bookings.length === 0 && (
-                <p className="booking-note">ยังไม่มีประวัติการจอง</p>
+               <p className="booking-note">
+  {tr('ยังไม่มีประวัติการจอง', 'No booking history yet.')}
+</p>
               )}
 
              {bookings.length > 0 && (
@@ -1279,12 +1296,12 @@ const getScheduleBooking = (barberName, hour) => {
     <table className="customer-history-table">
     <thead>
       <tr>
-        <th>วันที่</th>
-        <th>เวลา</th>
-        <th>บริการ</th>
-        <th>ช่าง</th>
-        <th>ราคา</th>
-        <th>สถานะ</th>
+       <th>{tr('วันที่', 'Date')}</th>
+<th>{tr('เวลา', 'Time')}</th>
+<th>{tr('บริการ', 'Service')}</th>
+<th>{tr('ช่าง', 'Barber')}</th>
+<th>{tr('ราคา', 'Price')}</th>
+<th>{tr('สถานะ', 'Status')}</th>
       </tr>
     </thead>
 
@@ -1292,7 +1309,7 @@ const getScheduleBooking = (barberName, hour) => {
       {bookings.map((booking) => (
         <tr key={booking.id}>
           <td>
-            {new Date(booking.starts_at).toLocaleDateString('th-TH', {
+            {new Date(booking.starts_at).toLocaleDateString(language === 'th' ? 'th-TH' : 'en-GB', {
               day: 'numeric',
               month: 'short',
               year: 'numeric',
@@ -1301,14 +1318,14 @@ const getScheduleBooking = (barberName, hour) => {
           </td>
 
           <td>
-            {new Date(booking.starts_at).toLocaleTimeString('th-TH', {
+            {new Date(booking.starts_at).toLocaleTimeString(language === 'th' ? 'th-TH' : 'en-GB', {
               hour: '2-digit',
               minute: '2-digit',
               timeZone: 'Asia/Bangkok'
             })}
           </td>
 
-          <td>{booking.service_name_snapshot || 'บริการ'}</td>
+          <td>{booking.service_name_snapshot || tr('บริการ', 'Service')}</td>
           <td>{booking.barber?.full_name || '-'}</td>
           <td>{money(booking.price_thb_snapshot)}</td>
 
