@@ -330,3 +330,163 @@ footer {
     font-size: 13px;
   }
 }
+/* =================================
+   CUSTOMER MANAGEMENT - LUXURY UI
+================================= */
+
+.customer-management {
+  width: 100%;
+  max-width: 1200px;
+  margin: 30px auto;
+  background: linear-gradient(145deg, #191919, #101010);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+}
+
+.customer-management > p {
+  color: #bbb;
+  margin: 18px 0;
+}
+
+.customer-management input[type="search"] {
+  margin: 12px 0 20px;
+  transition: border-color .25s, box-shadow .25s;
+}
+
+.customer-management input[type="search"]:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 12px rgba(212, 175, 55, .18);
+}
+
+/* Customer details panel */
+
+.customer-details-panel {
+  width: 100%;
+  margin-top: 28px;
+  padding: 28px;
+  background: linear-gradient(145deg, #202020, #111);
+  border: 1px solid rgba(212, 175, 55, .45);
+  border-radius: 12px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, .35);
+  animation: customerPanelIn .3s ease;
+}
+
+.customer-details-header {
+  padding-bottom: 20px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(212, 175, 55, .3);
+}
+
+.customer-details-header h3 {
+  margin-top: 12px;
+  color: var(--gold-light);
+  font-size: 23px;
+  text-align: center;
+}
+
+.customer-details-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.customer-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 18px 16px;
+  border-bottom: 1px solid rgba(212, 175, 55, .15);
+  border-radius: 6px;
+  transition: background .25s, padding-left .25s;
+}
+
+.customer-detail-item:hover {
+  background: rgba(212, 175, 55, .07);
+  padding-left: 22px;
+}
+
+.customer-detail-label {
+  color: var(--gold);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.customer-detail-value {
+  color: #f5f0e6;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+/* Luxury buttons */
+
+.customer-management .refresh-button,
+.customer-close-button {
+  padding: 11px 24px;
+  border: 1px solid var(--gold);
+  border-radius: 7px;
+  background: linear-gradient(135deg, #f5d779, #b68b20);
+  color: #111;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  transition: transform .25s, box-shadow .25s, filter .25s;
+}
+
+.customer-management .refresh-button:hover,
+.customer-close-button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.12);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, .25);
+}
+
+.customer-management .refresh-button:active,
+.customer-close-button:active {
+  transform: translateY(0) scale(.97);
+}
+
+.customer-close-button {
+  margin-top: 24px;
+}
+
+@keyframes customerPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .customer-details-panel {
+    padding: 18px 14px;
+  }
+
+  .customer-detail-item {
+    padding: 15px 10px;
+  }
+
+  .customer-detail-value {
+    font-size: 14px;
+  }
+
+  .customer-close-button {
+    width: 100%;
+  }
+}
+
+/* Respect reduced motion preference */
+
+@media (prefers-reduced-motion: reduce) {
+  .customer-details-panel,
+  .customer-detail-item,
+  .customer-management .refresh-button,
+  .customer-close-button {
+    animation: none;
+    transition: none;
+  }
+}
