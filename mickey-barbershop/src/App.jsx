@@ -751,14 +751,17 @@ const [recoveryReady, setRecoveryReady] = useState(false)
                 <p className="booking-note">ยังไม่พบรายการจอง หรือบัญชีไม่มีสิทธิ์อ่านข้อมูล</p>
               )}
               {ownerBookings.map((booking) => (
-                <article className="booking-item" key={booking.id}>
-                  <h3>{booking.service_name_snapshot || 'บริการ'}</h3>
-                  <p>รหัสจอง: {booking.booking_code || '-'}</p>
-                  <p>วันเวลา: {formatDateTime(booking.starts_at)}</p>
-                  <p>ราคา: {money(booking.price_thb_snapshot)}</p>
-                  <p>สถานะ: {statusLabel(booking.status)}</p>
-                  <p>การชำระเงิน: {booking.payment_status || '-'}</p>
-                </article>
+               <article className="booking-item" key={booking.id}>
+  <h3>{booking.customer?.full_name || 'ไม่พบชื่อลูกค้า'}</h3>
+  <p>เบอร์โทรศัพท์: {booking.customer?.phone || '-'}</p>
+  <p>บริการ: {booking.service_name_snapshot || 'บริการ'}</p>
+  <p>ช่าง: {booking.barber?.full_name || '-'}</p>
+  <p>รหัสจอง: {booking.booking_code || '-'}</p>
+  <p>วันเวลา: {formatDateTime(booking.starts_at)}</p>
+  <p>ราคา: {money(booking.price_thb_snapshot)}</p>
+  <p>สถานะ: {statusLabel(booking.status)}</p>
+  <p>การชำระเงิน: {booking.payment_status || '-'}</p>
+</article>
               ))}
             </section>
           </>
@@ -894,6 +897,7 @@ const [recoveryReady, setRecoveryReady] = useState(false)
                     loading ||
                     !selectedService ||
                     !selectedTime ||
+                
                     barbers.length === 0
                   }
                 >
