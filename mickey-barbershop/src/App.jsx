@@ -756,6 +756,8 @@ const [recoveryReady, setRecoveryReady] = useState(false)
 <div className="owner-table-wrap">
   <table className="owner-booking-table">
     
+
+
 <thead>
   <tr>
     <th>ชื่อลูกค้า</th>
@@ -782,22 +784,7 @@ const [recoveryReady, setRecoveryReady] = useState(false)
     </tr>
   ))}
 </tbody>
-
-      {ownerBookings.map((booking) => (
-        <tr key={booking.id}>
-          <td>{booking.customer?.full_name || '-'}</td>
-          <td>{booking.customer?.phone || '-'}</td>
-          <td>{booking.service_name_snapshot || '-'}</td>
-          <td>{booking.barber?.full_name || '-'}</td>
-          <td>{booking.booking_code || '-'}</td>
-          <td>{formatDateTime(booking.starts_at)}</td>
-          <td>{money(booking.price_thb_snapshot)}</td>
-          <td>{statusLabel(booking.status)}</td>
-          <td>{booking.payment_status || '-'}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
+ </table>
 </div>
 
             </section>
