@@ -377,7 +377,7 @@ const loadOwnerCustomers = useCallback(async () => {
     setLoading(true)
     setMessage('')
 
-    try  
+        try {
       if (mode === 'register') {
         const normalizedPhone = phone.replace(/[^0-9]/g, '')
 
