@@ -107,17 +107,23 @@ const isStaffDashboard = isOwner || isBarber
     initialize()
 
     const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      setAuthInitialized(true)
-    })
+  data: { subscription },
+} = supabase.auth.onAuthStateChange((event, session) => {
+  setUser(session?.user ?? null)
 
-    return () => {
-      mounted = false
-      subscription.unsubscribe()
-    }
-  }, [])
+  if (event === 'PASSWORD_RECOVERY') {
+    setRecoveryReady(true)
+    navigate('/reset-password', true)
+  }
+
+  setAuthInitialized(true)
+})
+
+return () => {
+  mounted = false
+  subscription.unsubscribe()
+}
+}, [])
 
   // Load the signed-in user's staff profile first, then customer profile if needed.
   useEffect(() => {
@@ -197,6 +203,11 @@ if (profile?.role === 'owner' || profile?.role === 'baber') {
 useEffect(() => {
   if (!authInitialized || profileLoading) return
 
+  // Keep the password recovery page open.
+  if (recoveryReady && route === '/reset-password') {
+    return
+  }
+
   if (!user) {
     if (route !== '/login') navigate('/login', true)
     return
@@ -223,6 +234,7 @@ useEffect(() => {
   isBarber,
   route,
   navigate,
+  recoveryReady,
 ])
 
 // Load services and active barbers.
@@ -543,28 +555,70 @@ const loadBookings = useCallback(async () => {
     setLoading(false)
   }
 
- async function handleForgotPassword() {
-  if (!email.trim()) {
-    setMessage('กรุณากรอกอีเมลก่อน')
-    return
+  async function handleForgotPassword() {
+    if (!email.trim()) {
+      setMessage('กรุณากรอกอีเมลก่อน')
+      return
+    }
+
+    setLoading(true)
+    setMessage('')
+
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      email.trim(),
+      { redirectTo: `${window.location.origin}/reset-password` }
+    )
+
+    setMessage(
+      error
+        ? error.message
+        : 'ส่งลิงก์ตั้งรหัสผ่านใหม่ไปยังอีเมลแล้ว'
+    )
+
+    setLoading(false)
   }
 
-  setLoading(true)
-  setMessage('')
+  async function handleUpdatePassword() {
+    setMessage('')
 
-  const { error } = await supabase.auth.resetPasswordForEmail(
-    email.trim(),
-    { redirectTo: `${window.location.origin}/reset-password` }
-  )
+    if (newPassword.length < 6) {
+      setMessage('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร')
+      return
+    }
 
-  setMessage(
-    error
-      ? error.message
-      : 'ส่งลิงก์ตั้งรหัสผ่านใหม่ไปยังอีเมลแล้ว'
-  )
+    if (newPassword !== confirmPassword) {
+      setMessage('รหัสผ่านทั้งสองช่องไม่ตรงกัน')
+      return
+    }
 
-  setLoading(false)
-}
+    setLoading(true)
+
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    })
+
+    if (error) {
+      setMessage(error.message)
+      setLoading(false)
+      return
+    }
+
+    const { error: signOutError } = await supabase.auth.signOut()
+
+    if (signOutError) {
+      setMessage('เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบใหม่')
+      setLoading(false)
+      return
+    }
+
+    setNewPassword('')
+    setConfirmPassword('')
+    setRecoveryReady(false)
+    setMessage('เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่')
+
+    navigate('/login', true)
+    setLoading(false)
+  }
 
   const chosenService = useMemo(
     () => services.find((service) => service.id === selectedService),
@@ -666,6 +720,49 @@ const getScheduleBooking = (barberName, hour) => {
       </header>
 
       <main className="main">
+        {route === '/reset-password' && recoveryReady && (
+          <section className="auth-card">
+            <span className="gold-text">MICKEY MEMBERSHIP</span>
+            <h2>ตั้งรหัสผ่านใหม่</h2>
+            <p className="auth-description">
+              กรุณากรอกรหัสผ่านใหม่ของคุณ
+            </p>
+
+            <form
+              onSubmit={(event) => {
+                event.preventDefault()
+                handleUpdatePassword()
+              }}
+            >
+              <label>รหัสผ่านใหม่</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                autoComplete="new-password"
+                minLength={6}
+                required
+              />
+
+              <label>ยืนยันรหัสผ่านใหม่</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                autoComplete="new-password"
+                minLength={6}
+                required
+              />
+
+              {message && <p>{message}</p>}
+
+              <button type="submit" disabled={loading}>
+                {loading ? 'กำลังบันทึก...' : 'บันทึกรหัสผ่านใหม่'}
+              </button>
+            </form>
+          </section>
+        )}
+
         {!user && route === '/login' && (
           <section className="auth-card">
             <span className="gold-text">MICKEY MEMBERSHIP</span>
