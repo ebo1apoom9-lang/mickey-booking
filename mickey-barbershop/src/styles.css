@@ -232,3 +232,42 @@ footer {
     padding: 25px 20px;
   }
 }
+
+
+.owner-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 20px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 10px;
+}
+
+.owner-booking-table {
+  width: 100%;
+  min-width: 1100px;
+  border-collapse: collapse;
+  color: #f5f5f5;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.owner-booking-table th {
+  background: #b8943f;
+  color: #111;
+  padding: 14px 12px;
+  text-align: left;
+}
+
+.owner-booking-table td {
+  padding: 13px 12px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  text-align: left;
+}
+
+.owner-booking-table tbody tr:hover {
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.owner-booking-table tbody tr:last-child td {
+  border-bottom: none;
+}
