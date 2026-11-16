@@ -897,24 +897,15 @@ const getScheduleBooking = (barberName, hour) => {
               </button>
             </section>
 
-           <section className="auth-card today-overview">
+          <section className="auth-card today-overview">
   <span className="gold-text">TODAY OVERVIEW</span>
   <h2>ภาพรวมวันนี้</h2>
 
   <div className="booking-summary">
-    <div className="summary-row">
-      <span>คิวทั้งหมดที่โหลดมา</span>
-      <strong>{ownerBookings.length} รายการ</strong>
-    </div>
 
     <div className="summary-row">
       <span>คิววันนี้</span>
       <strong>{todayOwnerBookings.length} รายการ</strong>
-    </div>
-
-    <div className="summary-row">
-      <span>คิวที่ยืนยันแล้ว</span>
-      <strong>{confirmedOwnerBookings.length} รายการ</strong>
     </div>
 
     <div className="summary-row">
@@ -926,6 +917,7 @@ const getScheduleBooking = (barberName, hour) => {
       <span>ยอดบริการที่เสร็จสิ้นวันนี้</span>
       <strong>{money(todayRevenue)}</strong>
     </div>
+
   </div>
 
   <button
