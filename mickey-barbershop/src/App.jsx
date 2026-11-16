@@ -17,27 +17,33 @@ const bangkokDate = (date = new Date()) => {
   return `${get('year')}-${get('month')}-${get('day')}`
 }
 
-const formatDateTime = (value) => {
+const formatDateTime = (value, language = 'th') => {
   if (!value) return '-'
-  return new Date(value).toLocaleString('th-TH', {
-    timeZone: 'Asia/Bangkok',
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  })
+
+  return new Date(value).toLocaleString(
+    language === 'th' ? 'th-TH' : 'en-GB',
+    {
+      timeZone: 'Asia/Bangkok',
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }
+  )
 }
 
-const statusLabel = (status) => {
+const statusLabel = (status, language = 'th') => {
   const labels = {
-    Confirmed: 'ยืนยันแล้ว',
-    'Checked In': 'เช็กอินแล้ว',
-    'In Progress': 'กำลังให้บริการ',
-    Completed: 'เสร็จสิ้น',
-    Cancelled: 'ยกเลิกแล้ว',
-    'No Show': 'ไม่มาตามนัด',
+    Confirmed: ['ยืนยันแล้ว', 'Confirmed'],
+    'Checked In': ['เช็กอินแล้ว', 'Checked In'],
+    'In Progress': ['กำลังให้บริการ', 'In Progress'],
+    Completed: ['เสร็จสิ้น', 'Completed'],
+    Cancelled: ['ยกเลิกแล้ว', 'Cancelled'],
+    'No Show': ['ไม่มาตามนัด', 'No Show'],
   }
-  return labels[status] || status || '-'
-}
 
+  return labels[status]
+    ? labels[status][language === 'en' ? 1 : 0]
+    : status || '-'
+}
 function App() {
   const [user, setUser] = useState(null)
   const [customer, setCustomer] = useState(null)
@@ -250,7 +256,7 @@ useEffect(() => {
   recoveryReady,
 ])
 
-// Load services and active barbers.
+ Load ser//vices and active barbers.
 const loadBookingData = useCallback(async () => {
   const [serviceResult, barberResult] = await Promise.all([
     supabase
@@ -265,19 +271,19 @@ const loadBookingData = useCallback(async () => {
       .order('full_name'),
   ])
 
-  if (serviceResult.error) {
-    setMessage('โหลดบริการไม่สำเร็จ: ' + serviceResult.error.message)
-  } else {
-    setServices(serviceResult.data || [])
-  }
+if (serviceResult.error) {
+  setMessage(tr('โหลดบริการไม่สำเร็จ: ', 'Failed to load services: ') + serviceResult.error.message)
+} else {
+  setServices(serviceResult.data || [])
+}
 
-  if (barberResult.error) {
-    setMessage('โหลดรายชื่อช่างไม่สำเร็จ: ' + barberResult.error.message)
-  } else {
-    setBarbers(barberResult.data || [])
-  }
-}, [])
-
+if (barberResult.error) {
+  setMessage(tr('โหลดรายชื่อช่างไม่สำเร็จ: ', 'Failed to load barbers: ') + barberResult.error.message)
+} else {
+  setBarbers(barberResult.data || [])
+}
+}, [language])
+  
 // Load customer bookings.
 const loadBookings = useCallback(async () => {
   const { data, error } = await supabase
@@ -507,55 +513,65 @@ const loadOwnerCustomers = useCallback(async () => {
     }
   }
 
-  async function handleBooking(event) {
-    event.preventDefault()
-    setLoading(true)
-    setMessage('')
-    setBookingResult(null)
+ async function handleBooking(event) {
+  event.preventDefault()
+  setLoading(true)
+  setMessage('')
+  setBookingResult(null)
 
-    try {
-      if (!user || !customer) throw new Error('กรุณาเข้าสู่ระบบก่อนจองคิว')
-      if (!selectedService) throw new Error('กรุณาเลือกบริการ')
-      if (!selectedDate || !selectedTime) {
-        throw new Error('กรุณาเลือกวันที่และเวลา')
-      }
-
-      const startsAt = new Date(`${selectedDate}T${selectedTime}:00+07:00`)
-      if (Number.isNaN(startsAt.getTime()) || startsAt <= new Date()) {
-        throw new Error('กรุณาเลือกเวลาในอนาคต')
-      }
-
-      const maxDate = new Date()
-      maxDate.setDate(maxDate.getDate() + 14)
-      if (startsAt > maxDate) {
-        throw new Error('จองล่วงหน้าได้ไม่เกิน 14 วัน')
-      }
-
-      const { data, error } = await supabase.rpc('create_customer_booking', {
-        p_service_id: selectedService,
-        p_starts_at: startsAt.toISOString(),
-        p_barber_id: selectedBarber || null,
-      })
-
-      if (error) throw error
-
-      const result = Array.isArray(data) ? data[0] : data
-      if (!result) {
-        throw new Error('ระบบไม่ได้ส่งข้อมูลยืนยันการจองกลับมา')
-      }
-
-      setBookingResult(result)
-      setMessage('จองคิวสำเร็จแล้ว!')
-      await loadBookings()
-    } catch (error) {
-      setMessage(error.message || 'จองคิวไม่สำเร็จ')
-    } finally {
-      setLoading(false)
+  try {
+    if (!user || !customer) {
+      throw new Error(tr('กรุณาเข้าสู่ระบบก่อนจองคิว', 'Please log in before booking.'))
     }
+
+    if (!selectedService) {
+      throw new Error(tr('กรุณาเลือกบริการ', 'Please select a service.'))
+    }
+
+    if (!selectedDate || !selectedTime) {
+      throw new Error(tr('กรุณาเลือกวันที่และเวลา', 'Please select a date and time.'))
+    }
+
+    const startsAt = new Date(`${selectedDate}T${selectedTime}:00+07:00`)
+
+    if (Number.isNaN(startsAt.getTime()) || startsAt <= new Date()) {
+      throw new Error(tr('กรุณาเลือกเวลาในอนาคต', 'Please select a future time.'))
+    }
+
+    const maxDate = new Date()
+    maxDate.setDate(maxDate.getDate() + 14)
+
+    if (startsAt > maxDate) {
+      throw new Error(tr('จองล่วงหน้าได้ไม่เกิน 14 วัน', 'Bookings can be made up to 14 days in advance.'))
+    }
+
+    const { data, error } = await supabase.rpc('create_customer_booking', {
+      p_service_id: selectedService,
+      p_starts_at: startsAt.toISOString(),
+      p_barber_id: selectedBarber || null,
+    })
+
+    if (error) throw error
+
+    const result = Array.isArray(data) ? data[0] : data
+
+    if (!result) {
+      throw new Error(tr('ระบบไม่ได้ส่งข้อมูลยืนยันการจองกลับมา', 'The booking system did not return confirmation details.'))
+    }
+
+    setBookingResult(result)
+    setMessage(tr('จองคิวสำเร็จแล้ว!', 'Booking successful!'))
+
+    await loadBookings()
+  } catch (error) {
+    setMessage(error.message || tr('จองคิวไม่สำเร็จ', 'Booking failed.'))
+  } finally {
+    setLoading(false)
   }
+}
 
   async function handleCancelBooking(bookingId) {
-    if (!window.confirm('ต้องการ{tr('ยกเลิกการจอง', 'Cancel Booking')}คิวนี้ใช่หรือไม่?')) return
+    if (!window.confirm(tr('ต้องการยกเลิกการจองคิวนี้ใช่หรือไม่?', 'Are you sure you want to cancel this booking?'))) return
 
     setLoading(true)
     setMessage('')
@@ -566,10 +582,10 @@ const loadOwnerCustomers = useCallback(async () => {
       })
       if (error) throw error
 
-      setMessage('ยกเลิกการจองเรียบร้อยแล้ว')
+      setMessage(tr('ยกเลิกการจองเรียบร้อยแล้ว', 'Booking cancelled successfully.'))
       await loadBookings()
     } catch (error) {
-      setMessage(error.message || 'ยกเลิกการจองไม่สำเร็จ')
+      setMessage(error.message || tr('ยกเลิกการจองไม่สำเร็จ', 'Failed to cancel booking.'))
     } finally {
       setLoading(false)
     }
@@ -984,17 +1000,7 @@ const getScheduleBooking = (barberName, hour) => {
   </tr>
 </thead>
 <tbody>
-  {ownerBookings.map((booking) => (
-    <tr key={booking.id}>
-      <td>{booking.customer?.full_name || '-'}</td>
-      <td>{booking.service_name_snapshot || '-'}</td>
-      <td>{booking.barber?.full_name || '-'}</td>
-      <td>{formatDateTime(booking.starts_at)}</td>
-      <td>{booking.booking_code || '-'}</td>
-      <td>{statusLabel(booking.status)}</td>
-      <td>{booking.payment_status || '-'}</td>
-      <td>{money(booking.price_thb_snapshot)}</td>
-    </tr>
+ 
   ))}
 </tbody>
  </table>
@@ -1267,7 +1273,7 @@ const getScheduleBooking = (barberName, hour) => {
   <div className="booking-success">
     <h3>{tr('จองคิวสำเร็จ!', 'Booking Successful!')}</h3>
     <p>{tr('รหัสจอง:', 'Booking ID:')} {bookingResult.booking_code || '-'}</p>
-    <p>{tr('เวลา:', 'Time:')} {formatDateTime(bookingResult.starts_at)}</p>
+    <p>{tr('เวลา:', 'Time:')} {formatDateTime(bookingResult.starts_at, language)}</p>
     <p>{tr('ระบบจัดการคำขอจองเรียบร้อยแล้ว', 'Your booking has been processed successfully.')}</p>
   </div>
 )}
@@ -1331,7 +1337,7 @@ const getScheduleBooking = (barberName, hour) => {
 
           <td>
             <span className="customer-status">
-              {statusLabel(booking.status)}
+              {statusLabel(booking.status, language)}
             </span>
 
             {booking.status === 'Confirmed' &&
@@ -1343,7 +1349,7 @@ const getScheduleBooking = (barberName, hour) => {
                   onClick={() => handleCancelBooking(booking.id)}
                   disabled={loading}
                 >
-                  ยกเลิกการจอง
+                  {tr('ยกเลิกการจอง', 'Cancel Booking')}
                 </button>
               )}
           </td>
