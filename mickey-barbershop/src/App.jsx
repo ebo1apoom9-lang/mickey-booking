@@ -193,25 +193,29 @@ if (profile?.role === 'owner' || profile?.role === 'baber') {
     }
   }, [user, authInitialized])
 
-  // Route users according to their authenticated role.
-  useEffect(() => {
-    if (!authInitialized || profileLoading) return
+ // Route users according to their authenticated role.
+useEffect(() => {
+  if (!authInitialized || profileLoading) return
 
-    if (!user) {
-      if (route !== '/login') navigate('/login', true)
-      return
-    }
+  if (!user) {
+    if (route !== '/login') navigate('/login', true)
+    return
+  }
 
   if (isOwner) {
-  if (route !== '/owner') navigate('/owner', true)
-  return
-}
+    if (route !== '/owner') navigate('/owner', true)
+    return
+  }
 
-if (isBarber) {
-  if (route !== '/barber') navigate('/barber', true)
-  return
-}
-    }, [
+  if (isBarber) {
+    if (route !== '/barber') navigate('/barber', true)
+    return
+  }
+
+  if (route !== '/booking') {
+    navigate('/booking', true)
+  }
+}, [
   authInitialized,
   profileLoading,
   user,
@@ -220,37 +224,6 @@ if (isBarber) {
   route,
   navigate,
 ])
-
-if (route !== '/booking') navigate('/booking', true)
-  }, [authInitialized, profileLoading, user, isOwner, route, navigate])
-
-  const loadBookingData = useCallback(async () => {
-    const [serviceResult, barberResult] = await Promise.all([
-      supabase
-        .from('services')
-        .select('id, name, price_thb, duration_minutes')
-        .eq('is_active', true)
-        .order('name'),
-      supabase
-        .from('active_barbers')
-        .select('id, full_name')
-        .order('full_name'),
-    ])
-
-    if (serviceResult.error) {
-      setMessage('โหลดบริการไม่สำเร็จ: ' + serviceResult.error.message)
-    } else {
-      setServices(serviceResult.data || [])
-    }
-
-    if (barberResult.error) {
-      setMessage('โหลดรายชื่อช่างไม่สำเร็จ: ' + barberResult.error.message)
-    } else {
-      setBarbers(barberResult.data || [])
-    }
-  }, [])
-
-  const loadBookings = useCallback(async () => {
     const { data, error } = await supabase
       .from('bookings')
       .select(`
