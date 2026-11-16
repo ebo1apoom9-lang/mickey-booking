@@ -752,19 +752,40 @@ const [recoveryReady, setRecoveryReady] = useState(false)
               {ownerBookings.length === 0 && (
                 <p className="booking-note">ยังไม่พบรายการจอง หรือบัญชีไม่มีสิทธิ์อ่านข้อมูล</p>
               )}
-              {ownerBookings.map((booking) => (
-               <article className="booking-item" key={booking.id}>
-  <h3>{booking.customer?.full_name || 'ไม่พบชื่อลูกค้า'}</h3>
-  <p>เบอร์โทรศัพท์: {booking.customer?.phone || '-'}</p>
-  <p>บริการ: {booking.service_name_snapshot || 'บริการ'}</p>
-  <p>ช่าง: {booking.barber?.full_name || '-'}</p>
-  <p>รหัสจอง: {booking.booking_code || '-'}</p>
-  <p>วันเวลา: {formatDateTime(booking.starts_at)}</p>
-  <p>ราคา: {money(booking.price_thb_snapshot)}</p>
-  <p>สถานะ: {statusLabel(booking.status)}</p>
-  <p>การชำระเงิน: {booking.payment_status || '-'}</p>
-</article>
-              ))}
+              
+<div className="owner-table-wrap">
+  <table className="owner-booking-table">
+    <thead>
+      <tr>
+        <th>ลูกค้า</th>
+        <th>เบอร์โทรศัพท์</th>
+        <th>บริการ</th>
+        <th>ช่าง</th>
+        <th>รหัสจอง</th>
+        <th>วันเวลา</th>
+        <th>ราคา</th>
+        <th>สถานะ</th>
+        <th>การชำระเงิน</th>
+      </tr>
+    </thead>
+    <tbody>
+      {ownerBookings.map((booking) => (
+        <tr key={booking.id}>
+          <td>{booking.customer?.full_name || '-'}</td>
+          <td>{booking.customer?.phone || '-'}</td>
+          <td>{booking.service_name_snapshot || '-'}</td>
+          <td>{booking.barber?.full_name || '-'}</td>
+          <td>{booking.booking_code || '-'}</td>
+          <td>{formatDateTime(booking.starts_at)}</td>
+          <td>{money(booking.price_thb_snapshot)}</td>
+          <td>{statusLabel(booking.status)}</td>
+          <td>{booking.payment_status || '-'}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
             </section>
           </>
         )}
