@@ -66,6 +66,7 @@ const [recoveryReady, setRecoveryReady] = useState(false)
   const [selectedService, setSelectedService] = useState('')
   const [selectedBarber, setSelectedBarber] = useState('')
   const [selectedDate, setSelectedDate] = useState(bangkokDate())
+  const [scheduleDate, setScheduleDate] = useState(bangkokDate())
   const [selectedTime, setSelectedTime] = useState('10:00')
   const [bookingResult, setBookingResult] = useState(null)
 
@@ -210,6 +211,15 @@ if (isBarber) {
   if (route !== '/barber') navigate('/barber', true)
   return
 }
+    }, [
+  authInitialized,
+  profileLoading,
+  user,
+  isOwner,
+  isBarber,
+  route,
+  navigate,
+])
 
 if (route !== '/booking') navigate('/booking', true)
   }, [authInitialized, profileLoading, user, isOwner, route, navigate])
@@ -587,6 +597,31 @@ if (route !== '/booking') navigate('/booking', true)
   }, [availableTimes, selectedTime])
 
   const today = bangkokDate()
+const scheduleBookings = ownerBookings.filter((booking) => {
+  return bangkokDate(new Date(booking.starts_at)) === scheduleDate
+})
+
+const scheduleHours = Array.from(
+  { length: 10 },
+  (_, index) => index + 10
+)
+
+const getScheduleBooking = (barberName, hour) => {
+  return scheduleBookings.find((booking) => {
+    if (booking.barber?.full_name !== barberName) return false
+
+    const start = new Date(booking.starts_at)
+    const end = new Date(booking.ends_at)
+
+    const slotStart = new Date(
+      `${scheduleDate}T${String(hour).padStart(2, '0')}:00:00+07:00`
+    )
+
+    const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000)
+
+    return start < slotEnd && end > slotStart
+  })
+}
   const maxBookingDate = bangkokDate(
     new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
   )
