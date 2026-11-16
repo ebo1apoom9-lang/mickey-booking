@@ -278,7 +278,8 @@ const loadBookings = useCallback(async () => {
 
   setBookings(data || [])
 }, [])
-    const { data, error } = await supabase
+    const loadOwnerBookings = useCallback(async () => {
+  const { data, error } = await supabase
       .from('bookings')
             .select(`
         id,
