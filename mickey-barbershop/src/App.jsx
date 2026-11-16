@@ -1269,7 +1269,7 @@ const getScheduleBooking = (barberName, hour) => {
   </table>
 </div>
 )}                            
-                         
+          </section>                 
           </>
         )}
 
