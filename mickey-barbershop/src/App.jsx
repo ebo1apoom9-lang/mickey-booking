@@ -755,20 +755,34 @@ const [recoveryReady, setRecoveryReady] = useState(false)
               
 <div className="owner-table-wrap">
   <table className="owner-booking-table">
-    <thead>
-      <tr>
-        <th>ลูกค้า</th>
-        <th>เบอร์โทรศัพท์</th>
-        <th>บริการ</th>
-        <th>ช่าง</th>
-        <th>รหัสจอง</th>
-        <th>วันเวลา</th>
-        <th>ราคา</th>
-        <th>สถานะ</th>
-        <th>การชำระเงิน</th>
-      </tr>
-    </thead>
-    <tbody>
+    
+<thead>
+  <tr>
+    <th>ชื่อลูกค้า</th>
+    <th>การบริการ</th>
+    <th>ชื่อช่าง</th>
+    <th>วันเวลา</th>
+    <th>รหัสจอง</th>
+    <th>สถานะ</th>
+    <th>การชำระเงิน</th>
+    <th>ราคา</th>
+  </tr>
+</thead>
+<tbody>
+  {ownerBookings.map((booking) => (
+    <tr key={booking.id}>
+      <td>{booking.customer?.full_name || '-'}</td>
+      <td>{booking.service_name_snapshot || '-'}</td>
+      <td>{booking.barber?.full_name || '-'}</td>
+      <td>{formatDateTime(booking.starts_at)}</td>
+      <td>{booking.booking_code || '-'}</td>
+      <td>{statusLabel(booking.status)}</td>
+      <td>{booking.payment_status || '-'}</td>
+      <td>{money(booking.price_thb_snapshot)}</td>
+    </tr>
+  ))}
+</tbody>
+
       {ownerBookings.map((booking) => (
         <tr key={booking.id}>
           <td>{booking.customer?.full_name || '-'}</td>
