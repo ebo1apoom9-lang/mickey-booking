@@ -278,7 +278,7 @@ const loadBookings = useCallback(async () => {
       starts_at,
       ends_at,
       status,
-      payment_status
+      barber:profiles!bookings_barber_id_fkey(full_name)
     `)
     .order('starts_at', { ascending: false })
     .limit(50)
@@ -1082,7 +1082,7 @@ const getScheduleBooking = (barberName, hour) => {
               )}
             </section>
 
-            <section className="auth-card booking-history">
+            <section className="auth-card booking-history customer-booking-history">
               <span className="gold-text">MY BOOKINGS</span>
               <h2>ประวัติการจอง</h2>
               <button
@@ -1098,29 +1098,68 @@ const getScheduleBooking = (barberName, hour) => {
                 <p className="booking-note">ยังไม่มีประวัติการจอง</p>
               )}
 
-              {bookings.map((booking) => (
-                <article className="booking-item" key={booking.id}>
-                  <h3>{booking.service_name_snapshot || 'บริการ'}</h3>
-                  <p>รหัสจอง: {booking.booking_code || '-'}</p>
-                  <p>วันที่: {formatDateTime(booking.starts_at)}</p>
-                  <p>ราคา: {money(booking.price_thb_snapshot)}</p>
-                  <p>สถานะ: {statusLabel(booking.status)}</p>
-                  <p>การชำระเงิน: {booking.payment_status || '-'}</p>
+             {bookings.length > 0 && (
+  <div className="customer-history-wrap">
+    <table className="customer-history-table">
+    <thead>
+      <tr>
+        <th>วันที่</th>
+        <th>เวลา</th>
+        <th>บริการ</th>
+        <th>ช่าง</th>
+        <th>ราคา</th>
+        <th>สถานะ</th>
+      </tr>
+    </thead>
 
-                  {booking.status === 'Confirmed' &&
-                    new Date(booking.starts_at).getTime() >
-                      Date.now() + 2 * 60 * 60 * 1000 && (
-                      <button
-                        type="button"
-                        className="cancel-button"
-                        onClick={() => handleCancelBooking(booking.id)}
-                        disabled={loading}
-                      >
-                        ยกเลิกการจอง
-                      </button>
-                    )}
-                </article>
-              ))}
+    <tbody>
+      {bookings.map((booking) => (
+        <tr key={booking.id}>
+          <td>
+            {new Date(booking.starts_at).toLocaleDateString('th-TH', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+              timeZone: 'Asia/Bangkok'
+            })}
+          </td>
+
+          <td>
+            {new Date(booking.starts_at).toLocaleTimeString('th-TH', {
+              hour: '2-digit',
+              minute: '2-digit',
+              timeZone: 'Asia/Bangkok'
+            })}
+          </td>
+
+          <td>{booking.service_name_snapshot || 'บริการ'}</td>
+          <td>{booking.barber?.full_name || '-'}</td>
+          <td>{money(booking.price_thb_snapshot)}</td>
+
+          <td>
+            <span className="customer-status">
+              {statusLabel(booking.status)}
+            </span>
+
+            {booking.status === 'Confirmed' &&
+              new Date(booking.starts_at).getTime() >
+                Date.now() + 2 * 60 * 60 * 1000 && (
+                <button
+                  type="button"
+                  className="cancel-button"
+                  onClick={() => handleCancelBooking(booking.id)}
+                  disabled={loading}
+                >
+                  ยกเลิกการจอง
+                </button>
+              )}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+)}                            
             </section>
           </>
         )}
