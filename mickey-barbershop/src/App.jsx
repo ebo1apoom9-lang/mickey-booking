@@ -323,7 +323,7 @@ if (route !== '/booking') navigate('/booking', true)
     profileLoading,
     user,
     customer,
-    isOwner,
+    isStaffDashboard,
     loadBookingData,
     loadBookings,
     loadOwnerBookings,
