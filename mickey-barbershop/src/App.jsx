@@ -193,7 +193,7 @@ if (profile?.role === 'owner' || profile?.role === 'baber') {
     }
   }, [user, authInitialized])
 
- // Route users according to their authenticated role.
+// Route users according to their authenticated role.
 useEffect(() => {
   if (!authInitialized || profileLoading) return
 
@@ -224,31 +224,60 @@ useEffect(() => {
   route,
   navigate,
 ])
-    const { data, error } = await supabase
-      .from('bookings')
-      .select(`
-        id,
-        booking_code,
-        service_name_snapshot,
-        price_thb_snapshot,
-        duration_minutes_snapshot,
-        starts_at,
-        ends_at,
-        status,
-        payment_status
-      `)
-      .order('starts_at', { ascending: false })
-      .limit(50)
 
-    if (error) {
-      setMessage('โหลดประวัติการจองไม่สำเร็จ: ' + error.message)
-      return
-    }
+// Load services and active barbers.
+const loadBookingData = useCallback(async () => {
+  const [serviceResult, barberResult] = await Promise.all([
+    supabase
+      .from('services')
+      .select('id, name, price_thb, duration_minutes')
+      .eq('is_active', true)
+      .order('name'),
 
-    setBookings(data || [])
-  }, [])
+    supabase
+      .from('active_barbers')
+      .select('id, full_name')
+      .order('full_name'),
+  ])
 
-  const loadOwnerBookings = useCallback(async () => {
+  if (serviceResult.error) {
+    setMessage('โหลดบริการไม่สำเร็จ: ' + serviceResult.error.message)
+  } else {
+    setServices(serviceResult.data || [])
+  }
+
+  if (barberResult.error) {
+    setMessage('โหลดรายชื่อช่างไม่สำเร็จ: ' + barberResult.error.message)
+  } else {
+    setBarbers(barberResult.data || [])
+  }
+}, [])
+
+// Load customer bookings.
+const loadBookings = useCallback(async () => {
+  const { data, error } = await supabase
+    .from('bookings')
+    .select(`
+      id,
+      booking_code,
+      service_name_snapshot,
+      price_thb_snapshot,
+      duration_minutes_snapshot,
+      starts_at,
+      ends_at,
+      status,
+      payment_status
+    `)
+    .order('starts_at', { ascending: false })
+    .limit(50)
+
+  if (error) {
+    setMessage('โหลดประวัติการจองไม่สำเร็จ: ' + error.message)
+    return
+  }
+
+  setBookings(data || [])
+}, [])
     const { data, error } = await supabase
       .from('bookings')
             .select(`
