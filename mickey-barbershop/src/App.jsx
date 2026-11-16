@@ -261,7 +261,7 @@ const [recoveryReady, setRecoveryReady] = useState(false)
   const loadOwnerBookings = useCallback(async () => {
     const { data, error } = await supabase
       .from('bookings')
-      .select(`
+            .select(`
         id,
         booking_code,
         service_name_snapshot,
@@ -270,7 +270,9 @@ const [recoveryReady, setRecoveryReady] = useState(false)
         starts_at,
         ends_at,
         status,
-        payment_status
+        payment_status,
+        customer:customers!bookings_customer_id_fkey(full_name, phone),
+        barber:profiles!bookings_barber_id_fkey(full_name)
       `)
       .order('starts_at', { ascending: false })
       .limit(100)
