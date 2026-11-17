@@ -694,3 +694,215 @@ footer {
 .schedule-error { margin:12px 0; color:#ff9d9d; overflow-wrap:anywhere; }
 .schedule-hint { margin-top:14px; color:#b9ad91; font-size:13px; }
 @media(max-width:600px) { .customer-schedule-card { padding:22px 14px; } .customer-schedule-toolbar { align-items:stretch; flex-direction:column; } .customer-schedule-toolbar input,.schedule-refresh-button { width:100%; } }
+
+
+/* Unified customer booking experience */
+.unified-booking-card { max-width:1200px; }
+.unified-booking-controls {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+  margin:22px 0 18px;
+}
+.unified-booking-controls label {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  color:#e8dfca;
+  font-size:14px;
+  font-weight:600;
+}
+.unified-booking-controls select,
+.unified-booking-controls input {
+  width:100%;
+  min-width:0;
+  min-height:46px;
+  padding:10px 12px;
+  color:#f5f0e6 !important;
+  background:#0d0d0d !important;
+  border:1px solid rgba(212,175,55,.45) !important;
+  border-radius:8px;
+  color-scheme:dark;
+}
+.unified-booking-controls select:focus,
+.unified-booking-controls input:focus {
+  outline:none;
+  border-color:var(--gold-light) !important;
+  box-shadow:0 0 0 3px rgba(212,175,55,.12);
+}
+.unified-service-summary {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:12px 22px;
+  padding:12px 15px;
+  margin:0 0 22px;
+  color:#f5e7bd;
+  background:rgba(212,175,55,.08);
+  border:1px solid rgba(212,175,55,.25);
+  border-radius:8px;
+}
+.unified-service-summary span:first-child { flex:1 1 auto; font-weight:700; }
+.unified-schedule-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin:14px 0 10px;
+}
+.unified-schedule-heading h3 { margin:0 0 5px; color:var(--gold-light); }
+.unified-schedule-heading p { margin:0; color:#aaa; font-size:13px; }
+.unified-booking-footer {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  margin-top:22px;
+  padding-top:18px;
+  border-top:1px solid rgba(212,175,55,.22);
+}
+.unified-selected-time { display:flex; flex-direction:column; gap:3px; }
+.unified-selected-time span { color:#aaa; font-size:12px; }
+.unified-selected-time strong { color:var(--gold-light); font-size:24px; }
+.unified-selected-time small { color:#bbb; }
+.unified-booking-footer button {
+  min-width:220px;
+  min-height:48px;
+}
+.unified-booking-footer button:disabled { opacity:.5; cursor:not-allowed; }
+@media(max-width:760px) {
+  .unified-booking-controls { grid-template-columns:1fr; gap:12px; }
+  .unified-schedule-heading { align-items:stretch; flex-direction:column; }
+  .unified-schedule-heading .schedule-refresh-button { width:100%; }
+  .unified-booking-footer { align-items:stretch; flex-direction:column; }
+  .unified-booking-footer button { width:100%; min-width:0; }
+}
+
+
+/* Date-first customer booking and modal */
+.customer-date-first { display: grid; gap: 18px; }
+.customer-date-first > label { display: grid; gap: 8px; max-width: 360px; color: var(--gold, #d6b56d); font-weight: 600; }
+.customer-date-first input[type="date"], .staff-schedule-heading input[type="date"] { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid rgba(214,181,109,.45); border-radius: 10px; background: #111; color: #f6f0e4; color-scheme: dark; }
+.legend-closed { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #6b7280; margin-right: 7px; }
+.booking-modal-backdrop { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 18px; background: rgba(0,0,0,.78); }
+.booking-modal { position: relative; width: min(100%, 520px); max-height: min(90vh, 760px); overflow: auto; padding: 30px; border: 1px solid rgba(214,181,109,.55); border-radius: 18px; background: #111; color: #f5f0e7; box-shadow: 0 24px 80px rgba(0,0,0,.55); }
+.booking-modal h3 { margin: 8px 0; color: #f1d18a; font-size: 1.45rem; }
+.booking-modal form { display: grid; gap: 16px; margin-top: 20px; }
+.booking-modal label { display: grid; gap: 8px; }
+.booking-modal select { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid rgba(214,181,109,.4); border-radius: 10px; background: #191919; color: #fff; }
+.booking-modal-time { color: #e8c77e; font-weight: 700; }
+.booking-modal-close { position: absolute; top: 10px; right: 14px; width: 38px; height: 38px; border: 1px solid #66532c; border-radius: 50%; background: transparent; color: #f1d18a; font-size: 24px; cursor: pointer; }
+.booking-modal-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+.booking-modal-actions button { min-height: 44px; }
+.customer-schedule-table .schedule-slot { min-width: 64px; min-height: 38px; }
+.customer-schedule-table .schedule-slot.is-open { border: 1px solid rgba(218,184,111,.65); background: rgba(218,184,111,.12); color: #f1d18a; font-weight: 800; }
+.customer-schedule-table .schedule-slot.is-open:hover:not(:disabled) { background: #d6b56d; color: #17120a; }
+.customer-schedule-table .schedule-slot:disabled { opacity: .55; cursor: not-allowed; }
+
+/* Shared owner / barber shop schedule */
+.staff-schedule-section, .staff-queue-section { margin-top: 22px; }
+.staff-schedule-heading { display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 18px; }
+.staff-schedule-heading h2 { margin-bottom: 5px; }
+.staff-schedule-heading p { margin: 0; color: #aaa; }
+.staff-schedule-heading label { display: grid; gap: 6px; min-width: 180px; color: #e4c477; }
+.staff-schedule-table { width: 100%; min-width: 900px; border-collapse: separate; border-spacing: 0; }
+.staff-schedule-table th, .staff-schedule-table td { padding: 8px; border-bottom: 1px solid rgba(214,181,109,.15); text-align: center; }
+.staff-schedule-table thead th { position: sticky; top: 0; z-index: 1; background: #171717; color: #e8c77e; }
+.staff-schedule-table tbody th { position: sticky; left: 0; z-index: 1; min-width: 130px; background: #151515; color: #f2e6c8; text-align: left; }
+.staff-booking-cell { display: grid; gap: 4px; width: 100%; min-width: 90px; padding: 8px; border: 1px solid rgba(214,181,109,.4); border-radius: 8px; background: rgba(214,181,109,.1); color: #f6e8c4; cursor: pointer; }
+.staff-booking-cell strong, .staff-booking-cell small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.staff-booking-cell small { color: #c7b68f; font-size: 11px; }
+.staff-empty-slot { display: inline-block; padding: 8px 10px; color: #8f8f8f; font-size: 11px; }
+.staff-actions { min-width: 180px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.staff-actions button, .staff-actions select { min-height: 36px; padding: 6px 9px; border: 1px solid rgba(214,181,109,.35); border-radius: 7px; background: #171717; color: #e8c77e; }
+.staff-actions select { max-width: 145px; }
+@media (max-width: 640px) {
+  .booking-modal { padding: 25px 18px 20px; }
+  .booking-modal-actions { flex-direction: column-reverse; }
+  .booking-modal-actions button { width: 100%; }
+  .staff-schedule-heading { align-items: stretch; }
+  .staff-schedule-heading label { width: 100%; }
+}
+
+.owner-reports-section { margin-top: 22px; }
+.owner-reports-section h3 { margin-top: 20px; color: #e8c77e; }
+
+
+/* Staff dashboard: integrated schedule actions + compact sidebar */
+.staff-sidebar {
+  position: fixed;
+  z-index: 30;
+  top: 18px;
+  left: max(14px, calc((100vw - 1440px) / 2));
+  width: 188px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 12px;
+  border: 1px solid rgba(205, 166, 83, .32);
+  border-radius: 14px;
+  background: rgba(13, 13, 13, .97);
+  box-shadow: 0 12px 36px rgba(0,0,0,.28);
+}
+.sidebar-brand {
+  color: #d7b56d;
+  font-weight: 800;
+  letter-spacing: .12em;
+  font-size: 13px;
+  padding: 4px 8px 14px;
+  border-bottom: 1px solid rgba(205,166,83,.25);
+  margin-bottom: 5px;
+}
+.sidebar-brand span { display:block; color:#f3eee3; font-size:10px; letter-spacing:.2em; margin-top:4px; }
+.staff-sidebar a, .staff-sidebar button {
+  display:block;
+  width:100%;
+  text-align:left;
+  text-decoration:none;
+  color:#eee6d5;
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:8px;
+  padding:11px 10px;
+  font:inherit;
+  cursor:pointer;
+}
+.staff-sidebar a:hover, .staff-sidebar button:hover {
+  color:#e4c47d;
+  border-color:rgba(205,166,83,.4);
+  background:rgba(205,166,83,.08);
+}
+.staff-sidebar button { margin-top:12px; border-color:rgba(205,166,83,.3); }
+.app-shell:has(.staff-sidebar) .main { width:min(1120px, calc(100% - 230px)); margin-left:max(215px, calc((100vw - 1440px) / 2 + 215px)); }
+.staff-schedule-section, .owner-reports-section { scroll-margin-top:20px; }
+.staff-booking-cell { min-width:104px; cursor:pointer; transition:transform .16s ease, border-color .16s ease, background .16s ease; }
+.staff-booking-cell:hover { transform:translateY(-2px); border-color:#d8b66d; background:rgba(205,166,83,.14); }
+.staff-booking-cell::after { content:' · ' attr(data-action); }
+.staff-booking-overlay {
+  position:fixed; inset:0; z-index:100;
+  display:flex; align-items:center; justify-content:center;
+  padding:20px; background:rgba(0,0,0,.76);
+}
+.staff-booking-modal {
+  position:relative; width:min(480px,100%); max-height:90vh; overflow:auto;
+  padding:28px; border:1px solid rgba(213,177,104,.55); border-radius:16px;
+  background:#111; color:#f4efe5; box-shadow:0 24px 80px rgba(0,0,0,.5);
+}
+.staff-booking-modal h2 { margin:8px 0 18px; color:#e4c47d; }
+.staff-modal-close { position:absolute; right:14px; top:10px; border:0; background:none; color:#e4c47d; font-size:28px; cursor:pointer; }
+.staff-booking-details { padding:12px 0; border-top:1px solid rgba(213,177,104,.2); border-bottom:1px solid rgba(213,177,104,.2); margin-bottom:16px; }
+.staff-booking-details p { margin:8px 0; }
+.staff-booking-modal label { display:grid; gap:8px; }
+.staff-booking-modal select { width:100%; padding:12px; border-radius:8px; }
+.staff-modal-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+.staff-modal-actions button { flex:1; min-height:44px; }
+.staff-modal-actions .secondary { background:transparent; border:1px solid rgba(213,177,104,.45); color:#eee; }
+@media (max-width: 900px) {
+  .staff-sidebar {
+    position:static; width:auto; margin:12px 14px 0;
+    flex-direction:row; flex-wrap:wrap; align-items:center;
+  }
+  .sidebar-brand { width:100%; padding-bottom:8px; }
+  .staff-sidebar a, .staff-sidebar button { width:auto; flex:1 1 auto; text-align:center; }
+  .app-shell:has(.staff-sidebar) .main { width:100%; margin:0 auto; }
+}

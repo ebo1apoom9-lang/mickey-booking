@@ -86,14 +86,16 @@ const [selectedCustomer, setSelectedCustomer] = useState(null)
   const [selectedBarber, setSelectedBarber] = useState('')
   const [selectedDate, setSelectedDate] = useState(bangkokDate())
   const [scheduleDate, setScheduleDate] = useState(bangkokDate())
-  const [selectedTime, setSelectedTime] = useState('10:00')
+  const [selectedTime, setSelectedTime] = useState('')
+  const [showBookingModal, setShowBookingModal] = useState(false)
+  const [selectedStaffBooking, setSelectedStaffBooking] = useState(null)
   const [bookingResult, setBookingResult] = useState(null)
   const [publicAvailability, setPublicAvailability] = useState([])
   const [availabilityLoading, setAvailabilityLoading] = useState(false)
   const [availabilityError, setAvailabilityError] = useState('')
 
  const isOwner = staffProfile?.role === 'owner'
-const isBarber = staffProfile?.role === 'baber'
+const isBarber = ['barber', 'baber'].includes(staffProfile?.role)
 const isStaffDashboard = isOwner || isBarber
 
   const navigate = useCallback((path, replace = false) => {
@@ -182,7 +184,7 @@ return () => {
       setStaffProfile(profile)
 
      // Owner and barber accounts do not need a customer record.
-if (profile?.role === 'owner' || profile?.role === 'baber') {
+if (profile?.role === 'owner' || ['barber', 'baber'].includes(profile?.role)) {
   setProfileLoading(false)
   return
 }
@@ -346,11 +348,12 @@ const loadBookings = useCallback(async () => {
         ends_at,
         status,
         payment_status,
+        barber_id,
         customer:customers!bookings_customer_id_fkey(full_name, phone),
         barber:profiles!bookings_barber_id_fkey(full_name)
       `)
       .order('starts_at', { ascending: false })
-      .limit(100)
+      .limit(1000)
 
     if (error) {
       setMessage('โหลดรายการจองของร้านไม่สำเร็จ: ' + error.message)
@@ -596,6 +599,8 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     }
 
     setBookingResult(result)
+    setShowBookingModal(false)
+    await loadPublicAvailability()
     setMessage(tr('จองคิวสำเร็จแล้ว!', 'Booking successful!'))
 
     await loadBookings()
@@ -625,6 +630,53 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     } finally {
       setLoading(false)
     }
+  }
+
+  async function handleStaffBookingUpdate(bookingId, updates) {
+    setLoading(true)
+    setMessage('')
+    try {
+      const { error } = await supabase.from('bookings').update(updates).eq('id', bookingId)
+      if (error) throw error
+      setMessage(tr('อัปเดตคิวเรียบร้อยแล้ว', 'Booking updated.'))
+      await loadOwnerBookings()
+    } catch (error) {
+      setMessage(error.message || tr('ไม่สามารถอัปเดตคิวได้', 'Could not update booking.'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleMoveStaffBooking(booking) {
+    const current = new Date(booking.starts_at)
+    const currentLocal = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit' }).format(current)
+    const currentTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', hour12: false }).format(current)
+    const nextDate = window.prompt(tr('วันที่ใหม่ (YYYY-MM-DD)', 'New date (YYYY-MM-DD)'), currentLocal)
+    if (!nextDate) return
+    const nextTime = window.prompt(tr('เวลาใหม่ (HH:MM)', 'New time (HH:MM)'), currentTime)
+    if (!nextTime) return
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(nextDate) || !/^([01]\d|2[0-3]):00$/.test(nextTime)) {
+      setMessage(tr('รูปแบบวันที่หรือเวลาไม่ถูกต้อง', 'Invalid date or time format.'))
+      return
+    }
+    const starts = new Date(`${nextDate}T${nextTime}:00+07:00`)
+    const duration = Number(booking.duration_minutes_snapshot || 60)
+    const ends = new Date(starts.getTime() + duration * 60000)
+    const closing = new Date(`${nextDate}T20:00:00+07:00`)
+    const opening = new Date(`${nextDate}T10:00:00+07:00`)
+    if (starts < opening || starts <= new Date() || ends > closing) {
+      setMessage(tr('เวลาใหม่ต้องอยู่ในเวลาทำการ 10:00–20:00 และเป็นเวลาในอนาคต', 'New time must be in the future and within business hours (10:00–20:00).'))
+      return
+    }
+    const conflict = ownerBookings.some((other) => {
+      if (other.id === booking.id || other.barber_id !== booking.barber_id || ['Cancelled', 'No Show'].includes(other.status)) return false
+      return starts < new Date(other.ends_at) && ends > new Date(other.starts_at)
+    })
+    if (conflict) {
+      setMessage(tr('ช่างมีคิวอื่นในช่วงเวลานี้แล้ว กรุณาเลือกเวลาใหม่', 'This barber already has another booking during that time. Choose another time.'))
+      return
+    }
+    await handleStaffBookingUpdate(booking.id, { starts_at: starts.toISOString(), ends_at: ends.toISOString() })
   }
 
   async function handleLogout() {
@@ -753,14 +805,6 @@ async function handleUpdatePassword() {
     return times
   }, [selectedDate, chosenService, selectedBarber, barbers, publicAvailability])
 
-  useEffect(() => {
-    if (availableTimes.length && !availableTimes.includes(selectedTime)) {
-      setSelectedTime(availableTimes[0])
-    } else if (!availableTimes.length) {
-      setSelectedTime('')
-    }
-  }, [availableTimes, selectedTime])
-
   const today = bangkokDate()
 const scheduleBookings = ownerBookings.filter((booking) => {
   return bangkokDate(new Date(booking.starts_at)) === scheduleDate
@@ -772,6 +816,7 @@ const scheduleHours = Array.from(
 )
 
 const isCustomerSlotAvailable = (barberId, hour) => {
+  if (availabilityLoading || availabilityError) return false
   const duration = Number(chosenService?.duration_minutes || 60)
   const start = new Date(`${selectedDate}T${String(hour).padStart(2, '0')}:00:00+07:00`)
   const end = new Date(start.getTime() + duration * 60 * 1000)
@@ -785,9 +830,9 @@ const isCustomerSlotAvailable = (barberId, hour) => {
   })
 }
 
-const getScheduleBooking = (barberName, hour) => {
+const getScheduleBooking = (barberId, hour) => {
   return scheduleBookings.find((booking) => {
-    if (booking.barber?.full_name !== barberName) return false
+    if (booking.barber_id !== barberId) return false
 
     const start = new Date(booking.starts_at)
     const end = new Date(booking.ends_at)
@@ -814,12 +859,34 @@ const getScheduleBooking = (barberName, hour) => {
   const completedOwnerBookings = ownerBookings.filter(
     (booking) => booking.status === 'Completed'
   )
-  const todayRevenue = todayOwnerBookings
-    .filter((booking) => booking.status === 'Completed')
-    .reduce(
-      (total, booking) => total + Number(booking.price_thb_snapshot || 0),
-      0
-    )
+  const todayCompletedBookings = todayOwnerBookings.filter((booking) => booking.status === 'Completed')
+  const todayCancelledBookings = todayOwnerBookings.filter((booking) => booking.status === 'Cancelled')
+  const todayNoShowBookings = todayOwnerBookings.filter((booking) => booking.status === 'No Show')
+  const todayRevenue = todayCompletedBookings.reduce(
+    (total, booking) => total + Number(booking.price_thb_snapshot || 0),
+    0
+  )
+  const monthCompletedBookings = completedOwnerBookings.filter((booking) =>
+    bangkokDate(new Date(booking.starts_at)).startsWith(today.slice(0, 7))
+  )
+  const monthRevenue = monthCompletedBookings.reduce(
+    (total, booking) => total + Number(booking.price_thb_snapshot || 0),
+    0
+  )
+  const completedServicePerformance = Object.values(
+    completedOwnerBookings.reduce((groups, booking) => {
+      const key = `${booking.service_name_snapshot || 'Service'}|||${booking.barber?.full_name || 'Unassigned'}`
+      if (!groups[key]) groups[key] = {
+        service: booking.service_name_snapshot || 'Service',
+        barber: booking.barber?.full_name || 'Unassigned',
+        count: 0,
+        revenue: 0,
+      }
+      groups[key].count += 1
+      groups[key].revenue += Number(booking.price_thb_snapshot || 0)
+      return groups
+    }, {})
+  ).sort((a, b) => b.count - a.count)
 
   if (!authInitialized || (user && profileLoading)) {
     return (
@@ -1006,6 +1073,16 @@ const getScheduleBooking = (barberName, hour) => {
           </section>
         )}
 
+        {user && (isOwner || isBarber) && (route === '/owner' || route === '/barber') && (
+          <aside className="staff-sidebar">
+            <div className="sidebar-brand">MICKEY<span>BARBERSHOP</span></div>
+            <a href="#staff-schedule">{tr('ตารางคิว', 'Schedule')}</a>
+            {isOwner && <a href="#owner-reports">{tr('รายงานร้าน', 'Reports')}</a>}
+            {isOwner && <a href="#owner-customers">{tr('จัดการลูกค้า', 'Customers')}</a>}
+            <button type="button" onClick={handleLogout} disabled={loading}>{tr('ออกจากระบบ', 'Sign Out')}</button>
+          </aside>
+        )}
+
         {user && isOwner && route === '/owner' && (
           <>
             <section className="hero">
@@ -1034,8 +1111,16 @@ const getScheduleBooking = (barberName, hour) => {
     </div>
 
     <div className="summary-row">
-      <span>{tr('คิวที่เสร็จสิ้น', 'Completed Bookings')}</span>
-      <strong>   {completedOwnerBookings.length} {tr('รายการ', 'bookings')} </strong>
+      <span>{tr('คิวที่เสร็จสิ้นวันนี้', 'Completed Today')}</span>
+      <strong>{todayCompletedBookings.length} {tr('รายการ', 'bookings')}</strong>
+    </div>
+    <div className="summary-row">
+      <span>{tr('ยกเลิกวันนี้', 'Cancelled Today')}</span>
+      <strong>{todayCancelledBookings.length} {tr('รายการ', 'bookings')}</strong>
+    </div>
+    <div className="summary-row">
+      <span>{tr('ไม่มาตามนัดวันนี้', 'No-show Today')}</span>
+      <strong>{todayNoShowBookings.length} {tr('รายการ', 'bookings')}</strong>
     </div>
 
     <div className="summary-row summary-revenue">
@@ -1054,6 +1139,73 @@ const getScheduleBooking = (barberName, hour) => {
     {tr('รีเฟรชข้อมูล', 'Refresh Data')}
   </button>
 </section>
+
+            <section id="staff-schedule" className="auth-card staff-schedule-section">
+              <span className="gold-text">SHOP DAILY SCHEDULE</span>
+              <div className="staff-schedule-heading">
+                <div>
+                  <h2>{tr('ตารางงานช่างทุกคน', 'All Barbers Schedule')}</h2>
+                  <p>{tr('ภาพรวมคิวของร้าน แยกตามช่างและช่วงเวลา · ช่อง — คือไม่มีรายการจอง', 'Shop-wide bookings by barber and time. — means no booking is listed.')}</p>
+                </div>
+                <label>{tr('วันที่', 'Date')}
+                  <input type="date" value={scheduleDate} onChange={(event) => setScheduleDate(event.target.value)} />
+                </label>
+              </div>
+              <div className="customer-schedule-scroll">
+                <table className="staff-schedule-table">
+                  <thead><tr><th>{tr('ช่าง', 'Barber')}</th>{scheduleHours.map((hour) => <th key={hour}>{String(hour).padStart(2, '0')}:00</th>)}</tr></thead>
+                  <tbody>
+                    {barbers.map((barber) => (
+                      <tr key={barber.id}>
+                        <th>{barber.full_name}</th>
+                        {scheduleHours.map((hour) => {
+                          const booking = getScheduleBooking(barber.id, hour)
+                          return <td key={hour}>
+                            {booking ? (
+                              <button type="button" className={`staff-booking-cell status-${String(booking.status || '').toLowerCase().replace(/\s+/g, '-')}`} onClick={() => setSelectedStaffBooking(booking)}>
+                                <strong>{booking.customer?.full_name || tr('ลูกค้า', 'Customer')}</strong>
+                                <small>{booking.service_name_snapshot || '-'}</small>
+                              </button>
+                            ) : <span className="staff-empty-slot">—</span>}
+                          </td>
+                        })}
+                      </tr>
+                    ))}
+                    {!barbers.length && <tr><td colSpan={11}>{tr('ไม่พบรายชื่อช่าง', 'No barbers found.')}</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+            <section id="owner-reports" className="auth-card owner-reports-section">
+              <span className="gold-text">OWNER REPORTS</span>
+              <h2>{tr('รายงานยอดขายและบริการ', 'Sales & Service Reports')}</h2>
+              <div className="booking-summary">
+                <div className="summary-row">
+                  <span>{tr('รายได้เดือนนี้ (เฉพาะ Completed)', 'Monthly Revenue (Completed Only)')}</span>
+                  <strong>{money(monthRevenue)}</strong>
+                </div>
+                <div className="summary-row">
+                  <span>{tr('จำนวนบริการที่เสร็จสิ้นเดือนนี้', 'Completed Services This Month')}</span>
+                  <strong>{monthCompletedBookings.length}</strong>
+                </div>
+              </div>
+              <h3>{tr('บริการยอดนิยมแยกตามช่าง', 'Popular Services by Barber')}</h3>
+              <div className="owner-table-wrap">
+                <table className="owner-booking-table">
+                  <thead><tr><th>{tr('บริการ', 'Service')}</th><th>{tr('ช่าง', 'Barber')}</th><th>{tr('จำนวนที่ให้บริการจริง', 'Completed')}</th><th>{tr('รายได้', 'Revenue')}</th></tr></thead>
+                  <tbody>
+                    {completedServicePerformance.map((item) => (
+                      <tr key={`${item.service}-${item.barber}`}>
+                        <td>{item.service}</td><td>{item.barber}</td><td>{item.count}</td><td>{money(item.revenue)}</td>
+                      </tr>
+                    ))}
+                    {!completedServicePerformance.length && <tr><td colSpan={4}>{tr('ยังไม่มีรายการ Completed สำหรับรายงาน', 'No completed bookings available for reports yet.')}</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+              <p className="booking-note">{tr('รายงานนี้นับเฉพาะคิว Completed และอ้างอิงรายการจองที่โหลดจากระบบ', 'Reports count Completed bookings only and use bookings currently loaded from the system.')}</p>
+            </section>
+
             <section className="auth-card booking-history">
               <span className="gold-text">ALL BOOKINGS</span>
               <h2>{tr('รายการจองของร้าน', 'All Shop Bookings')}</h2>
@@ -1104,7 +1256,7 @@ const getScheduleBooking = (barberName, hour) => {
 
                         {/* CUSTOMER MANAGEMENT */}
             <section className="auth-card customer-management">
-              <span className="gold-text">CUSTOMER MANAGEMENT</span>
+              <span id="owner-customers" className="gold-text">CUSTOMER MANAGEMENT</span>
               <h2>{tr('จัดการข้อมูลลูกค้า', 'Customer Management')}</h2>
 
               <p>   
@@ -1221,6 +1373,57 @@ const getScheduleBooking = (barberName, hour) => {
             </>
           )}
 
+
+        {user && isBarber && route === '/barber' && (
+          <>
+            <section className="hero">
+              <span className="gold-text">MICKEY BARBERSHOP · BARBER</span>
+              <h2>{tr('ตารางงานช่าง', 'Barber Dashboard')}</h2>
+              <p>{staffProfile?.full_name || user.email}</p>
+              <button onClick={handleLogout} disabled={loading}>{tr('ออกจากระบบ', 'Sign Out')}</button>
+            </section>
+
+            <section id="staff-schedule" className="auth-card staff-schedule-section">
+              <span className="gold-text">SHOP DAILY SCHEDULE</span>
+              <div className="staff-schedule-heading">
+                <div>
+                  <h2>{tr('ตารางงานช่างทุกคน', 'All Barbers Schedule')}</h2>
+                  <p>{tr('ภาพรวมคิวของร้าน แยกตามช่างและช่วงเวลา · ช่อง — คือไม่มีรายการจอง', 'Shop-wide bookings by barber and time. — means no booking is listed.')}</p>
+                </div>
+                <label>{tr('วันที่', 'Date')}
+                  <input type="date" value={scheduleDate} onChange={(event) => setScheduleDate(event.target.value)} />
+                </label>
+              </div>
+              <div className="customer-schedule-scroll">
+                <table className="staff-schedule-table">
+                  <thead><tr><th>{tr('ช่าง', 'Barber')}</th>{scheduleHours.map((hour) => <th key={hour}>{String(hour).padStart(2, '0')}:00</th>)}</tr></thead>
+                  <tbody>
+                    {barbers.map((barber) => (
+                      <tr key={barber.id}>
+                        <th>{barber.full_name}</th>
+                        {scheduleHours.map((hour) => {
+                          const booking = getScheduleBooking(barber.id, hour)
+                          return <td key={hour}>
+                            {booking ? (
+                              <button type="button" className={`staff-booking-cell status-${String(booking.status || '').toLowerCase().replace(/\s+/g, '-')}`} onClick={() => setSelectedStaffBooking(booking)}>
+                                <strong>{booking.customer?.full_name || tr('ลูกค้า', 'Customer')}</strong>
+                                <small>{booking.service_name_snapshot || '-'}</small>
+                              </button>
+                            ) : <span className="staff-empty-slot">—</span>}
+                          </td>
+                        })}
+                      </tr>
+                    ))}
+                    {!barbers.length && <tr><td colSpan={11}>{tr('ไม่พบรายชื่อช่าง', 'No barbers found.')}</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+
+          </>
+        )}
+
         {user && !isOwner && route === '/booking' && !customer && (
           <section className="auth-card">
             <span className="gold-text">MICKEY MEMBERSHIP</span>
@@ -1269,172 +1472,152 @@ const getScheduleBooking = (barberName, hour) => {
                 {loading ? 'กำลังดำเนินการ...' : 'ออกจากระบบ'}
               </button>
             </section>
+            <section className="auth-card customer-schedule-card unified-booking-card">
+              <span className="gold-text">MICKEY BARBERSHOP · LIVE BOOKING</span>
+              <h2>{tr('เลือกบริการและจองคิว', 'Choose Service & Book')}</h2>
+              <p className="auth-description">
+                {tr(
+                  'เลือกวันที่ก่อน แล้วดูตารางเวลาของช่างทุกคนและกด OPEN เพื่อเริ่มจอง',
+                  'Choose a date, view every barber’s schedule, and tap OPEN to start booking.'
+                )}
+              </p>
 
-            <section className="auth-card customer-schedule-card">
-              <span className="gold-text">LIVE BOOKING SCHEDULE</span>
-              <h2>{tr('ตารางเวลาว่างของช่าง', 'Barber Availability')}</h2>
-              <p className="auth-description">{tr('เลือกวันที่และดูช่วงเวลาว่างของช่างแต่ละคน กดช่องว่างเพื่อเลือกเวลาได้เลย', 'Choose a date, view each barber’s availability, and tap an open slot to select it.')}</p>
-              <div className="customer-schedule-toolbar">
-                <label htmlFor="customer-schedule-date">{tr('วันที่ต้องการจอง', 'Booking Date')}</label>
-                <input
-                  id="customer-schedule-date"
-                  type="date"
-                  value={selectedDate}
-                  min={today}
-                  max={maxBookingDate}
-                  onChange={(event) => setSelectedDate(event.target.value)}
-                />
-                <button type="button" className="schedule-refresh-button" onClick={loadPublicAvailability} disabled={availabilityLoading}>
-                  {availabilityLoading ? tr('กำลังโหลด...', 'Loading...') : tr('รีเฟรชตาราง', 'Refresh Schedule')}
-                </button>
-              </div>
-              <div className="schedule-legend">
-                <span><i className="legend-open" />{tr('ว่าง', 'Available')}</span>
-                <span><i className="legend-busy" />{tr('ไม่ว่าง', 'Booked')}</span>
-              </div>
-              {availabilityError && <p className="schedule-error">{availabilityError}</p>}
-              <div className="customer-schedule-scroll">
-                <table className="customer-schedule-table">
-                  <thead><tr>
-                    <th>{tr('ช่าง', 'Barber')}</th>
-                    {scheduleHours.map((hour) => <th key={hour}>{String(hour).padStart(2, '0')}:00</th>)}
-                  </tr></thead>
-                  <tbody>
-                    {barbers.map((barber) => (
-                      <tr key={barber.id}>
-                        <th>{barber.full_name}</th>
-                        {scheduleHours.map((hour) => {
-                          const open = isCustomerSlotAvailable(barber.id, hour)
-                          const selected = selectedBarber === barber.id && selectedTime === `${String(hour).padStart(2, '0')}:00`
-                          return <td key={hour}>
-                            <button
-                              type="button"
-                              className={`schedule-slot ${open ? 'is-open' : 'is-busy'} ${selected ? 'is-selected' : ''}`}
-                              disabled={!open || availabilityLoading || !chosenService}
-                              title={!chosenService ? tr('เลือกบริการก่อน', 'Select a service first') : open ? tr('เลือกเวลานี้', 'Select this time') : tr('ไม่ว่าง', 'Unavailable')}
-                              onClick={() => { setSelectedBarber(barber.id); setSelectedTime(`${String(hour).padStart(2, '0')}:00`) }}
-                            >{open ? tr('ว่าง', 'Open') : '—'}</button>
-                          </td>
-                        })}
+              <div className="customer-date-first">
+                <label>
+                  {tr('เลือกวันที่ต้องการจอง', 'Choose Booking Date')}
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    min={today}
+                    max={maxBookingDate}
+                    onChange={(event) => {
+                      setAvailabilityLoading(true)
+                      setPublicAvailability([])
+                      setSelectedDate(event.target.value)
+                      setSelectedTime('')
+                      setShowBookingModal(false)
+                    }}
+                    required
+                  />
+                </label>
+                <div className="unified-schedule-heading">
+                  <div>
+                    <h3>{tr('ตารางเวลาของช่างทุกคน', 'All Barbers Schedule')}</h3>
+                    <p>{tr('เลือกวันที่ แล้วกด OPEN ในช่วงเวลาที่ต้องการ จากนั้นเลือกบริการและช่าง', 'Choose a date, tap OPEN, then select your service and preferred barber.')}</p>
+                  </div>
+                  <button type="button" className="schedule-refresh-button" onClick={loadPublicAvailability} disabled={availabilityLoading}>
+                    {availabilityLoading ? tr('กำลังโหลด...', 'Loading...') : tr('รีเฟรช', 'Refresh')}
+                  </button>
+                </div>
+                <div className="schedule-legend">
+                  <span><i className="legend-open" />OPEN</span>
+                  <span><i className="legend-busy" />{tr('ไม่ว่าง', 'Unavailable')}</span>
+                  <span><i className="legend-closed" />{tr('ปิด', 'Closed')}</span>
+                </div>
+                {availabilityError && <p className="schedule-error">{availabilityError}</p>}
+                <div className="customer-schedule-scroll">
+                  <table className="customer-schedule-table">
+                    <thead>
+                      <tr>
+                        <th>{tr('ช่าง', 'Barber')}</th>
+                        {scheduleHours.map((hour) => <th key={hour}>{String(hour).padStart(2, '0')}:00</th>)}
                       </tr>
-                    ))}
-                    {barbers.length === 0 && <tr><td colSpan={11}>{tr('ไม่พบรายชื่อช่างที่เปิดใช้งาน', 'No active barbers found.')}</td></tr>}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {barbers.map((barber) => (
+                        <tr key={barber.id}>
+                          <th>{barber.full_name}</th>
+                          {scheduleHours.map((hour) => {
+                            const time = `${String(hour).padStart(2, '0')}:00`
+                            const open = isCustomerSlotAvailable(barber.id, hour)
+                            const isPast = new Date(`${selectedDate}T${time}:00+07:00`) <= new Date()
+                            return (
+                              <td key={hour}>
+                                <button
+                                  type="button"
+                                  className={`schedule-slot ${open ? 'is-open' : 'is-busy'}`}
+                                  disabled={!open || availabilityLoading || isPast}
+                                  onClick={() => {
+                                    setSelectedTime(time)
+                                    setSelectedService('')
+                                    setSelectedBarber('')
+                                    setMessage('')
+                                    setShowBookingModal(true)
+                                  }}
+                                  aria-label={`${barber.full_name} ${time} ${open ? 'OPEN' : 'Unavailable'}`}
+                                >
+                                  {open && !isPast ? 'OPEN' : '—'}
+                                </button>
+                              </td>
+                            )
+                          })}
+                        </tr>
+                      ))}
+                      {!barbers.length && <tr><td colSpan={11}>{tr('ไม่พบรายชื่อช่างที่เปิดใช้งาน', 'No active barbers found.')}</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-              {!chosenService && <p className="schedule-hint">{tr('เลือกบริการด้านล่างก่อน ตารางจะแสดงเวลาว่างตามระยะเวลาของบริการ', 'Select a service below to calculate availability using its duration.')}</p>}
-              {chosenService && <p className="schedule-hint">{tr('บริการที่เลือก:', 'Selected service:')} {chosenService.name} · {chosenService.duration_minutes} {tr('นาที', 'min')}</p>}
-            </section>
 
-            <section className="auth-card booking-card">
-              <span className="gold-text">ONLINE BOOKING</span>
-<h2>{tr('จองคิวตัดผม', 'Book an Appointment')}</h2>
-<p className="auth-description">
-  {tr(
-    'เลือกบริการ ช่าง วันที่ และเวลาที่ต้องการ',
-    'Choose your service, barber, date and time.'
-  )}
-</p>
-
-              <form onSubmit={handleBooking}>
-                <label>{tr('เลือกบริการ', 'Select Service')}</label>
-                <select
-                  value={selectedService}
-                  onChange={(event) => setSelectedService(event.target.value)}
-                  required
-                >
-                  <option value="">
-                    {tr('-- เลือกบริการ --', '-- Select Service --')}
-                  </option>
-                  {services.map((service) => (
-                    <option key={service.id} value={service.id}>
-                     {service.name} — {money(service.price_thb)} ({service.duration_minutes} {tr('นาที', 'min')})
-                    </option>
-                  ))}
-                </select>
-
-                {chosenService && (
-                  <div className="booking-summary">
-  <p>{tr('บริการ:', 'Service:')} {chosenService.name}</p>
-  <p>{tr('ราคา:', 'Price:')} {money(chosenService.price_thb)}</p>
-  <p>{tr('ระยะเวลา:', 'Duration:')} {chosenService.duration_minutes} {tr('นาที', 'min')}</p>
-</div>
-                )}
-
-                <label>{tr('เลือกช่าง', 'Select Barber')}</label>
-                <select
-                  value={selectedBarber}
-                  onChange={(event) => setSelectedBarber(event.target.value)}
-                >
-                 <option value="">
-  {tr('ให้ระบบจัดสรรช่างอัตโนมัติ', 'Assign Any Barber')}
-</option>
-                  {barbers.map((barber) => (
-                    <option key={barber.id} value={barber.id}>
-                      {barber.full_name}
-                    </option>
-                  ))}
-                </select>
-
-                {barbers.length === 0 && (
-                  <p className="booking-note">
-                    ขณะนี้ยังไม่พบช่างที่เปิดใช้งานในระบบ
-                  </p>
-                )}
-
-                <label>{tr('เลือกวันที่', 'Select Date')}</label>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  min={today}
-                  max={maxBookingDate}
-                  onChange={(event) => setSelectedDate(event.target.value)}
-                  required
-                />
-
-                <label>{tr('เลือกเวลา', 'Select Time')}</label>
-                <select
-                  value={selectedTime}
-                  onChange={(event) => setSelectedTime(event.target.value)}
-                  required
-                >
-                  {!availableTimes.length && (
-                  <option value="">
-  {tr('ไม่มีเวลาที่เลือกได้', 'No available time slots')}
-</option>
-                  )}
-                  {availableTimes.map((time) => (
-                    <option key={time} value={time}>
-                      {time} น.
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  type="submit"
-                  disabled={
-                    loading ||
-                    !selectedService ||
-                    !selectedTime ||
-                
-                    barbers.length === 0
-                  }
-                >
-                 {loading
-  ? tr('กำลังจองคิว...', 'Booking...')
-  : tr('ยืนยันการจอง', 'Confirm Booking')}
-                </button>
-              </form>
+              {showBookingModal && (
+                <div className="booking-modal-backdrop" role="presentation" onMouseDown={(event) => {
+                  if (event.target === event.currentTarget) setShowBookingModal(false)
+                }}>
+                  <section className="booking-modal" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
+                    <button type="button" className="booking-modal-close" onClick={() => setShowBookingModal(false)} aria-label={tr('ปิด', 'Close')}>×</button>
+                    <span className="gold-text">BOOK YOUR APPOINTMENT</span>
+                    <h3 id="booking-modal-title">{tr('รายละเอียดการจอง', 'Booking Details')}</h3>
+                    <p className="booking-modal-time">{selectedDate} · {selectedTime}</p>
+                    <form onSubmit={handleBooking}>
+                      <label>
+                        {tr('เลือกบริการ', 'Choose Service')}
+                        <select value={selectedService} onChange={(event) => setSelectedService(event.target.value)} required>
+                          <option value="">{tr('-- เลือกบริการ --', '-- Select Service --')}</option>
+                          {services.map((service) => (
+                            <option key={service.id} value={service.id}>
+                              {service.name} — {money(service.price_thb)} ({service.duration_minutes} {tr('นาที', 'min')})
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label>
+                        {tr('เลือกช่าง', 'Choose Barber')}
+                        <select value={selectedBarber} onChange={(event) => setSelectedBarber(event.target.value)}>
+                          <option value="">{tr('ช่างคนไหนก็ได้ · ให้ระบบจัดสรร', 'Any Barber · Auto-assign')}</option>
+                          {barbers.map((barber) => <option key={barber.id} value={barber.id}>{barber.full_name}</option>)}
+                        </select>
+                      </label>
+                      {chosenService && (
+                        <div className="unified-service-summary">
+                          <span>{chosenService.name}</span>
+                          <span>{money(chosenService.price_thb)}</span>
+                          <span>{chosenService.duration_minutes} {tr('นาที', 'min')}</span>
+                        </div>
+                      )}
+                      {selectedService && selectedBarber && !isCustomerSlotAvailable(selectedBarber, Number(selectedTime.slice(0, 2))) && (
+                        <p className="schedule-error">{tr('ช่างคนนี้ไม่ว่างในช่วงเวลานี้ กรุณาเลือกช่างคนอื่นหรือ Any Barber', 'This barber is unavailable for this time. Choose another barber or Any Barber.')}</p>
+                      )}
+                      <div className="booking-modal-actions">
+                        <button type="button" className="text-button" onClick={() => setShowBookingModal(false)}>{tr('กลับไปดูตาราง', 'Back to Schedule')}</button>
+                        <button type="submit" disabled={loading || !selectedService || !selectedTime || !availableTimes.includes(selectedTime) || (selectedBarber && !isCustomerSlotAvailable(selectedBarber, Number(selectedTime.slice(0, 2))))}>
+                          {loading ? tr('กำลังจอง...', 'Booking...') : tr('ยืนยันการจอง', 'Confirm Booking')}
+                        </button>
+                      </div>
+                    </form>
+                  </section>
+                </div>
+              )}
 
               {bookingResult && (
-  <div className="booking-success">
-    <h3>{tr('จองคิวสำเร็จ!', 'Booking Successful!')}</h3>
-    <p>{tr('รหัสจอง:', 'Booking ID:')} {bookingResult.booking_code || '-'}</p>
-    <p>{tr('เวลา:', 'Time:')} {formatDateTime(bookingResult.starts_at, language)}</p>
-    <p>{tr('ระบบจัดการคำขอจองเรียบร้อยแล้ว', 'Your booking has been processed successfully.')}</p>
-  </div>
-)}
+                <div className="booking-success">
+                  <h3>{tr('จองคิวสำเร็จ!', 'Booking Successful!')}</h3>
+                  <p>{tr('รหัสจอง:', 'Booking ID:')} {bookingResult.booking_code || '-'}</p>
+                  <p>{tr('เวลา:', 'Time:')} {formatDateTime(bookingResult.starts_at, language)}</p>
+                  <p>{tr('ระบบจัดการคำขอจองเรียบร้อยแล้ว', 'Your booking has been processed successfully.')}</p>
+                </div>
+              )}
             </section>
+
 
             <section className="auth-card booking-history customer-booking-history">
               <span className="gold-text">MY BOOKINGS</span>
@@ -1520,6 +1703,35 @@ const getScheduleBooking = (barberName, hour) => {
           </>
         )}
 
+        {selectedStaffBooking && (
+          <div className="staff-booking-overlay" onClick={(event) => { if (event.target === event.currentTarget) setSelectedStaffBooking(null) }}>
+            <section className="staff-booking-modal" role="dialog" aria-modal="true" aria-label={tr('จัดการคิว', 'Manage booking')}>
+              <button className="staff-modal-close" type="button" onClick={() => setSelectedStaffBooking(null)}>×</button>
+              <span className="gold-text">BOOKING DETAILS</span>
+              <h2>{selectedStaffBooking.customer?.full_name || tr('ลูกค้า', 'Customer')}</h2>
+              <div className="staff-booking-details">
+                <p><b>{tr('บริการ', 'Service')}:</b> {selectedStaffBooking.service_name_snapshot || '-'}</p>
+                <p><b>{tr('ช่าง', 'Barber')}:</b> {selectedStaffBooking.barber?.full_name || '-'}</p>
+                <p><b>{tr('เวลา', 'Time')}:</b> {formatDateTime(selectedStaffBooking.starts_at, language)}</p>
+                <p><b>{tr('สถานะ', 'Status')}:</b> {statusLabel(selectedStaffBooking.status, language)}</p>
+                {selectedStaffBooking.customer?.phone && <p><b>{tr('โทรศัพท์', 'Phone')}:</b> {selectedStaffBooking.customer.phone}</p>}
+              </div>
+              <label>{tr('เปลี่ยนสถานะ', 'Change status')}
+                <select value={selectedStaffBooking.status || 'Confirmed'} disabled={loading} onChange={async (event) => {
+                  const nextStatus = event.target.value
+                  await handleStaffBookingUpdate(selectedStaffBooking.id, { status: nextStatus })
+                  setSelectedStaffBooking({ ...selectedStaffBooking, status: nextStatus })
+                }}>
+                  {['Confirmed', 'Checked In', 'In Progress', 'Completed', 'Cancelled', 'No Show'].map((status) => <option key={status} value={status}>{statusLabel(status, language)}</option>)}
+                </select>
+              </label>
+              <div className="staff-modal-actions">
+                <button type="button" disabled={loading} onClick={() => handleMoveStaffBooking(selectedStaffBooking)}>{tr('ย้ายคิว', 'Move booking')}</button>
+                <button type="button" className="secondary" onClick={() => setSelectedStaffBooking(null)}>{tr('ปิด', 'Close')}</button>
+              </div>
+            </section>
+          </div>
+        )}
         {message && <div className="auth-message" role="status">{message}</div>}
       </main>
 
