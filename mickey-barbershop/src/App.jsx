@@ -88,6 +88,9 @@ const [selectedCustomer, setSelectedCustomer] = useState(null)
   const [scheduleDate, setScheduleDate] = useState(bangkokDate())
   const [selectedTime, setSelectedTime] = useState('10:00')
   const [bookingResult, setBookingResult] = useState(null)
+  const [publicAvailability, setPublicAvailability] = useState([])
+  const [availabilityLoading, setAvailabilityLoading] = useState(false)
+  const [availabilityError, setAvailabilityError] = useState('')
 
  const isOwner = staffProfile?.role === 'owner'
 const isBarber = staffProfile?.role === 'baber'
@@ -283,6 +286,27 @@ if (barberResult.error) {
   setBarbers(barberResult.data || [])
 }
 }, [language])
+
+// Customer-safe availability: the RPC returns only barber IDs and occupied time ranges.
+const loadPublicAvailability = useCallback(async () => {
+  if (!user || !selectedDate) return
+  setAvailabilityLoading(true)
+  setAvailabilityError('')
+  const { data, error } = await supabase.rpc('get_public_booking_availability', {
+    p_date: selectedDate,
+  })
+  if (error) {
+    setAvailabilityError(tr('โหลดตารางคิวไม่สำเร็จ: ', 'Could not load the schedule: ') + error.message)
+    setPublicAvailability([])
+  } else {
+    setPublicAvailability(data || [])
+  }
+  setAvailabilityLoading(false)
+}, [user, selectedDate, language])
+
+useEffect(() => {
+  if (user && customer && route === '/booking') loadPublicAvailability()
+}, [user, customer, route, selectedDate, loadPublicAvailability])
   
 // Load customer bookings.
 const loadBookings = useCallback(async () => {
@@ -709,11 +733,25 @@ async function handleUpdatePassword() {
       }
 
       const slot = new Date(`${selectedDate}T${time}:00+07:00`)
-      if (slot > new Date()) times.push(time)
+      const duration = Number(chosenService?.duration_minutes || 60)
+      const slotEnd = new Date(slot.getTime() + duration * 60 * 1000)
+      const closing = new Date(`${selectedDate}T20:00:00+07:00`)
+      if (slot <= new Date() || slotEnd > closing) continue
+
+      const eligibleBarbers = selectedBarber
+        ? barbers.filter((barber) => barber.id === selectedBarber)
+        : barbers
+      const hasAvailableBarber = eligibleBarbers.some((barber) => {
+        return !publicAvailability.some((item) => {
+          if (item.barber_id !== barber.id) return false
+          return slot < new Date(item.ends_at) && slotEnd > new Date(item.starts_at)
+        })
+      })
+      if (hasAvailableBarber) times.push(time)
     }
 
     return times
-  }, [selectedDate, chosenService])
+  }, [selectedDate, chosenService, selectedBarber, barbers, publicAvailability])
 
   useEffect(() => {
     if (availableTimes.length && !availableTimes.includes(selectedTime)) {
@@ -732,6 +770,20 @@ const scheduleHours = Array.from(
   { length: 10 },
   (_, index) => index + 10
 )
+
+const isCustomerSlotAvailable = (barberId, hour) => {
+  const duration = Number(chosenService?.duration_minutes || 60)
+  const start = new Date(`${selectedDate}T${String(hour).padStart(2, '0')}:00:00+07:00`)
+  const end = new Date(start.getTime() + duration * 60 * 1000)
+  const closing = new Date(`${selectedDate}T20:00:00+07:00`)
+  if (end > closing || start <= new Date()) return false
+  return !publicAvailability.some((item) => {
+    if (item.barber_id !== barberId) return false
+    const occupiedStart = new Date(item.starts_at)
+    const occupiedEnd = new Date(item.ends_at)
+    return start < occupiedEnd && end > occupiedStart
+  })
+}
 
 const getScheduleBooking = (barberName, hour) => {
   return scheduleBookings.find((booking) => {
@@ -1216,6 +1268,62 @@ const getScheduleBooking = (barberName, hour) => {
               <button onClick={handleLogout} disabled={loading}>
                 {loading ? 'กำลังดำเนินการ...' : 'ออกจากระบบ'}
               </button>
+            </section>
+
+            <section className="auth-card customer-schedule-card">
+              <span className="gold-text">LIVE BOOKING SCHEDULE</span>
+              <h2>{tr('ตารางเวลาว่างของช่าง', 'Barber Availability')}</h2>
+              <p className="auth-description">{tr('เลือกวันที่และดูช่วงเวลาว่างของช่างแต่ละคน กดช่องว่างเพื่อเลือกเวลาได้เลย', 'Choose a date, view each barber’s availability, and tap an open slot to select it.')}</p>
+              <div className="customer-schedule-toolbar">
+                <label htmlFor="customer-schedule-date">{tr('วันที่ต้องการจอง', 'Booking Date')}</label>
+                <input
+                  id="customer-schedule-date"
+                  type="date"
+                  value={selectedDate}
+                  min={today}
+                  max={maxBookingDate}
+                  onChange={(event) => setSelectedDate(event.target.value)}
+                />
+                <button type="button" className="schedule-refresh-button" onClick={loadPublicAvailability} disabled={availabilityLoading}>
+                  {availabilityLoading ? tr('กำลังโหลด...', 'Loading...') : tr('รีเฟรชตาราง', 'Refresh Schedule')}
+                </button>
+              </div>
+              <div className="schedule-legend">
+                <span><i className="legend-open" />{tr('ว่าง', 'Available')}</span>
+                <span><i className="legend-busy" />{tr('ไม่ว่าง', 'Booked')}</span>
+              </div>
+              {availabilityError && <p className="schedule-error">{availabilityError}</p>}
+              <div className="customer-schedule-scroll">
+                <table className="customer-schedule-table">
+                  <thead><tr>
+                    <th>{tr('ช่าง', 'Barber')}</th>
+                    {scheduleHours.map((hour) => <th key={hour}>{String(hour).padStart(2, '0')}:00</th>)}
+                  </tr></thead>
+                  <tbody>
+                    {barbers.map((barber) => (
+                      <tr key={barber.id}>
+                        <th>{barber.full_name}</th>
+                        {scheduleHours.map((hour) => {
+                          const open = isCustomerSlotAvailable(barber.id, hour)
+                          const selected = selectedBarber === barber.id && selectedTime === `${String(hour).padStart(2, '0')}:00`
+                          return <td key={hour}>
+                            <button
+                              type="button"
+                              className={`schedule-slot ${open ? 'is-open' : 'is-busy'} ${selected ? 'is-selected' : ''}`}
+                              disabled={!open || availabilityLoading || !chosenService}
+                              title={!chosenService ? tr('เลือกบริการก่อน', 'Select a service first') : open ? tr('เลือกเวลานี้', 'Select this time') : tr('ไม่ว่าง', 'Unavailable')}
+                              onClick={() => { setSelectedBarber(barber.id); setSelectedTime(`${String(hour).padStart(2, '0')}:00`) }}
+                            >{open ? tr('ว่าง', 'Open') : '—'}</button>
+                          </td>
+                        })}
+                      </tr>
+                    ))}
+                    {barbers.length === 0 && <tr><td colSpan={11}>{tr('ไม่พบรายชื่อช่างที่เปิดใช้งาน', 'No active barbers found.')}</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+              {!chosenService && <p className="schedule-hint">{tr('เลือกบริการด้านล่างก่อน ตารางจะแสดงเวลาว่างตามระยะเวลาของบริการ', 'Select a service below to calculate availability using its duration.')}</p>}
+              {chosenService && <p className="schedule-hint">{tr('บริการที่เลือก:', 'Selected service:')} {chosenService.name} · {chosenService.duration_minutes} {tr('นาที', 'min')}</p>}
             </section>
 
             <section className="auth-card booking-card">
