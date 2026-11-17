@@ -256,7 +256,7 @@ useEffect(() => {
   recoveryReady,
 ])
 
- Load ser//vices and active barbers.
+// Load services and active barbers.
 const loadBookingData = useCallback(async () => {
   const [serviceResult, barberResult] = await Promise.all([
     supabase
@@ -303,9 +303,9 @@ const loadBookings = useCallback(async () => {
     .limit(50)
 
   if (error) {
-    etMessage('โหลดประวัติการจองไม่สำเร็จ: ' + error.message)
+    setMessage('โหลดประวัติการจองไม่สำเร็จ: ' + error.message)
     return
-  }s
+  }
 
   setBookings(data || [])
 }, [])
@@ -1000,7 +1000,17 @@ const getScheduleBooking = (barberName, hour) => {
   </tr>
 </thead>
 <tbody>
- 
+  {ownerBookings.map((booking) => (
+    <tr key={booking.id}>
+      <td>{booking.customer?.full_name || '-'}</td>
+      <td>{booking.service_name_snapshot || '-'}</td>
+      <td>{booking.barber?.full_name || '-'}</td>
+      <td>{formatDateTime(booking.starts_at, language)}</td>
+      <td>{booking.booking_code || '-'}</td>
+      <td>{statusLabel(booking.status, language)}</td>
+      <td>{booking.payment_status || '-'}</td>
+      <td>{money(booking.price_thb_snapshot)}</td>
+    </tr>
   ))}
 </tbody>
  </table>
