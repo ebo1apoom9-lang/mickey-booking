@@ -773,7 +773,7 @@ const getScheduleBooking = (barberName, hour) => {
 <header className="app-header">
   <p>MICKEY BARBERSHOP EXPERIENCE</p>
 
-  {route === '/booking' && (
+  {(route === '/booking' || route === '/login') && (
     <div className="language-switch">
       <button
         type="button"
@@ -840,22 +840,27 @@ const getScheduleBooking = (barberName, hour) => {
         {!user && route === '/login' && (
           <section className="auth-card">
             <span className="gold-text">MICKEY MEMBERSHIP</span>
-            <h2>{mode === 'login' ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'}</h2>
-            <p className="auth-description">
-              เข้าสู่ระบบเพื่อจองคิวร้านตัดผม
-            </p>
+           <h2>
+  {mode === 'login'
+    ? tr('เข้าสู่ระบบ', 'Sign In')
+    : tr('สมัครสมาชิก', 'Create Account')}
+</h2>
+
+<p className="auth-description">
+  {tr('เข้าสู่ระบบเพื่อจองคิวร้านตัดผม', 'Sign in to book your appointment.')}
+</p>
 
             <form onSubmit={handleSubmit}>
               {mode === 'register' && (
                 <>
-                  <label>ชื่อ-นามสกุล</label>
+                  <label>{tr('ชื่อ-นามสกุล', 'Full Name')}</label>
                   <input
                     value={fullName}
                     onChange={(event) => setFullName(event.target.value)}
                     autoComplete="name"
                     required
                   />
-                  <label>เบอร์โทรศัพท์</label>
+                  <label>{tr('เบอร์โทรศัพท์', 'Phone Number')}</label>
                   <input
                     type="tel"
                     value={phone}
@@ -866,7 +871,7 @@ const getScheduleBooking = (barberName, hour) => {
                 </>
               )}
 
-              <label>อีเมล</label>
+              <label>{tr('อีเมล', 'Email')}</label>
               <input
                 type="email"
                 value={email}
@@ -875,24 +880,14 @@ const getScheduleBooking = (barberName, hour) => {
                 required
               />
 
-              <label>รหัสผ่าน</label>
+              <label>{tr('รหัสผ่าน', 'Password')}</label>
               <input
                 type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                 required
-              />
-
-              <button type="submit" disabled={loading}>
-                {loading
-                  ? 'กำลังดำเนินการ...'
-                  : mode === 'login'
-                    ? 'เข้าสู่ระบบ'
-                    : 'สมัครสมาชิก'}
-              </button>
-            </form>
-
+          
             {mode === 'login' && (
               <>
                 <button
@@ -1139,7 +1134,7 @@ const getScheduleBooking = (barberName, hour) => {
             </p>
 
             <form onSubmit={handleCompleteProfile}>
-              <label>ชื่อ-นามสกุล</label>
+              <label>{tr('ชื่อ-นามสกุล', 'Full Name')}</label>
               <input
                 value={fullName}
                 onChange={(event) => setFullName(event.target.value)}
