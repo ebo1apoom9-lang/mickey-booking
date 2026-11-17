@@ -399,13 +399,13 @@ const loadOwnerCustomers = useCallback(async () => {
         const normalizedPhone = phone.replace(/[^0-9]/g, '')
 
         if (!fullName.trim()) {
-          throw new Error('กรุณากรอกชื่อ-นามสกุล')
+          throw new Error(tr('กรุณากรอกชื่อ-นามสกุล', 'Please enter your full name.'))
         }
         if (normalizedPhone.length < 9 || normalizedPhone.length > 15) {
-          throw new Error('กรุณากรอกเบอร์โทรศัพท์ 9–15 หลัก')
+          throw new Error(   tr('กรุณากรอกเบอร์โทรศัพท์ 9–15 หลัก', 'Please enter a phone number with 9–15 digits.') )
         }
         if (password.length < 6) {
-          throw new Error('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร')
+          throw new Error(   tr('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', 'Password must be at least 6 characters.') )
         }
 
         const { data, error } = await supabase.auth.signUp({
@@ -421,25 +421,30 @@ const loadOwnerCustomers = useCallback(async () => {
 
         if (error) throw error
 
-        setMessage(
-          data.session
-            ? 'สมัครสมาชิกสำเร็จ'
-            : 'สมัครสมาชิกสำเร็จ กรุณาตรวจสอบอีเมลเพื่อยืนยันบัญชี'
-        )
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        })
-        if (error) throw error
-        setMessage('เข้าสู่ระบบสำเร็จ')
-      }
-    } catch (error) {
-      setMessage(error.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่')
-    } finally {
-      setLoading(false)
-    }
-  }
+      setMessage(
+  data.session
+    ? tr('สมัครสมาชิกสำเร็จ', 'Registration successful')
+    : tr(
+        'สมัครสมาชิกสำเร็จ กรุณาตรวจสอบอีเมลเพื่อยืนยันบัญชี',
+        'Registration successful. Please check your email to confirm your account.'
+      )
+)
+} else {
+  const { error } = await supabase.auth.signInWithPassword({
+    email: email.trim(),
+    password,
+  })
+  if (error) throw error
+  setMessage(tr('เข้าสู่ระบบสำเร็จ', 'Login successful'))
+}
+} catch (error) {
+  setMessage(
+    error.message || tr('เกิดข้อผิดพลาด กรุณาลองใหม่', 'Something went wrong. Please try again.')
+  )
+}finally {
+  setLoading(false)
+}
+}
 
   async function handleGoogleLogin() {
     setLoading(true)
@@ -452,10 +457,15 @@ const loadOwnerCustomers = useCallback(async () => {
       },
     })
 
-    if (error) {
-      setMessage(error.message)
-      setLoading(false)
-    }
+   if (error) {
+  setMessage(
+    tr(
+      `เข้าสู่ระบบด้วย Google ไม่สำเร็จ: ${error.message}`,
+      `Google sign-in failed: ${error.message}`
+    )
+  )
+  setLoading(false)
+}
   }
 
   async function handleCompleteProfile(event) {
@@ -469,9 +479,9 @@ const loadOwnerCustomers = useCallback(async () => {
       const normalizedPhone = phone.replace(/[^0-9]/g, '')
       const normalizedName = fullName.trim()
 
-      if (!normalizedName) throw new Error('กรุณากรอกชื่อ-นามสกุล')
+      if (!normalizedName) throw new Error(tr('กรุณากรอกชื่อ-นามสกุล', 'Please enter your full name.'))
       if (normalizedPhone.length < 9 || normalizedPhone.length > 15) {
-        throw new Error('กรุณากรอกเบอร์โทรศัพท์ 9–15 หลัก')
+        throw new Error(   tr('กรุณากรอกเบอร์โทรศัพท์ 9–15 หลัก', 'Please enter a phone number with 9–15 digits.') )
       }
 
       const { data, error } = await supabase
@@ -496,22 +506,24 @@ const loadOwnerCustomers = useCallback(async () => {
 
           if (readError) throw readError
           if (existing) {
-            setCustomer(existing)
-            setMessage('พบข้อมูลสมาชิกเดิมแล้ว')
-            return
-          }
-        }
-        throw error
-      }
+  setCustomer(existing)
+  setMessage(tr('พบข้อมูลสมาชิกเดิมแล้ว', 'Existing member information found.'))
+  return
+}
+}
+throw error
+}
 
-      setCustomer(data)
-      setMessage('บันทึกข้อมูลสมาชิกเรียบร้อยแล้ว')
-    } catch (error) {
-      setMessage(error.message || 'บันทึกข้อมูลไม่สำเร็จ')
-    } finally {
-      setLoading(false)
-    }
-  }
+setCustomer(data)
+setMessage(tr('บันทึกข้อมูลสมาชิกเรียบร้อยแล้ว', 'Member information saved successfully.'))
+} catch (error) {
+  setMessage(
+    error.message || tr('บันทึกข้อมูลไม่สำเร็จ', 'Failed to save member information.')
+  )
+} finally {
+  setLoading(false)
+}
+}
 
  async function handleBooking(event) {
   event.preventDefault()
@@ -610,70 +622,73 @@ const loadOwnerCustomers = useCallback(async () => {
     setLoading(false)
   }
 
-  async function handleForgotPassword() {
-    if (!email.trim()) {
-      setMessage('กรุณากรอกอีเมลก่อน')
-      return
-    }
-
-    setLoading(true)
-    setMessage('')
-
-    const { error } = await supabase.auth.resetPasswordForEmail(
-      email.trim(),
-      { redirectTo: `${window.location.origin}/reset-password` }
-    )
-
-    setMessage(
-      error
-        ? error.message
-        : 'ส่งลิงก์ตั้งรหัสผ่านใหม่ไปยังอีเมลแล้ว'
-    )
-
-    setLoading(false)
+ async function handleForgotPassword() {
+  if (!email.trim()) {
+    setMessage(tr('กรุณากรอกอีเมลก่อน', 'Please enter your email address first.'))
+    return
   }
 
-  async function handleUpdatePassword() {
-    setMessage('')
+  setLoading(true)
+  setMessage('')
 
-    if (newPassword.length < 6) {
-      setMessage('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร')
-      return
-    }
+  const { error } = await supabase.auth.resetPasswordForEmail(
+    email.trim(),
+    { redirectTo: `${window.location.origin}/reset-password` }
+  )
 
-    if (newPassword !== confirmPassword) {
-      setMessage('รหัสผ่านทั้งสองช่องไม่ตรงกัน')
-      return
-    }
+  setMessage(
+    error
+      ? error.message
+      : tr(
+          'ส่งลิงก์ตั้งรหัสผ่านใหม่ไปยังอีเมลแล้ว',
+          'A password reset link has been sent to your email.'
+        )
+  )
 
-    setLoading(true)
+  setLoading(false)
+}
 
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword,
-    })
+async function handleUpdatePassword() {
+  setMessage('')
 
-    if (error) {
-      setMessage(error.message)
-      setLoading(false)
-      return
-    }
-
-    const { error: signOutError } = await supabase.auth.signOut()
-
-    if (signOutError) {
-      setMessage('เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบใหม่')
-      setLoading(false)
-      return
-    }
-
-    setNewPassword('')
-    setConfirmPassword('')
-    setRecoveryReady(false)
-    setMessage('เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่')
-
-    navigate('/login', true)
-    setLoading(false)
+  if (newPassword.length < 6) {
+    setMessage(tr('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', 'Password must be at least 6 characters.'))
+    return
   }
+
+  if (newPassword !== confirmPassword) {
+    setMessage(tr('รหัสผ่านทั้งสองช่องไม่ตรงกัน', 'The passwords do not match.'))
+    return
+  }
+
+  setLoading(true)
+
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword,
+  })
+
+  if (error) {
+    setMessage(error.message)
+    setLoading(false)
+    return
+  }
+
+  const { error: signOutError } = await supabase.auth.signOut()
+
+  if (signOutError) {
+    setMessage(tr('เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบใหม่', 'Password changed successfully. Please sign in again.'))
+    setLoading(false)
+    return
+  }
+
+  setNewPassword('')
+  setConfirmPassword('')
+  setRecoveryReady(false)
+  setMessage(tr('เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่', 'Password changed successfully. Please sign in with your new password.'))
+
+  navigate('/login', true)
+  setLoading(false)
+}
 
   const chosenService = useMemo(
     () => services.find((service) => service.id === selectedService),
@@ -773,7 +788,7 @@ const getScheduleBooking = (barberName, hour) => {
 <header className="app-header">
   <p>MICKEY BARBERSHOP EXPERIENCE</p>
 
-  {(route === '/booking' || route === '/login') && (
+  {(route === '/booking' || route === '/login' || route === '/reset-password') && (
     <div className="language-switch">
       <button
         type="button"
@@ -797,10 +812,10 @@ const getScheduleBooking = (barberName, hour) => {
         {route === '/reset-password' && recoveryReady && (
           <section className="auth-card">
             <span className="gold-text">MICKEY MEMBERSHIP</span>
-            <h2>ตั้งรหัสผ่านใหม่</h2>
-            <p className="auth-description">
-              กรุณากรอกรหัสผ่านใหม่ของคุณ
-            </p>
+            <h2>{tr('ตั้งรหัสผ่านใหม่', 'Reset Password')}</h2>
+<p className="auth-description">
+  {tr('กรุณากรอกรหัสผ่านใหม่ของคุณ', 'Please enter your new password.')}
+</p>
 
             <form
               onSubmit={(event) => {
@@ -808,7 +823,7 @@ const getScheduleBooking = (barberName, hour) => {
                 handleUpdatePassword()
               }}
             >
-              <label>รหัสผ่านใหม่</label>
+              <label>{tr('รหัสผ่านใหม่', 'New Password')}</label>
               <input
                 type="password"
                 value={newPassword}
@@ -818,7 +833,7 @@ const getScheduleBooking = (barberName, hour) => {
                 required
               />
 
-              <label>ยืนยันรหัสผ่านใหม่</label>
+              <label>{tr('ยืนยันรหัสผ่านใหม่', 'Confirm New Password')}</label>
               <input
                 type="password"
                 value={confirmPassword}
@@ -831,7 +846,9 @@ const getScheduleBooking = (barberName, hour) => {
               {message && <p>{message}</p>}
 
               <button type="submit" disabled={loading}>
-                {loading ? 'กำลังบันทึก...' : 'บันทึกรหัสผ่านใหม่'}
+              {loading
+  ? tr('กำลังบันทึก...', 'Saving...')
+  : tr('บันทึกรหัสผ่านใหม่', 'Save New Password')}
               </button>
             </form>
           </section>
@@ -879,16 +896,24 @@ const getScheduleBooking = (barberName, hour) => {
                 autoComplete="email"
                 required
               />
+            <label>{tr('รหัสผ่าน', 'Password')}</label>
+<input
+  type="password"
+  value={password}
+  onChange={(event) => setPassword(event.target.value)}
+  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+  required
+/>
 
-              <label>{tr('รหัสผ่าน', 'Password')}</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                required
-          
-            {mode === 'login' && (
+<button type="submit" disabled={loading}>
+  {loading
+    ? tr('กำลังดำเนินการ...', 'Please wait...')
+    : mode === 'login'
+      ? tr('เข้าสู่ระบบ', 'Sign In')
+      : tr('สมัครสมาชิก', 'Create Account')}
+</button>
+</form>
+{mode === 'login' && (
               <>
                 <button
                   type="button"
@@ -896,7 +921,7 @@ const getScheduleBooking = (barberName, hour) => {
                   onClick={handleForgotPassword}
                   disabled={loading}
                 >
-                  ลืมรหัสผ่าน?
+                  {tr('ลืมรหัสผ่าน?', 'Forgot Password?')}
                 </button>
                 <button
                   type="button"
@@ -904,25 +929,28 @@ const getScheduleBooking = (barberName, hour) => {
                   onClick={handleGoogleLogin}
                   disabled={loading}
                 >
-                  เข้าสู่ระบบด้วย Google
+                  {tr('เข้าสู่ระบบด้วย Google', 'Sign in with Google')}
                 </button>
               </>
             )}
 
-            <div className="auth-switch">
-              {mode === 'login'
-                ? 'ยังไม่มีบัญชีสมาชิก?'
-                : 'มีบัญชีสมาชิกแล้ว?'}
-              <button
-                type="button"
-                onClick={() => {
-                  setMode(mode === 'login' ? 'register' : 'login')
-                  setMessage('')
-                }}
-              >
-                {mode === 'login' ? 'สมัครสมาชิก' : 'เข้าสู่ระบบ'}
-              </button>
-            </div>
+           <div className="auth-switch">
+  {mode === 'login'
+    ? tr('ยังไม่มีบัญชีสมาชิก?', "Don't have an account?")
+    : tr('มีบัญชีสมาชิกแล้ว?', 'Already have an account?')}
+
+  <button
+    type="button"
+    onClick={() => {
+      setMode(mode === 'login' ? 'register' : 'login')
+      setMessage('')
+    }}
+  >
+    {mode === 'login'
+      ? tr('สมัครสมาชิก', 'Sign Up')
+      : tr('เข้าสู่ระบบ', 'Sign In')}
+  </button>
+</div>
           </section>
         )}
 
@@ -930,32 +958,36 @@ const getScheduleBooking = (barberName, hour) => {
           <>
             <section className="hero">
               <span className="gold-text">MICKEY MANAGEMENT</span>
-              <h2>แดชบอร์ดเจ้าของร้าน</h2>
+              <h2>{tr('แดชบอร์ดเจ้าของร้าน', 'Owner Dashboard')}</h2>
               <p>{staffProfile?.full_name || user.email}</p>
-              <p>บัญชีผู้ดูแลระบบร้าน MICKEY BARBERSHOP</p>
+              <p>{tr('บัญชีผู้ดูแลระบบร้าน MICKEY BARBERSHOP', 'MICKEY BARBERSHOP Administrator Account')}</p>
               <button onClick={handleLogout} disabled={loading}>
-                {loading ? 'กำลังดำเนินการ...' : 'ออกจากระบบ'}
+                {loading
+  ? tr('กำลังดำเนินการ...', 'Please wait...')
+  : tr('ออกจากระบบ', 'Sign Out')}
               </button>
             </section>
 
           <section className="auth-card today-overview">
   <span className="gold-text">TODAY OVERVIEW</span>
-  <h2>ภาพรวมวันนี้</h2>
+  <h2>{tr('ภาพรวมวันนี้', 'Today Overview')}</h2>
 
   <div className="booking-summary">
 
     <div className="summary-row">
-      <span>คิววันนี้</span>
-      <strong>{todayOwnerBookings.length} รายการ</strong>
+      <span>{tr('คิววันนี้', "Today's Bookings")}</span>
+     <strong>
+        {todayOwnerBookings.length} {tr('รายการ', 'bookings')}
+     </strong>
     </div>
 
     <div className="summary-row">
-      <span>คิวที่เสร็จสิ้น</span>
-      <strong>{completedOwnerBookings.length} รายการ</strong>
+      <span>{tr('คิวที่เสร็จสิ้น', 'Completed Bookings')}</span>
+      <strong>   {completedOwnerBookings.length} {tr('รายการ', 'bookings')} </strong>
     </div>
 
     <div className="summary-row summary-revenue">
-      <span>ยอดบริการที่เสร็จสิ้นวันนี้</span>
+      <span>{tr('ยอดบริการที่เสร็จสิ้นวันนี้', "Today's Revenue")}</span>
       <strong>{money(todayRevenue)}</strong>
     </div>
 
@@ -967,14 +999,19 @@ const getScheduleBooking = (barberName, hour) => {
     onClick={loadOwnerBookings}
     disabled={loading}
   >
-    รีเฟรชข้อมูล
+    {tr('รีเฟรชข้อมูล', 'Refresh Data')}
   </button>
 </section>
             <section className="auth-card booking-history">
               <span className="gold-text">ALL BOOKINGS</span>
-              <h2>รายการจองของร้าน</h2>
+              <h2>{tr('รายการจองของร้าน', 'All Shop Bookings')}</h2>
               {ownerBookings.length === 0 && (
-                <p className="booking-note">ยังไม่พบรายการจอง หรือบัญชีไม่มีสิทธิ์อ่านข้อมูล</p>
+               <p className="booking-note">
+  {tr(
+    'ยังไม่พบรายการจอง หรือบัญชีไม่มีสิทธิ์อ่านข้อมูล',
+    'No bookings found, or this account does not have permission to view them.'
+  )}
+</p>
               )}
               
 <div className="owner-table-wrap">
@@ -984,14 +1021,14 @@ const getScheduleBooking = (barberName, hour) => {
 
 <thead>
   <tr>
-    <th>ชื่อลูกค้า</th>
-    <th>การบริการ</th>
-    <th>ชื่อช่าง</th>
-    <th>วันเวลา</th>
-    <th>รหัสจอง</th>
-    <th>สถานะ</th>
-    <th>การชำระเงิน</th>
-    <th>ราคา</th>
+    <th>{tr('ชื่อลูกค้า', 'Customer')}</th>
+    <th>{tr('การบริการ', 'Service')}</th>
+    <th>{tr('ชื่อช่าง', 'Barber')}</th>
+    <th>{tr('วันเวลา', 'Date & Time')}</th>
+    <th>{tr('รหัสจอง', 'Booking ID')}</th>
+    <th>{tr('สถานะ', 'Status')}</th>
+    <th>{tr('การชำระเงิน', 'Payment')}</th>
+    <th>{tr('ราคา', 'Price')}</th>
   </tr>
 </thead>
 <tbody>
@@ -1016,13 +1053,15 @@ const getScheduleBooking = (barberName, hour) => {
                         {/* CUSTOMER MANAGEMENT */}
             <section className="auth-card customer-management">
               <span className="gold-text">CUSTOMER MANAGEMENT</span>
-              <h2>จัดการข้อมูลลูกค้า</h2>
+              <h2>{tr('จัดการข้อมูลลูกค้า', 'Customer Management')}</h2>
 
-              <p>ลูกค้าทั้งหมด {ownerCustomers.length} คน</p>
+              <p>   
+                {tr('ลูกค้าทั้งหมด', 'Total Customers')} {ownerCustomers.length} {tr('คน', 'customers')}
+              </p>
 
               <input
                 type="search"
-                placeholder="ค้นหาชื่อหรือเบอร์โทรศัพท์..."
+                placeholder={tr('ค้นหาชื่อหรือเบอร์โทรศัพท์...', 'Search name or phone number...')}
                 value={customerSearch}
                 onChange={(event) =>
                   setCustomerSearch(event.target.value)
@@ -1033,12 +1072,12 @@ const getScheduleBooking = (barberName, hour) => {
                 <table className="owner-booking-table">
                   <thead>
                     <tr>
-                      <th>ชื่อลูกค้า</th>
-                      <th>เบอร์โทรศัพท์</th>
-                      <th>อีเมล</th>
-                      <th>รายละเอียด</th>
-                    </tr>
-                  </thead>
+    <th>{tr('ชื่อลูกค้า', 'Customer Name')}</th>
+    <th>{tr('เบอร์โทรศัพท์', 'Phone Number')}</th>
+    <th>{tr('อีเมล', 'Email')}</th>
+    <th>{tr('รายละเอียด', 'Details')}</th>
+  </tr>
+</thead>
 
                   <tbody>
                     {ownerCustomers
@@ -1060,7 +1099,7 @@ const getScheduleBooking = (barberName, hour) => {
                               className="refresh-button"
                               onClick={() => setSelectedCustomer(item)}
                             >
-                              ดูข้อมูล
+                              {tr('ดูข้อมูล', 'View Details')}
                             </button>
                           </td>
                         </tr>
@@ -1071,7 +1110,7 @@ const getScheduleBooking = (barberName, hour) => {
 
               {ownerCustomers.length === 0 && (
                 <p className="booking-note">
-                  ยังไม่พบข้อมูลลูกค้า
+                  {tr('ยังไม่พบข้อมูลลูกค้า', 'No customer information found.')}
                 </p>
               )}
 
@@ -1079,33 +1118,38 @@ const getScheduleBooking = (barberName, hour) => {
   <div className="customer-details-panel">
     <div className="customer-details-header">
       <span className="gold-text">CUSTOMER PROFILE</span>
-      <h3>รายละเอียดข้อมูลลูกค้า</h3>
+      <h3>{tr('รายละเอียดข้อมูลลูกค้า', 'Customer Details')}</h3>
     </div>
 
     <div className="customer-details-list">
       <div className="customer-detail-item">
-        <span className="customer-detail-label">ชื่อลูกค้า</span>
+        <span className="customer-detail-label">   {tr('ชื่อลูกค้า', 'Customer Name')} </span>
         <span className="customer-detail-value">
           {selectedCustomer.full_name || '-'}
         </span>
       </div>
 
       <div className="customer-detail-item">
-        <span className="customer-detail-label">เบอร์โทรศัพท์</span>
+        <span className="customer-detail-label">   
+          {tr('เบอร์โทรศัพท์', 'Phone Number')} </span>
         <span className="customer-detail-value">
           {selectedCustomer.phone || '-'}
         </span>
       </div>
 
       <div className="customer-detail-item">
-        <span className="customer-detail-label">อีเมล</span>
+        <span className="customer-detail-label">
+         {tr('อีเมล', 'Email')}
+        </span>
         <span className="customer-detail-value">
           {selectedCustomer.email || '-'}
         </span>
       </div>
 
       <div className="customer-detail-item">
-        <span className="customer-detail-label">บันทึกเพิ่มเติม</span>
+        <span className="customer-detail-label">
+  {tr('บันทึกเพิ่มเติม', 'Additional Notes')}
+</span>
         <span className="customer-detail-value">
           {selectedCustomer.notes || '-'}
         </span>
@@ -1117,7 +1161,7 @@ const getScheduleBooking = (barberName, hour) => {
         className="customer-close-button"
         onClick={() => setSelectedCustomer(null)}
       >
-        ปิดรายละเอียด
+        {tr('ปิดรายละเอียด', 'Close Details')}
       </button>
     </div>
   )}
