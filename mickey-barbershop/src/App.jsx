@@ -51,8 +51,11 @@ function App() {
   const [authInitialized, setAuthInitialized] = useState(false)
   const [profileLoading, setProfileLoading] = useState(true)
 
-  const [route, setRoute] = useState(window.location.pathname || '/login')
-  const [language, setLanguage] = useState(() => {
+ const [route, setRoute] = useState(window.location.pathname || '/login')
+
+const [activeStaffPage, setActiveStaffPage] = useState('overview')
+
+const [language, setLanguage] = useState(() => {
   return localStorage.getItem('mickey-language') || 'th'
 })
 
@@ -1074,13 +1077,102 @@ const getScheduleBooking = (barberId, hour) => {
         )}
 
         {user && (isOwner || isBarber) && (route === '/owner' || route === '/barber') && (
-          <aside className="staff-sidebar">
-            <div className="sidebar-brand">MICKEY<span>BARBERSHOP</span></div>
-            <a href="#staff-schedule">{tr('ตารางคิว', 'Schedule')}</a>
-            {isOwner && <a href="#owner-reports">{tr('รายงานร้าน', 'Reports')}</a>}
-            {isOwner && <a href="#owner-customers">{tr('จัดการลูกค้า', 'Customers')}</a>}
-            <button type="button" onClick={handleLogout} disabled={loading}>{tr('ออกจากระบบ', 'Sign Out')}</button>
-          </aside>
+        <aside className="staff-sidebar">
+  <div className="sidebar-brand">
+    MICKEY<span>BARBERSHOP</span>
+  </div>
+
+  <a
+    href="#overview"
+    className={activeStaffPage === 'overview' ? 'active' : ''}
+    onClick={(e) => {
+      e.preventDefault()
+      setActiveStaffPage('overview')
+    }}
+  >
+    {tr('ภาพรวม', 'Overview')}
+  </a>
+
+  <a
+    href="#schedule"
+    className={activeStaffPage === 'schedule' ? 'active' : ''}
+    onClick={(e) => {
+      e.preventDefault()
+      setActiveStaffPage('schedule')
+    }}
+  >
+    {tr('ตารางคิวร้าน', 'Shop Schedule')}
+  </a>
+
+  {!isOwner && (
+    <a
+      href="#my-schedule"
+      className={activeStaffPage === 'my-schedule' ? 'active' : ''}
+      onClick={(e) => {
+        e.preventDefault()
+        setActiveStaffPage('my-schedule')
+      }}
+    >
+      {tr('ตารางงานของฉัน', 'My Schedule')}
+    </a>
+  )}
+
+  {isOwner && (
+    <>
+      <a
+        href="#reports"
+        className={activeStaffPage === 'reports' ? 'active' : ''}
+        onClick={(e) => {
+          e.preventDefault()
+          setActiveStaffPage('reports')
+        }}
+      >
+        {tr('รายงานร้าน', 'Reports')}
+      </a>
+
+      <a
+        href="#customers"
+        className={activeStaffPage === 'customers' ? 'active' : ''}
+        onClick={(e) => {
+          e.preventDefault()
+          setActiveStaffPage('customers')
+        }}
+      >
+        {tr('จัดการลูกค้า', 'Customers')}
+      </a>
+
+      <a
+        href="#barbers"
+        className={activeStaffPage === 'barbers' ? 'active' : ''}
+        onClick={(e) => {
+          e.preventDefault()
+          setActiveStaffPage('barbers')
+        }}
+      >
+        {tr('จัดการช่างตัดผม', 'Barbers')}
+      </a>
+
+      <a
+        href="#settings"
+        className={activeStaffPage === 'settings' ? 'active' : ''}
+        onClick={(e) => {
+          e.preventDefault()
+          setActiveStaffPage('settings')
+        }}
+      >
+        {tr('ตั้งค่าร้าน', 'Settings')}
+      </a>
+    </>
+  )}
+
+  <button
+    type="button"
+    onClick={handleLogout}
+    disabled={loading}
+  >
+    {tr('ออกจากระบบ', 'Sign Out')}
+  </button>
+</aside>
         )}
 
         {user && isOwner && route === '/owner' && (
