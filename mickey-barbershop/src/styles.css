@@ -906,3 +906,17 @@ footer {
   .staff-sidebar a, .staff-sidebar button { width:auto; flex:1 1 auto; text-align:center; }
   .app-shell:has(.staff-sidebar) .main { width:100%; margin:0 auto; }
 }
+.staff-sidebar a.active {
+  color: #f0d18a;
+  border-color: rgba(205,166,83,.58);
+  background: rgba(205,166,83,.13);
+  box-shadow: inset 3px 0 0 #d7b56d;
+}
+
+/* Selected staff navigation item */
+.staff-sidebar a.active {
+  color: #f1d28a;
+  border-color: rgba(205, 166, 83, .62);
+  background: linear-gradient(100deg, rgba(205,166,83,.18), rgba(205,166,83,.06));
+  box-shadow: inset 3px 0 0 #d7b56d;
+}

@@ -1077,7 +1077,7 @@ const getScheduleBooking = (barberId, hour) => {
         )}
 
         {user && (isOwner || isBarber) && (route === '/owner' || route === '/barber') && (
-        <aside className="staff-sidebar">
+          <aside className="staff-sidebar">
   <div className="sidebar-brand">
     MICKEY<span>BARBERSHOP</span>
   </div>
@@ -1177,6 +1177,8 @@ const getScheduleBooking = (barberId, hour) => {
 
         {user && isOwner && route === '/owner' && (
           <>
+            {activeStaffPage === 'overview' && (
+              <>
             <section className="hero">
               <span className="gold-text">MICKEY MANAGEMENT</span>
               <h2>{tr('แดชบอร์ดเจ้าของร้าน', 'Owner Dashboard')}</h2>
@@ -1232,6 +1234,11 @@ const getScheduleBooking = (barberId, hour) => {
   </button>
 </section>
 
+              </>
+            )}
+
+            {activeStaffPage === 'schedule' && (
+              <>
             <section id="staff-schedule" className="auth-card staff-schedule-section">
               <span className="gold-text">SHOP DAILY SCHEDULE</span>
               <div className="staff-schedule-heading">
@@ -1268,6 +1275,11 @@ const getScheduleBooking = (barberId, hour) => {
                 </table>
               </div>
             </section>
+              </>
+            )}
+
+            {activeStaffPage === 'reports' && (
+              <>
             <section id="owner-reports" className="auth-card owner-reports-section">
               <span className="gold-text">OWNER REPORTS</span>
               <h2>{tr('รายงานยอดขายและบริการ', 'Sales & Service Reports')}</h2>
@@ -1298,6 +1310,10 @@ const getScheduleBooking = (barberId, hour) => {
               <p className="booking-note">{tr('รายงานนี้นับเฉพาะคิว Completed และอ้างอิงรายการจองที่โหลดจากระบบ', 'Reports count Completed bookings only and use bookings currently loaded from the system.')}</p>
             </section>
 
+              </>
+            )}
+
+            {activeStaffPage === 'schedule' && (
             <section className="auth-card booking-history">
               <span className="gold-text">ALL BOOKINGS</span>
               <h2>{tr('รายการจองของร้าน', 'All Shop Bookings')}</h2>
@@ -1346,8 +1362,10 @@ const getScheduleBooking = (barberId, hour) => {
 
             </section>
 
-                        {/* CUSTOMER MANAGEMENT */}
-            <section className="auth-card customer-management">
+                        )}
+
+            {activeStaffPage === 'customers' && (
+              <section className="auth-card customer-management">
               <span id="owner-customers" className="gold-text">CUSTOMER MANAGEMENT</span>
               <h2>{tr('จัดการข้อมูลลูกค้า', 'Customer Management')}</h2>
 
@@ -1462,57 +1480,131 @@ const getScheduleBooking = (barberId, hour) => {
     </div>
   )}
               </section>
+            )}
+            {activeStaffPage === 'barbers' && (
+              <section className="auth-card">
+                <span className="gold-text">BARBER MANAGEMENT</span>
+                <h2>{tr('จัดการช่างตัดผม', 'Barber Management')}</h2>
+                <p>{tr('หน้านี้ยังอยู่ระหว่างพัฒนา', 'This page is not implemented yet.')}</p>
+              </section>
+            )}
+            {activeStaffPage === 'settings' && (
+              <section className="auth-card">
+                <span className="gold-text">SHOP SETTINGS</span>
+                <h2>{tr('ตั้งค่าร้าน', 'Shop Settings')}</h2>
+                <p>{tr('หน้านี้ยังอยู่ระหว่างพัฒนา', 'This page is not implemented yet.')}</p>
+              </section>
+            )}
             </>
           )}
 
 
         {user && isBarber && route === '/barber' && (
           <>
-            <section className="hero">
+            {activeStaffPage === 'overview' && (
+              <section className="hero">
               <span className="gold-text">MICKEY BARBERSHOP · BARBER</span>
               <h2>{tr('ตารางงานช่าง', 'Barber Dashboard')}</h2>
               <p>{staffProfile?.full_name || user.email}</p>
               <button onClick={handleLogout} disabled={loading}>{tr('ออกจากระบบ', 'Sign Out')}</button>
-            </section>
+              </section>
+            )}
 
-            <section id="staff-schedule" className="auth-card staff-schedule-section">
-              <span className="gold-text">SHOP DAILY SCHEDULE</span>
-              <div className="staff-schedule-heading">
-                <div>
-                  <h2>{tr('ตารางงานช่างทุกคน', 'All Barbers Schedule')}</h2>
-                  <p>{tr('ภาพรวมคิวของร้าน แยกตามช่างและช่วงเวลา · ช่อง — คือไม่มีรายการจอง', 'Shop-wide bookings by barber and time. — means no booking is listed.')}</p>
-                </div>
-                <label>{tr('วันที่', 'Date')}
-                  <input type="date" value={scheduleDate} onChange={(event) => setScheduleDate(event.target.value)} />
-                </label>
-              </div>
-              <div className="customer-schedule-scroll">
-                <table className="staff-schedule-table">
-                  <thead><tr><th>{tr('ช่าง', 'Barber')}</th>{scheduleHours.map((hour) => <th key={hour}>{String(hour).padStart(2, '0')}:00</th>)}</tr></thead>
-                  <tbody>
-                    {barbers.map((barber) => (
-                      <tr key={barber.id}>
-                        <th>{barber.full_name}</th>
-                        {scheduleHours.map((hour) => {
-                          const booking = getScheduleBooking(barber.id, hour)
-                          return <td key={hour}>
-                            {booking ? (
-                              <button type="button" className={`staff-booking-cell status-${String(booking.status || '').toLowerCase().replace(/\s+/g, '-')}`} onClick={() => setSelectedStaffBooking(booking)}>
-                                <strong>{booking.customer?.full_name || tr('ลูกค้า', 'Customer')}</strong>
-                                <small>{booking.service_name_snapshot || '-'}</small>
-                              </button>
-                            ) : <span className="staff-empty-slot">—</span>}
-                          </td>
-                        })}
-                      </tr>
-                    ))}
-                    {!barbers.length && <tr><td colSpan={11}>{tr('ไม่พบรายชื่อช่าง', 'No barbers found.')}</td></tr>}
-                  </tbody>
-                </table>
-              </div>
-            </section>
+           {(activeStaffPage === 'schedule' || activeStaffPage === 'my-schedule') && (
+  <section id="staff-schedule" className="auth-card staff-schedule-section">
+    <span className="gold-text">
+      {activeStaffPage === 'my-schedule' ? 'MY DAILY SCHEDULE' : 'SHOP DAILY SCHEDULE'}
+    </span>
 
+    <div className="staff-schedule-heading">
+      <div>
+        <h2>
+          {activeStaffPage === 'my-schedule'
+            ? tr('ตารางงานของฉัน', 'My Schedule')
+            : tr('ตารางงานช่างทุกคน', 'All Barbers Schedule')}
+        </h2>
+        <p>
+          {activeStaffPage === 'my-schedule'
+            ? tr('แสดงเฉพาะคิวของคุณ', 'Showing only your bookings.')
+            : tr('ภาพรวมคิวของร้าน แยกตามช่างและช่วงเวลา · ช่อง — คือไม่มีรายการจอง', 'Shop-wide bookings by barber and time. — means no booking is listed.')}
+        </p>
+      </div>
 
+      <label>
+        {tr('วันที่', 'Date')}
+        <input
+          type="date"
+          value={scheduleDate}
+          onChange={(event) => setScheduleDate(event.target.value)}
+        />
+      </label>
+    </div>
+
+    <div className="customer-schedule-scroll">
+      <table className="staff-schedule-table">
+        <thead>
+          <tr>
+            <th>{tr('ช่าง', 'Barber')}</th>
+            {scheduleHours.map((hour) => (
+              <th key={hour}>{String(hour).padStart(2, '0')}:00</th>
+            ))}
+          </tr>
+        </thead>
+
+        <tbody>
+          {(activeStaffPage === 'my-schedule'
+            ? barbers.filter(
+                (barber) => String(barber.id) === String(staffProfile?.id)
+              )
+            : barbers
+          ).map((barber) => (
+            <tr key={barber.id}>
+              <th>{barber.full_name}</th>
+
+              {scheduleHours.map((hour) => {
+                const booking = getScheduleBooking(barber.id, hour);
+
+                return (
+                  <td key={hour}>
+                    {booking ? (
+                      <button
+                        type="button"
+                        className={`staff-booking-cell status-${String(booking.status || '').toLowerCase().replace(/\s+/g, '-')}`}
+                        onClick={() => setSelectedStaffBooking(booking)}
+                      >
+                        <strong>
+                          {booking.customer?.full_name || tr('ลูกค้า', 'Customer')}
+                        </strong>
+                        <small>{booking.service_name_snapshot || '-'}</small>
+                      </button>
+                    ) : (
+                      <span className="staff-empty-slot">—</span>
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+
+          {(activeStaffPage === 'my-schedule'
+            ? barbers.filter(
+                (barber) => String(barber.id) === String(staffProfile?.id)
+              ).length === 0
+            : barbers.length === 0
+          ) && (
+            <tr>
+              <td colSpan={scheduleHours.length + 1}>
+                {activeStaffPage === 'my-schedule'
+                  ? tr('ไม่พบข้อมูลช่างของบัญชีนี้', 'Your barber profile was not found.')
+                  : tr('ไม่พบรายชื่อช่าง', 'No barbers found.')}
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  </section>
+)}
           </>
         )}
 
