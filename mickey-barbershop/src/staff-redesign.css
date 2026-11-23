@@ -1,0 +1,206 @@
+/* MICKEY BARBERSHOP EXPERIENCE — Staff back-office visual refresh */
+:root {
+  --gold: #d8b45d;
+  --gold-light: #f2d78f;
+  --staff-line: rgba(216,180,93,.22);
+}
+html { scroll-behavior: smooth; }
+button, input, select, textarea { font: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--gold-light); outline-offset: 2px;
+}
+
+/* Desktop sidebar and content layout */
+.app-shell:has(.staff-sidebar) .main {
+  width: calc(100% - clamp(285px, 23vw, 380px));
+  max-width: 1320px;
+  margin: 0 24px 0 clamp(260px, 22vw, 360px);
+  padding: 34px 0 56px;
+}
+.staff-sidebar {
+  top: 24px; left: max(20px, calc((100vw - 1480px) / 2));
+  width: 204px; gap: 7px; padding: 20px 13px;
+  border: 1px solid var(--staff-line); border-radius: 16px;
+  background: rgba(12,12,12,.98); box-shadow: 0 18px 48px rgba(0,0,0,.42);
+}
+.sidebar-brand { padding: 5px 9px 18px; margin-bottom: 8px; color: var(--gold-light); font-size: 14px; letter-spacing: .16em; }
+.sidebar-brand span { margin-top: 5px; color: #f3eee3; font-size: 11px; letter-spacing: .18em; }
+.staff-sidebar a, .staff-sidebar button {
+  min-height: 43px; padding: 11px 12px; border-radius: 9px;
+  color: #d9d2c4; font-size: 13px;
+}
+.staff-sidebar a:hover, .staff-sidebar button:hover {
+  transform: translateX(2px); color: var(--gold-light);
+  background: rgba(216,180,93,.09); border-color: var(--staff-line);
+}
+.staff-sidebar a.active {
+  color: #f4d98f; border-color: rgba(216,180,93,.55);
+  background: linear-gradient(100deg,rgba(216,180,93,.18),rgba(216,180,93,.045));
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+.staff-sidebar button { margin-top: 14px; border-color: rgba(216,180,93,.3); }
+
+/* Back-office panels */
+.app-shell:has(.staff-sidebar) .main > section,
+.app-shell:has(.staff-sidebar) .main .auth-card { max-width: none; width: 100%; }
+.app-shell:has(.staff-sidebar) .auth-card,
+.app-shell:has(.staff-sidebar) .today-overview,
+.app-shell:has(.staff-sidebar) .customer-management,
+.app-shell:has(.staff-sidebar) .staff-schedule-section,
+.app-shell:has(.staff-sidebar) .owner-reports-section {
+  margin: 0 0 22px; padding: clamp(22px, 2.4vw, 34px);
+  border: 1px solid var(--staff-line); border-radius: 15px;
+  background: linear-gradient(145deg,#191919 0%,#111 100%);
+  box-shadow: 0 14px 38px rgba(0,0,0,.24);
+}
+.app-shell:has(.staff-sidebar) .hero {
+  min-height: 0; align-items: flex-start; text-align: left; gap: 10px;
+  margin-bottom: 22px; padding: 28px 32px; border-radius: 15px;
+  background: linear-gradient(110deg,#1c1a15,#111);
+}
+.app-shell:has(.staff-sidebar) .hero .gold-text { text-align:left; }
+.app-shell:has(.staff-sidebar) .hero h2 { font-size: clamp(25px,3vw,34px); }
+.app-shell:has(.staff-sidebar) .auth-card h2,
+.app-shell:has(.staff-sidebar) .today-overview h2,
+.app-shell:has(.staff-sidebar) .customer-management h2,
+.app-shell:has(.staff-sidebar) .staff-schedule-section h2,
+.app-shell:has(.staff-sidebar) .owner-reports-section h2 {
+  margin: 10px 0 20px; color: var(--gold-light);
+  font-size: clamp(22px,2.2vw,29px); line-height: 1.3;
+}
+.app-shell:has(.staff-sidebar) .gold-text { letter-spacing: .22em; font-size: 11px; }
+
+/* Dashboard metric cards */
+.booking-summary { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px 14px; margin: 22px 0; }
+.summary-row {
+  min-height: 76px; padding: 17px 18px;
+  border: 1px solid rgba(216,180,93,.14); border-radius: 10px;
+  background: rgba(255,255,255,.018);
+}
+.summary-row:hover { padding-left: 18px; background: rgba(216,180,93,.055); }
+.summary-row span { color: #bdb5a7; }
+.summary-row strong { color: var(--gold-light); font-size: 21px; }
+.summary-revenue { margin-top: 0; }
+
+/* Tables */
+.owner-table-wrap, .customer-history-wrap, .customer-schedule-scroll, .staff-schedule-scroll {
+  overflow: auto; border: 1px solid var(--staff-line); border-radius: 11px;
+  background: #101010; scrollbar-color: #8f743b #171717;
+}
+.owner-booking-table { min-width: 760px; font-size: 13px; }
+.owner-booking-table th {
+  position: sticky; top: 0; z-index: 2; padding: 14px 16px;
+  background: #252116; color: var(--gold-light); font-weight: 600;
+  border-bottom: 1px solid rgba(216,180,93,.3);
+}
+.owner-booking-table td { padding: 14px 16px; color: #e8e1d5; }
+.owner-booking-table tbody tr:nth-child(even) { background: rgba(255,255,255,.018); }
+.owner-booking-table tbody tr:hover { background: rgba(216,180,93,.07); }
+.owner-booking-table button, .customer-edit-entry > button, .customer-close-button,
+.staff-modal-actions button:not(.secondary) {
+  min-height: 40px; padding: 9px 17px; border: 1px solid #b99548;
+  border-radius: 8px; background: linear-gradient(135deg,#efd17e,#b48a31);
+  color: #17130a; font-weight: 700;
+}
+.owner-booking-table button:hover, .customer-edit-entry > button:hover,
+.customer-close-button:hover, .staff-modal-actions button:hover {
+  filter: brightness(1.08); transform: translateY(-1px);
+}
+
+/* Customer edit form: consistent fields, no tiny browser-default textarea */
+.customer-management input[type="search"] {
+  width: min(100%,520px); min-height: 46px; margin: 12px 0 20px;
+  padding: 12px 15px; color: #f5f0e6; background: #0c0c0c;
+  border: 1px solid rgba(216,180,93,.35); border-radius: 9px;
+}
+.customer-details-panel {
+  margin-top: 24px; padding: clamp(18px,2.5vw,30px);
+  border-color: rgba(216,180,93,.35); background: #151515;
+}
+.customer-edit-entry { display:flex; justify-content:flex-end; margin-bottom:18px; }
+.customer-edit-form {
+  display:grid; grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 14px; width:100%; padding:20px;
+  border:1px solid rgba(216,180,93,.24); border-radius:12px;
+  background:rgba(0,0,0,.24);
+}
+.customer-edit-form label {
+  display:grid; align-content:start; gap:8px; margin:0;
+  color:#d9c58f; font-size:13px; font-weight:600;
+}
+.customer-edit-form label:nth-child(3) { grid-column:1/-1; }
+.customer-edit-form input, .customer-edit-form textarea {
+  display:block; width:100%; min-height:46px; padding:12px 14px;
+  color:#f5f0e6; background:#0b0b0b; border:1px solid #484033;
+  border-radius:8px; resize:vertical; line-height:1.5;
+}
+.customer-edit-form textarea { min-height:92px; }
+.customer-edit-form input:focus, .customer-edit-form textarea:focus {
+  outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(216,180,93,.1);
+}
+.customer-edit-form .staff-modal-actions {
+  grid-column:1/-1; display:flex; justify-content:flex-end; gap:10px; margin-top:2px;
+}
+.customer-edit-form .staff-modal-actions button { min-width:120px; }
+.customer-edit-form .staff-modal-actions button:last-child {
+  color:#e7dfd0; background:#292929; border-color:#555;
+}
+.customer-detail-item { padding:17px 14px; }
+.customer-detail-item:hover { padding-left:18px; }
+.customer-detail-label { color:#d9b85f; font-weight:600; }
+.customer-detail-value { line-height:1.6; }
+.customer-close-button { margin-top:20px; }
+
+/* Schedule and booking details */
+.staff-schedule-heading { align-items:center; }
+.staff-schedule-table { min-width:940px; }
+.staff-schedule-table th, .staff-schedule-table td { padding:9px 7px; }
+.staff-schedule-table thead th { background:#242116; }
+.staff-booking-modal { border-radius:15px; }
+.staff-booking-modal select {
+  min-height:44px; color:#f5f0e6; background:#0d0d0d;
+  border:1px solid rgba(216,180,93,.4); border-radius:8px;
+}
+.staff-booking-details { color:#e8e1d5; }
+.staff-modal-actions button { background:linear-gradient(135deg,#efd17e,#b48a31); color:#17130a; border:1px solid #b99548; }
+.staff-modal-actions .secondary { background:#252525; color:#eee; border-color:#555; }
+.staff-booking-cell { min-height:54px; }
+.app-shell:has(.staff-sidebar) footer {
+  margin-left:clamp(260px,22vw,360px); padding:20px; color:#777;
+  border-color:var(--staff-line);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .staff-sidebar {
+    position:sticky; top:0; left:auto; z-index:40; width:auto;
+    margin:10px 12px 0; padding:12px; gap:6px;
+    background:rgba(10,10,10,.98); backdrop-filter:blur(12px);
+  }
+  .sidebar-brand { width:100%; padding:3px 8px 10px; }
+  .staff-sidebar a, .staff-sidebar button { flex:1 1 135px; min-height:40px; text-align:center; }
+  .staff-sidebar button { margin-top:0; }
+  .app-shell:has(.staff-sidebar) .main { width:auto; max-width:none; margin:0; padding:22px 14px 40px; }
+  .app-shell:has(.staff-sidebar) footer { margin-left:0; }
+}
+@media (max-width: 600px) {
+  .app-shell:has(.staff-sidebar) .auth-card,
+  .app-shell:has(.staff-sidebar) .today-overview,
+  .app-shell:has(.staff-sidebar) .customer-management,
+  .app-shell:has(.staff-sidebar) .staff-schedule-section,
+  .app-shell:has(.staff-sidebar) .owner-reports-section { padding:20px 14px; }
+  .booking-summary { grid-template-columns:1fr; gap:8px; }
+  .summary-row { min-height:66px; padding:14px; }
+  .customer-edit-form { grid-template-columns:1fr; padding:14px; }
+  .customer-edit-form label:nth-child(3), .customer-edit-form .staff-modal-actions { grid-column:auto; }
+  .customer-edit-form .staff-modal-actions { flex-direction:column; }
+  .customer-edit-form .staff-modal-actions button { width:100%; }
+  .customer-details-panel { padding:16px 12px; }
+  .customer-edit-entry > button { width:100%; }
+  .staff-booking-overlay { padding:12px; }
+  .staff-booking-modal { padding:24px 17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior:auto; }
+  *,*::before,*::after { transition:none !important; animation:none !important; }
+}

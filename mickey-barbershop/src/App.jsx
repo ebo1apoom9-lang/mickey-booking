@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from './supabase'
 import './styles.css'
-
+import './staff-redesign.css'
 const money = (value) =>
   new Intl.NumberFormat('th-TH').format(Number(value) || 0) + ' บาท'
 
