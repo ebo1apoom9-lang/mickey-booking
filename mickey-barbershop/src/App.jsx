@@ -62,7 +62,7 @@ const [language, setLanguage] = useState(() => {
 useEffect(() => {
   localStorage.setItem('mickey-language', language)
 }, [language])
-  
+
   const tr = (thai, english) => {
   return language === 'en' ? english : thai
 }
@@ -83,8 +83,18 @@ const [recoveryReady, setRecoveryReady] = useState(false)
   const [bookings, setBookings] = useState([])
   const [ownerBookings, setOwnerBookings] = useState([])
 const [ownerCustomers, setOwnerCustomers] = useState([])
+const [staffTimeBlocks, setStaffTimeBlocks] = useState([])
+const [weeklyDaysOff, setWeeklyDaysOff] = useState([])
+const [selectedDayOffBarberId, setSelectedDayOffBarberId] = useState('')
 const [customerSearch, setCustomerSearch] = useState('')
 const [selectedCustomer, setSelectedCustomer] = useState(null)
+
+  const [editingCustomerId, setEditingCustomerId] = useState('')
+  const [customerEditName, setCustomerEditName] = useState('')
+  const [customerEditPhone, setCustomerEditPhone] = useState('')
+  const [customerEditNotes, setCustomerEditNotes] = useState('')
+  const [customerEditSaving, setCustomerEditSaving] = useState(false)
+
   const [selectedService, setSelectedService] = useState('')
   const [selectedBarber, setSelectedBarber] = useState('')
   const [selectedDate, setSelectedDate] = useState(bangkokDate())
@@ -312,7 +322,7 @@ const loadPublicAvailability = useCallback(async () => {
 useEffect(() => {
   if (user && customer && route === '/booking') loadPublicAvailability()
 }, [user, customer, route, selectedDate, loadPublicAvailability])
-  
+
 // Load customer bookings.
 const loadBookings = useCallback(async () => {
   const { data, error } = await supabase
@@ -351,8 +361,9 @@ const loadBookings = useCallback(async () => {
         ends_at,
         status,
         payment_status,
+        source,
         barber_id,
-        customer:customers!bookings_customer_id_fkey(full_name, phone),
+        customer:customers!bookings_customer_id_fkey(id, full_name, phone, notes),
         barber:profiles!bookings_barber_id_fkey(full_name)
       `)
       .order('starts_at', { ascending: false })
@@ -389,6 +400,31 @@ const loadOwnerCustomers = useCallback(async () => {
   setOwnerCustomers(data || [])
 }, [])
 
+const loadStaffAvailability = useCallback(async () => {
+  const [blocksResult, daysOffResult] = await Promise.all([
+    supabase
+      .from('barber_time_blocks')
+      .select('id, barber_id, starts_at, ends_at')
+      .order('starts_at'),
+    supabase
+      .from('barber_weekly_days_off')
+      .select('id, barber_id, weekday')
+      .order('weekday'),
+  ])
+
+  if (blocksResult.error) {
+    setMessage(tr('โหลดช่วงเวลาที่ Block ไม่สำเร็จ: ', 'Could not load blocked times: ') + blocksResult.error.message)
+  } else {
+    setStaffTimeBlocks(blocksResult.data || [])
+  }
+
+  if (daysOffResult.error) {
+    setMessage(tr('โหลดวันหยุดช่างไม่สำเร็จ: ', 'Could not load barber days off: ') + daysOffResult.error.message)
+  } else {
+    setWeeklyDaysOff(daysOffResult.data || [])
+  }
+}, [])
+
   useEffect(() => {
     if (!authInitialized || profileLoading || !user) {
       setServices([])
@@ -403,6 +439,7 @@ const loadOwnerCustomers = useCallback(async () => {
   loadBookingData()
   loadOwnerBookings()
   loadOwnerCustomers()
+  loadStaffAvailability()
 } else if (customer) {
   loadBookingData()
   loadBookings()
@@ -417,6 +454,7 @@ const loadOwnerCustomers = useCallback(async () => {
     loadBookings,
     loadOwnerBookings,
     loadOwnerCustomers,
+    loadStaffAvailability,
   ])
 
   async function handleSubmit(event) {
@@ -635,6 +673,117 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     }
   }
 
+
+  function startCustomerEdit(customer) {
+    if (!customer?.id) return
+    setEditingCustomerId(String(customer.id))
+    setCustomerEditName(customer.full_name || '')
+    setCustomerEditPhone(customer.phone || '')
+    setCustomerEditNotes(customer.notes || '')
+  }
+
+  async function saveCustomerDetails(customerId) {
+    if (!customerId || !customerEditName.trim() || !customerEditPhone.trim()) {
+      alert(tr('กรุณากรอกชื่อลูกค้าและเบอร์โทรศัพท์', 'Please enter the customer name and phone number.'))
+      return
+    }
+
+    setCustomerEditSaving(true)
+    try {
+      const { data, error } = await supabase.rpc('update_customer_staff_details', {
+        p_customer_id: customerId,
+        p_full_name: customerEditName.trim(),
+        p_phone: customerEditPhone.trim(),
+        p_notes: customerEditNotes.trim() || null,
+      })
+      if (error) throw error
+
+      const updated = data || {
+        id: customerId,
+        full_name: customerEditName.trim(),
+        phone: customerEditPhone.trim(),
+        notes: customerEditNotes.trim() || null,
+      }
+
+      setSelectedCustomer(prev =>
+        prev && String(prev.id) === String(customerId) ? { ...prev, ...updated } : prev
+      )
+      setOwnerCustomers(prev =>
+        prev.map(item => String(item.id) === String(customerId) ? { ...item, ...updated } : item)
+      )
+      setOwnerBookings(prev =>
+        prev.map(item =>
+          String(item.customer?.id) === String(customerId)
+            ? { ...item, customer: { ...item.customer, ...updated } }
+            : item
+        )
+      )
+      setSelectedStaffBooking(prev =>
+        prev && String(prev.customer?.id) === String(customerId)
+          ? { ...prev, customer: { ...prev.customer, ...updated } }
+          : prev
+      )
+
+      setEditingCustomerId('')
+      alert(tr('บันทึกข้อมูลลูกค้าเรียบร้อยแล้ว', 'Customer details saved successfully.'))
+    } catch (error) {
+      console.error('saveCustomerDetails:', error)
+      alert(error.message || tr('ไม่สามารถบันทึกข้อมูลลูกค้าได้', 'Could not save customer details.'))
+    } finally {
+      setCustomerEditSaving(false)
+    }
+  }
+
+  function renderCustomerEditForm(customerId) {
+    return (
+      <div className="customer-edit-form">
+        <label>
+          {tr('ชื่อลูกค้า', 'Customer name')}
+          <input
+            value={customerEditName}
+            onChange={event => setCustomerEditName(event.target.value)}
+            disabled={customerEditSaving}
+          />
+        </label>
+        <label>
+          {tr('เบอร์โทรศัพท์', 'Phone number')}
+          <input
+            value={customerEditPhone}
+            onChange={event => setCustomerEditPhone(event.target.value)}
+            disabled={customerEditSaving}
+          />
+        </label>
+        <label>
+          {customerEditNotes.trim()
+            ? tr('✏️ แก้ไขบันทึก', '✏️ Edit notes')
+            : tr('+ เพิ่มบันทึกเพิ่มเติม', '+ Add notes')}
+          <textarea
+            value={customerEditNotes}
+            onChange={event => setCustomerEditNotes(event.target.value)}
+            rows={3}
+            disabled={customerEditSaving}
+          />
+        </label>
+        <div className="staff-modal-actions">
+          <button
+            type="button"
+            onClick={() => saveCustomerDetails(customerId)}
+            disabled={customerEditSaving}
+          >
+            {customerEditSaving ? tr('กำลังบันทึก...', 'Saving...') : tr('บันทึก', 'Save')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setEditingCustomerId('')}
+            disabled={customerEditSaving}
+          >
+            {tr('ยกเลิก', 'Cancel')}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   async function handleStaffBookingUpdate(bookingId, updates) {
     setLoading(true)
     setMessage('')
@@ -648,6 +797,87 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     } finally {
       setLoading(false)
     }
+  }
+
+  async function handleToggleScheduleBlock(barberId, hour) {
+    const existingBlock = getScheduleBlock(barberId, hour)
+
+    if (existingBlock) {
+      if (!window.confirm(tr('ต้องการปลด Block ช่วงเวลานี้ใช่หรือไม่?', 'Unblock this time slot?'))) return
+      setLoading(true)
+      const { error } = await supabase
+        .from('barber_time_blocks')
+        .delete()
+        .eq('id', existingBlock.id)
+      if (error) {
+        setMessage(error.message)
+      } else {
+        setMessage(tr('เปิดช่วงเวลากลับมาแล้ว', 'Time slot is open again.'))
+      }
+      await loadStaffAvailability()
+      setLoading(false)
+      return
+    }
+
+    if (getScheduleBooking(barberId, hour) || isScheduleDayOff(barberId)) {
+      setMessage(tr('ช่วงเวลานี้มีคิวหรือเป็นวันหยุดอยู่แล้ว', 'This slot is already booked or is a day off.'))
+      return
+    }
+
+    const startsAt = new Date(
+      `${scheduleDate}T${String(hour).padStart(2, '0')}:00:00+07:00`
+    )
+    const endsAt = new Date(startsAt.getTime() + 60 * 60 * 1000)
+    if (startsAt <= new Date()) {
+      setMessage(tr('ไม่สามารถ Block เวลาในอดีตได้', 'Past time slots cannot be blocked.'))
+      return
+    }
+
+    setLoading(true)
+    const { error } = await supabase.from('barber_time_blocks').insert({
+      barber_id: barberId,
+      starts_at: startsAt.toISOString(),
+      ends_at: endsAt.toISOString(),
+    })
+    if (error) {
+      setMessage(error.message)
+    } else {
+      setMessage(tr('Block ช่วงเวลาเรียบร้อยแล้ว', 'Time slot blocked.'))
+    }
+    await loadStaffAvailability()
+    setLoading(false)
+  }
+
+  async function handleWeeklyDayOffChange(barberId, weekday, enabled) {
+    const existing = weeklyDaysOff.find(
+      (item) =>
+        String(item.barber_id) === String(barberId) &&
+        Number(item.weekday) === Number(weekday)
+    )
+
+    setLoading(true)
+    let error = null
+    if (enabled && !existing) {
+      const result = await supabase
+        .from('barber_weekly_days_off')
+        .insert({ barber_id: barberId, weekday: Number(weekday) })
+      error = result.error
+    } else if (!enabled && existing) {
+      const result = await supabase
+        .from('barber_weekly_days_off')
+        .delete()
+        .eq('barber_id', barberId)
+        .eq('weekday', Number(weekday))
+      error = result.error
+    }
+
+    if (error) {
+      setMessage(error.message)
+    } else {
+      setMessage(tr('บันทึกวันหยุดประจำสัปดาห์แล้ว', 'Weekly day off saved.'))
+    }
+    await loadStaffAvailability()
+    setLoading(false)
   }
 
   async function handleMoveStaffBooking(booking) {
@@ -836,18 +1066,83 @@ const isCustomerSlotAvailable = (barberId, hour) => {
 const getScheduleBooking = (barberId, hour) => {
   return scheduleBookings.find((booking) => {
     if (booking.barber_id !== barberId) return false
+    if (['Cancelled', 'No Show'].includes(booking.status)) return false
 
     const start = new Date(booking.starts_at)
     const end = new Date(booking.ends_at)
-
     const slotStart = new Date(
       `${scheduleDate}T${String(hour).padStart(2, '0')}:00:00+07:00`
     )
-
     const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000)
-
     return start < slotEnd && end > slotStart
   })
+}
+
+const scheduleWeekday = new Date(`${scheduleDate}T12:00:00+07:00`).getUTCDay()
+
+const getScheduleBlock = (barberId, hour) => {
+  const slotStart = new Date(
+    `${scheduleDate}T${String(hour).padStart(2, '0')}:00:00+07:00`
+  )
+  const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000)
+  return staffTimeBlocks.find((block) => {
+    if (String(block.barber_id) !== String(barberId)) return false
+    return new Date(block.starts_at) < slotEnd && new Date(block.ends_at) > slotStart
+  })
+}
+
+const isScheduleDayOff = (barberId) => weeklyDaysOff.some(
+  (dayOff) =>
+    String(dayOff.barber_id) === String(barberId) &&
+    Number(dayOff.weekday) === scheduleWeekday
+)
+
+const renderStaffScheduleCell = (barber, hour) => {
+  const booking = getScheduleBooking(barber.id, hour)
+  if (booking) {
+    return (
+      <button
+        type="button"
+        className={`staff-booking-cell status-${String(booking.status || '').toLowerCase().replace(/\s+/g, '-')}`}
+        onClick={() => setSelectedStaffBooking(booking)}
+      >
+        <strong>{booking.customer?.full_name || tr('ลูกค้า', 'Customer')}</strong>
+        <small>{booking.service_name_snapshot || '-'}</small>
+        {booking.source === 'Walk-in' && <small>{tr('Walk-in', 'Walk-in')}</small>}
+      </button>
+    )
+  }
+
+  if (isScheduleDayOff(barber.id)) {
+    return <span className="staff-day-off-slot">{tr('วันหยุด', 'DAY OFF')}</span>
+  }
+
+  const block = getScheduleBlock(barber.id, hour)
+  if (block) {
+    return (
+      <button
+        type="button"
+        className="staff-blocked-slot"
+        onClick={() => handleToggleScheduleBlock(barber.id, hour)}
+        disabled={loading}
+        title={tr('กดเพื่อปลด Block', 'Click to unblock this time')}
+      >
+        {tr('BLOCKED · ปลด', 'BLOCKED · OPEN')}
+      </button>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      className="staff-open-slot"
+      onClick={() => handleToggleScheduleBlock(barber.id, hour)}
+      disabled={loading}
+      title={tr('กดเพื่อ Block เวลานี้', 'Click to block this time')}
+    >
+      +
+    </button>
+  )
 }
   const maxBookingDate = bangkokDate(
     new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
@@ -1257,23 +1552,17 @@ const getScheduleBooking = (barberId, hour) => {
                     {barbers.map((barber) => (
                       <tr key={barber.id}>
                         <th>{barber.full_name}</th>
-                        {scheduleHours.map((hour) => {
-                          const booking = getScheduleBooking(barber.id, hour)
-                          return <td key={hour}>
-                            {booking ? (
-                              <button type="button" className={`staff-booking-cell status-${String(booking.status || '').toLowerCase().replace(/\s+/g, '-')}`} onClick={() => setSelectedStaffBooking(booking)}>
-                                <strong>{booking.customer?.full_name || tr('ลูกค้า', 'Customer')}</strong>
-                                <small>{booking.service_name_snapshot || '-'}</small>
-                              </button>
-                            ) : <span className="staff-empty-slot">—</span>}
-                          </td>
-                        })}
+                        {scheduleHours.map((hour) => (
+                          <td key={hour}>{renderStaffScheduleCell(barber, hour)}</td>
+                        ))}
                       </tr>
                     ))}
                     {!barbers.length && <tr><td colSpan={11}>{tr('ไม่พบรายชื่อช่าง', 'No barbers found.')}</td></tr>}
                   </tbody>
                 </table>
               </div>
+
+
             </section>
               </>
             )}
@@ -1325,10 +1614,10 @@ const getScheduleBooking = (barberId, hour) => {
   )}
 </p>
               )}
-              
+
 <div className="owner-table-wrap">
   <table className="owner-booking-table">
-    
+
 
 
 <thead>
@@ -1369,7 +1658,7 @@ const getScheduleBooking = (barberId, hour) => {
               <span id="owner-customers" className="gold-text">CUSTOMER MANAGEMENT</span>
               <h2>{tr('จัดการข้อมูลลูกค้า', 'Customer Management')}</h2>
 
-              <p>   
+              <p>
                 {tr('ลูกค้าทั้งหมด', 'Total Customers')} {ownerCustomers.length} {tr('คน', 'customers')}
               </p>
 
@@ -1430,6 +1719,18 @@ const getScheduleBooking = (barberId, hour) => {
 
               {selectedCustomer && (
   <div className="customer-details-panel">
+    {selectedCustomer?.id && (
+      <div className="customer-edit-entry">
+        {String(editingCustomerId) === String(selectedCustomer.id)
+          ? renderCustomerEditForm(selectedCustomer.id)
+          : (
+            <button type="button" onClick={() => startCustomerEdit(selectedCustomer)}>
+              {tr('แก้ไขข้อมูลลูกค้า', 'Edit customer details')}
+            </button>
+          )}
+      </div>
+    )}
+
     <div className="customer-details-header">
       <span className="gold-text">CUSTOMER PROFILE</span>
       <h3>{tr('รายละเอียดข้อมูลลูกค้า', 'Customer Details')}</h3>
@@ -1444,7 +1745,7 @@ const getScheduleBooking = (barberId, hour) => {
       </div>
 
       <div className="customer-detail-item">
-        <span className="customer-detail-label">   
+        <span className="customer-detail-label">
           {tr('เบอร์โทรศัพท์', 'Phone Number')} </span>
         <span className="customer-detail-value">
           {selectedCustomer.phone || '-'}
@@ -1485,7 +1786,55 @@ const getScheduleBooking = (barberId, hour) => {
               <section className="auth-card">
                 <span className="gold-text">BARBER MANAGEMENT</span>
                 <h2>{tr('จัดการช่างตัดผม', 'Barber Management')}</h2>
-                <p>{tr('หน้านี้ยังอยู่ระหว่างพัฒนา', 'This page is not implemented yet.')}</p>
+                <p>{tr('จัดการวันหยุดประจำสัปดาห์ของช่างแต่ละคน', 'Manage each barber’s recurring weekly days off.')}</p>
+    {isOwner && (<section className="staff-dayoff-manager">
+                  <div className="staff-dayoff-heading">
+                    <div>
+                      <h3>{tr('กำหนดวันหยุดประจำสัปดาห์ของช่าง', 'Set recurring barber days off')}</h3>
+                      <p>{tr('เลือกช่างและติ๊กวันที่หยุดประจำ ระบบจะแสดงวันหยุดเป็นช่องสีดำในตาราง', 'Choose a barber and select recurring days off. These appear as black day-off cells.')}</p>
+                    </div>
+                    <select
+                      value={selectedDayOffBarberId || barbers[0]?.id || ''}
+                      onChange={(event) => setSelectedDayOffBarberId(event.target.value)}
+                      disabled={!barbers.length}
+                    >
+                      {barbers.map((barber) => (
+                        <option key={barber.id} value={barber.id}>{barber.full_name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="staff-dayoff-days">
+                    {[
+                      tr('อาทิตย์', 'Sunday'),
+                      tr('จันทร์', 'Monday'),
+                      tr('อังคาร', 'Tuesday'),
+                      tr('พุธ', 'Wednesday'),
+                      tr('พฤหัสบดี', 'Thursday'),
+                      tr('ศุกร์', 'Friday'),
+                      tr('เสาร์', 'Saturday'),
+                    ].map((label, weekday) => (
+                      <label key={weekday}>
+                        <input
+                          type="checkbox"
+                          checked={weeklyDaysOff.some(
+                            (item) =>
+                              String(item.barber_id) === String(selectedDayOffBarberId || barbers[0]?.id) &&
+                              Number(item.weekday) === weekday
+                          )}
+                          onChange={(event) =>
+                            handleWeeklyDayOffChange(
+                              selectedDayOffBarberId || barbers[0]?.id,
+                              weekday,
+                              event.target.checked
+                            )
+                          }
+                          disabled={loading || !barbers.length}
+                        />
+                        {label}
+                      </label>
+                    ))}
+                  </div>
+                </section>)}
               </section>
             )}
             {activeStaffPage === 'settings' && (
@@ -1561,28 +1910,9 @@ const getScheduleBooking = (barberId, hour) => {
             <tr key={barber.id}>
               <th>{barber.full_name}</th>
 
-              {scheduleHours.map((hour) => {
-                const booking = getScheduleBooking(barber.id, hour);
-
-                return (
-                  <td key={hour}>
-                    {booking ? (
-                      <button
-                        type="button"
-                        className={`staff-booking-cell status-${String(booking.status || '').toLowerCase().replace(/\s+/g, '-')}`}
-                        onClick={() => setSelectedStaffBooking(booking)}
-                      >
-                        <strong>
-                          {booking.customer?.full_name || tr('ลูกค้า', 'Customer')}
-                        </strong>
-                        <small>{booking.service_name_snapshot || '-'}</small>
-                      </button>
-                    ) : (
-                      <span className="staff-empty-slot">—</span>
-                    )}
-                  </td>
-                );
-              })}
+              {scheduleHours.map((hour) => (
+                <td key={hour}>{renderStaffScheduleCell(barber, hour)}</td>
+              ))}
             </tr>
           ))}
 
@@ -1882,14 +2212,29 @@ const getScheduleBooking = (barberId, hour) => {
     </tbody>
   </table>
 </div>
-)}                            
-          </section>                 
+)}
+          </section>
           </>
         )}
 
         {selectedStaffBooking && (
           <div className="staff-booking-overlay" onClick={(event) => { if (event.target === event.currentTarget) setSelectedStaffBooking(null) }}>
             <section className="staff-booking-modal" role="dialog" aria-modal="true" aria-label={tr('จัดการคิว', 'Manage booking')}>
+              {selectedStaffBooking?.customer?.id && (
+                <div className="customer-edit-entry">
+                  {String(editingCustomerId) === String(selectedStaffBooking.customer.id)
+                    ? renderCustomerEditForm(selectedStaffBooking.customer.id)
+                    : (
+                      <button
+                        type="button"
+                        onClick={() => startCustomerEdit(selectedStaffBooking.customer)}
+                      >
+                        {tr('แก้ไขข้อมูลลูกค้า', 'Edit customer details')}
+                      </button>
+                    )}
+                </div>
+              )}
+
               <button className="staff-modal-close" type="button" onClick={() => setSelectedStaffBooking(null)}>×</button>
               <span className="gold-text">BOOKING DETAILS</span>
               <h2>{selectedStaffBooking.customer?.full_name || tr('ลูกค้า', 'Customer')}</h2>

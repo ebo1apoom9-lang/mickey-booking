@@ -920,3 +920,98 @@ footer {
   background: linear-gradient(100deg, rgba(205,166,83,.18), rgba(205,166,83,.06));
   box-shadow: inset 3px 0 0 #d7b56d;
 }
+
+
+/* Dashboard prototype merge: live blocked slots and recurring barber days off */
+.staff-open-slot,
+.staff-blocked-slot,
+.staff-day-off-slot {
+  display: inline-flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding: 6px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+.staff-open-slot {
+  color: #e6c879;
+  background: rgba(214, 181, 109, .06);
+  border: 1px dashed rgba(214, 181, 109, .45);
+}
+.staff-open-slot:hover:not(:disabled) {
+  color: #17120a;
+  background: #d6b56d;
+}
+.staff-blocked-slot {
+  color: #ffd39a;
+  background: rgba(190, 105, 35, .2);
+  border: 1px solid rgba(220, 137, 66, .7);
+}
+.staff-blocked-slot:hover:not(:disabled) {
+  background: rgba(190, 105, 35, .38);
+}
+.staff-day-off-slot {
+  color: #aaa;
+  background: #090909;
+  border: 1px solid #343434;
+  letter-spacing: .04em;
+}
+.staff-open-slot:disabled,
+.staff-blocked-slot:disabled { opacity: .55; cursor: wait; }
+.staff-dayoff-manager {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid rgba(214,181,109,.22);
+  border-radius: 12px;
+  background: rgba(255,255,255,.025);
+}
+.staff-dayoff-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.staff-dayoff-heading h3 {
+  margin: 0 0 5px;
+  color: #e8c77e;
+  font-size: 16px;
+}
+.staff-dayoff-heading p {
+  margin: 0;
+  color: #aaa;
+  font-size: 13px;
+}
+.staff-dayoff-heading select {
+  min-width: 190px;
+  min-height: 42px;
+}
+.staff-dayoff-days {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.staff-dayoff-days label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid rgba(214,181,109,.25);
+  border-radius: 8px;
+  color: #e8dfcc;
+  background: #141414;
+}
+.staff-dayoff-days input {
+  width: auto;
+  accent-color: #d6b56d;
+}
+@media (max-width: 600px) {
+  .staff-dayoff-manager { padding: 14px; }
+  .staff-dayoff-heading select { width: 100%; }
+  .staff-open-slot, .staff-blocked-slot, .staff-day-off-slot { min-height: 44px; }
+}
