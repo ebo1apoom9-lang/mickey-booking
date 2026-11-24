@@ -1968,10 +1968,10 @@ const renderStaffScheduleCell = (barber, hour) => {
 
         {user && !isOwner && route === '/booking' && customer && (
           <>
-            <div className="customer-main-nav">
-              <button className={route === '/booking' ? 'active' : ''} onClick={() => navigate('/booking')}>{tr('??????','Book Appointment')}</button>
-              <button onClick={() => navigate('/products')}>{tr('??????','Products')}</button>
-              <button onClick={() => navigate('/cart')}>{tr('????????????','Cart')}</button>
+            <div className="customer-main-nav" aria-label={tr('\u0e40\u0e21\u0e19\u0e39\u0e2b\u0e25\u0e31\u0e01', 'Main navigation')}>
+              <button className={route === '/booking' ? 'active' : ''} onClick={() => navigate('/booking')}>{tr('\u0e08\u0e2d\u0e07\u0e04\u0e34\u0e27', 'Book Appointment')}</button>
+              <button className={route === '/products' ? 'active' : ''} onClick={() => navigate('/products')}>{tr('\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32', 'Products')}</button>
+              <button className={route === '/cart' ? 'active' : ''} onClick={() => navigate('/cart')}>{tr('\u0e15\u0e30\u0e01\u0e23\u0e49\u0e32\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32', 'Shopping Cart')}</button>
             </div>
             <section className="hero">
               <span className="gold-text">MICKEY MEMBERSHIP</span>
