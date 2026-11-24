@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from './supabase'
 import './styles.css'
 import './staff-redesign.css'
+import ProductsPage from './ProductsPage'
 const money = (value) =>
   new Intl.NumberFormat('th-TH').format(Number(value) || 0) + ' บาท'
 
@@ -1432,6 +1433,17 @@ const renderStaffScheduleCell = (barber, hour) => {
       </a>
 
       <a
+        href="#products"
+        className={activeStaffPage === 'products' ? 'active' : ''}
+        onClick={(e) => {
+          e.preventDefault()
+          setActiveStaffPage('products')
+        }}
+      >
+        {tr('\u0e08\u0e31\u0e14\u0e01\u0e32\u0e23\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32', 'Products')}
+      </a>
+
+      <a
         href="#barbers"
         className={activeStaffPage === 'barbers' ? 'active' : ''}
         onClick={(e) => {
@@ -1502,6 +1514,8 @@ const renderStaffScheduleCell = (barber, hour) => {
             </section>
               </>
             )}
+
+            {activeStaffPage === 'products' && <ProductsPage tr={tr} />}
 
             {activeStaffPage === 'reports' && (
               <>
