@@ -80,7 +80,6 @@ export default function CustomerShopPage({ tr, navigate, route, onLogout }) {
       <button className={route === '/products' ? 'shop-side-link active' : 'shop-side-link'} onClick={() => navigate('/products')}><span>▦</span>{tr('สินค้า', 'Products')}</button>
       <div className="shop-sidebar-spacer"/>
       <button className="shop-side-link shop-back-link" onClick={() => navigate('/booking')}><span>←</span>{tr('กลับไปหน้าจองคิว', 'Back to Booking')}</button>
-      <button className="shop-side-link shop-logout-link" onClick={onLogout}><span>↪</span>{tr('ออกจากระบบ', 'Sign Out')}</button>
       <div className="shop-sidebar-foot">MICKEY BARBERSHOP EXPERIENCE</div>
     </aside>
 
