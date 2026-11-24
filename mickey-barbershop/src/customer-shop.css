@@ -418,3 +418,68 @@ body.shop-overlay-open { overflow:hidden; }
     padding-left:9px;
   }
 }
+
+/* Keep Products and Shopping Cart navigation visually identical to Booking/Account. */
+.customer-shop .shop-customer-nav::before {
+  content: "MICKEY";
+  display: block;
+  padding: 10px 12px 2px;
+  color: #e0c98f;
+  font: 600 18px/1.2 Georgia,serif;
+  letter-spacing: 4px;
+}
+.customer-shop .shop-customer-nav::after {
+  content: "BARBERSHOP EXPERIENCE";
+  display: block;
+  padding: 0 12px 13px;
+  color: #82765d;
+  font-size: 8px;
+  letter-spacing: 2.1px;
+}
+.customer-shop .shop-customer-nav button {
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: #c9c0ae;
+  font-size: 13px;
+  text-align: left;
+  transition: background .2s ease,border-color .2s ease,transform .2s ease;
+}
+.customer-shop .shop-customer-nav button:hover {
+  background: rgba(201,168,106,.08);
+  border-color: rgba(201,168,106,.18);
+  transform: translateX(2px);
+}
+.customer-shop .shop-customer-nav button.active {
+  color: #17130c;
+  border-color: #e4ca91;
+  background: linear-gradient(115deg,#e1c78e,#b89455);
+  box-shadow: 0 8px 24px rgba(174,137,72,.2);
+}
+.customer-shop .shop-customer-nav .customer-sidebar-logout {
+  margin-top: 12px;
+  border: 1px solid rgba(201,168,106,.25);
+  background: rgba(201,168,106,.045);
+  color: #d0b77e;
+}
+.customer-shop .shop-customer-nav .customer-sidebar-logout:hover {
+  background: #c4a15c;
+  color: #111;
+}
+@media (max-width:760px) {
+  .customer-shop .shop-customer-nav::before {
+    padding: 3px 5px 0;
+    font-size: 16px;
+    letter-spacing: 3px;
+  }
+  .customer-shop .shop-customer-nav::after {
+    padding: 0 5px 8px;
+    font-size: 7px;
+  }
+  .customer-shop .shop-customer-nav button {
+    min-height: 42px;
+    border-radius: 9px;
+  }
+}
