@@ -1069,6 +1069,7 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
       return
     }
 
+    setShowLogoutConfirm(false)
     setCustomer(null)
     setStaffProfile(null)
     setBookingResult(null)
@@ -2237,7 +2238,7 @@ const renderStaffScheduleCell = (barber, hour) => {
               <button className={route === '/products' ? 'active' : ''} onClick={() => navigate('/products')}>{tr('\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32', 'Products')}</button>
               <button className={route === '/cart' ? 'active' : ''} onClick={() => navigate('/cart')}>{tr('\u0e15\u0e30\u0e01\u0e23\u0e49\u0e32\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32', 'Shopping Cart')}</button>
               <button className={route === '/account' ? 'active' : ''} onClick={() => navigate('/account')}>{tr('จัดการบัญชี', 'Account Management')}</button>
-              <button className="customer-sidebar-logout" onClick={handleLogout}>{tr('\u0e2d\u0e2d\u0e01\u0e08\u0e32\u0e01\u0e23\u0e30\u0e1a\u0e1a', 'Sign Out')}</button>
+              <button className="customer-sidebar-logout" onClick={() => setShowLogoutConfirm(true)}>{tr('\u0e2d\u0e2d\u0e01\u0e08\u0e32\u0e01\u0e23\u0e30\u0e1a\u0e1a', 'Sign Out')}</button>
             </div><section className="auth-card customer-schedule-card unified-booking-card">
               <span className="gold-text">MICKEY BARBERSHOP · LIVE BOOKING</span>
               <h2>{tr('เลือกบริการและจองคิว', 'Choose Service & Book')}</h2>
@@ -2477,7 +2478,7 @@ const renderStaffScheduleCell = (barber, hour) => {
               <button onClick={() => navigate('/products')}>{tr('สินค้า', 'Products')}</button>
               <button onClick={() => navigate('/cart')}>{tr('ตะกร้าสินค้า', 'Shopping Cart')}</button>
               <button className="active" onClick={() => navigate('/account')}>{tr('จัดการบัญชี', 'Account Management')}</button>
-              <button className="customer-sidebar-logout" onClick={handleLogout}>{tr('ออกจากระบบ', 'Sign Out')}</button>
+              <button className="customer-sidebar-logout" onClick={() => setShowLogoutConfirm(true)}>{tr('ออกจากระบบ', 'Sign Out')}</button>
             </div>
             <section className="hero customer-account-dashboard">
               <span className="gold-text">MICKEY MEMBERSHIP · ACCOUNT</span>
@@ -2511,7 +2512,7 @@ const renderStaffScheduleCell = (barber, hour) => {
             </section>
           </>
         )}
-        {user && !isOwner && customer && ['/products', '/cart'].includes(route) && <CustomerShopPage tr={tr} navigate={navigate} route={route} onLogout={handleLogout} />}
+        {user && !isOwner && customer && ['/products', '/cart'].includes(route) && <CustomerShopPage tr={tr} navigate={navigate} route={route} onLogout={() => setShowLogoutConfirm(true)} />}
 
         {selectedStaffBooking && (
           <div className="staff-booking-overlay" onClick={(event) => { if (event.target === event.currentTarget) setSelectedStaffBooking(null) }}>
@@ -2557,7 +2558,7 @@ const renderStaffScheduleCell = (barber, hour) => {
             </section>
           </div>
         )}
-        {showLogoutConfirm && isStaffDashboard && (
+        {showLogoutConfirm && user && (
           <div className="staff-logout-overlay" role="presentation" onMouseDown={(event) => {
             if (event.target === event.currentTarget) setShowLogoutConfirm(false)
           }}>
