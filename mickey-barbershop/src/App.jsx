@@ -5,6 +5,7 @@ import './staff-redesign.css'
 import './frontend-refresh.css'
 import './customer-premium.css'
 import ProductsPage from './ProductsPage'
+import StockPage from './StockPage'
 import CustomerShopPage from './CustomerShopPage'
 import StaffPageSkeleton from './StaffPageSkeleton'
 import AnimatedNumber from './AnimatedNumber'
@@ -1563,6 +1564,19 @@ const renderStaffScheduleCell = (barber, hour) => {
     {tr('ตารางคิวร้าน', 'Shop Schedule')}
   </a>
 
+  {isBarber && (
+    <a
+      href="#stock"
+      className={activeStaffPage === 'stock' ? 'active' : ''}
+      onClick={(e) => {
+        e.preventDefault()
+        setActiveStaffPage('stock')
+      }}
+    >
+      {tr('สต๊อกสินค้า', 'Stock Inventory')}
+    </a>
+  )}
+
   {isOwner && (
     <>
       <a
@@ -2176,6 +2190,8 @@ const renderStaffScheduleCell = (barber, hour) => {
     </div>
   </section>
 )}
+
+            {activeStaffPage === 'stock' && <StockPage tr={tr} />}
           </>
         )}
 

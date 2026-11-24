@@ -425,3 +425,134 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   opacity: .45;
   cursor: not-allowed;
 }
+
+
+/* Barber stock inventory */
+.barber-stock-page {
+  border: 1px solid rgba(201,168,106,.22) !important;
+  border-radius: 22px !important;
+  background: linear-gradient(145deg,rgba(29,28,24,.97),rgba(11,12,11,.98)) !important;
+  box-shadow: 0 24px 65px rgba(0,0,0,.3);
+}
+.barber-stock-heading {
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:22px;
+  margin-bottom:24px;
+}
+.barber-stock-heading h2 {
+  margin:12px 0 8px;
+  color:#f1e8d7;
+  font:500 clamp(27px,3vw,36px)/1.15 Georgia,serif;
+}
+.barber-stock-heading p { max-width:650px; color:#aaa18f; line-height:1.75; }
+.barber-stock-refresh,.barber-stock-save {
+  min-height:40px;
+  padding:0 16px;
+  border:1px solid rgba(201,168,106,.36);
+  border-radius:9px;
+  background:rgba(201,168,106,.09);
+  color:#e5cf9e;
+  cursor:pointer;
+}
+.barber-stock-summary {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin:22px 0;
+}
+.barber-stock-summary article {
+  padding:17px 18px;
+  border:1px solid rgba(201,168,106,.16);
+  border-radius:13px;
+  background:rgba(255,255,255,.025);
+}
+.barber-stock-summary span { display:block; color:#a99f8d; font-size:11px; }
+.barber-stock-summary strong {
+  display:block;
+  margin-top:9px;
+  color:#ead6aa;
+  font:500 27px Georgia,serif;
+}
+.barber-stock-toolbar {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin:18px 0 14px;
+}
+.barber-stock-toolbar input {
+  width:min(100%,420px);
+  min-height:43px;
+  padding:0 13px;
+  border:1px solid rgba(201,168,106,.22);
+  border-radius:9px;
+  background:#10110f;
+  color:#eee5d4;
+}
+.barber-stock-toolbar span { color:#a99f8d; font-size:12px; }
+.barber-stock-table-wrap {
+  overflow:auto;
+  border:1px solid rgba(201,168,106,.18);
+  border-radius:14px;
+}
+.barber-stock-table { width:100%; min-width:680px; border-collapse:collapse; }
+.barber-stock-table th {
+  padding:14px 15px;
+  background:#242118;
+  color:#d9c28f;
+  font-size:10px;
+  letter-spacing:.8px;
+  text-align:left;
+  white-space:nowrap;
+}
+.barber-stock-table td {
+  padding:14px 15px;
+  border-top:1px solid rgba(255,255,255,.055);
+  color:#cfc5b2;
+  font-size:12px;
+}
+.barber-stock-table tbody tr:hover { background:rgba(201,168,106,.035); }
+.barber-stock-table td strong { display:block; color:#eee5d4; font-size:13px; font-weight:500; }
+.barber-stock-table td small { display:block; margin-top:4px; color:#898170; }
+.barber-stock-count {
+  display:inline-flex;
+  padding:6px 10px;
+  border:1px solid rgba(201,168,106,.22);
+  border-radius:20px;
+  color:#e5d2a8;
+  background:rgba(201,168,106,.07);
+  white-space:nowrap;
+}
+.barber-stock-count.is-low { border-color:rgba(214,165,85,.35); color:#e7bd78; background:rgba(214,165,85,.08); }
+.barber-stock-count.is-out { border-color:rgba(190,100,85,.3); color:#d58e80; background:rgba(190,100,85,.08); }
+.barber-stock-table input {
+  width:95px;
+  min-height:37px;
+  padding:0 9px;
+  border:1px solid rgba(201,168,106,.24);
+  border-radius:8px;
+  background:#0d0e0c;
+  color:#f1e7d5;
+}
+.barber-stock-save { min-height:35px; padding:0 13px; font-size:11px; }
+.barber-stock-save:disabled,.barber-stock-refresh:disabled { opacity:.35; cursor:not-allowed; }
+.barber-stock-notice,.barber-stock-error {
+  margin:12px 0;
+  padding:11px 14px;
+  border-radius:9px;
+  font-size:12px;
+}
+.barber-stock-notice { border:1px solid rgba(110,175,125,.25); background:rgba(70,130,85,.08); color:#a9d0af; }
+.barber-stock-error { border:1px solid rgba(190,100,85,.28); background:rgba(160,65,55,.08); color:#e1a49a; }
+.barber-stock-empty { padding:35px 12px; color:#aaa18f; text-align:center; }
+.barber-stock-footnote { margin-top:18px; color:#888171; font-size:11px; line-height:1.7; }
+@media(max-width:760px) {
+  .barber-stock-page { padding:22px 15px !important; }
+  .barber-stock-heading { align-items:flex-start; flex-direction:column; }
+  .barber-stock-summary { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+  .barber-stock-summary article { padding:14px; }
+  .barber-stock-summary strong { font-size:23px; }
+  .barber-stock-toolbar { align-items:stretch; flex-direction:column; }
+  .barber-stock-toolbar input { width:100%; }
+}
