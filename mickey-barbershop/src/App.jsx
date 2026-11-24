@@ -1972,17 +1972,9 @@ const renderStaffScheduleCell = (barber, hour) => {
               <button className={route === '/booking' ? 'active' : ''} onClick={() => navigate('/booking')}>{tr('\u0e08\u0e2d\u0e07\u0e04\u0e34\u0e27', 'Book Appointment')}</button>
               <button className={route === '/products' ? 'active' : ''} onClick={() => navigate('/products')}>{tr('\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32', 'Products')}</button>
               <button className={route === '/cart' ? 'active' : ''} onClick={() => navigate('/cart')}>{tr('\u0e15\u0e30\u0e01\u0e23\u0e49\u0e32\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32', 'Shopping Cart')}</button>
+              <button className={route === '/account' ? 'active' : ''} onClick={() => navigate('/account')}>{tr('จัดการบัญชี', 'Account Management')}</button>
               <button className="customer-sidebar-logout" onClick={handleLogout}>{tr('\u0e2d\u0e2d\u0e01\u0e08\u0e32\u0e01\u0e23\u0e30\u0e1a\u0e1a', 'Sign Out')}</button>
-            </div>
-            <section className="hero">
-              <span className="gold-text">MICKEY MEMBERSHIP</span>
-              <h2>ยินดีต้อนรับ</h2>
-              <p>{customer.full_name}</p>
-              <p>เบอร์โทรศัพท์: {customer.phone}</p>
-              <p>{customer.email || user.email}</p>
-              <p>เข้าสู่ระบบเรียบร้อยแล้ว</p>
-            </section>
-            <section className="auth-card customer-schedule-card unified-booking-card">
+            </div><section className="auth-card customer-schedule-card unified-booking-card">
               <span className="gold-text">MICKEY BARBERSHOP · LIVE BOOKING</span>
               <h2>{tr('เลือกบริการและจองคิว', 'Choose Service & Book')}</h2>
               <p className="auth-description">
@@ -2213,6 +2205,28 @@ const renderStaffScheduleCell = (barber, hour) => {
           </>
         )}
 
+        {user && !isOwner && route === '/account' && customer && (
+          <>
+            <div className="customer-main-nav" aria-label={tr('เมนูหลัก', 'Main navigation')}>
+              <button onClick={() => navigate('/booking')}>{tr('จองคิว', 'Book Appointment')}</button>
+              <button onClick={() => navigate('/products')}>{tr('สินค้า', 'Products')}</button>
+              <button onClick={() => navigate('/cart')}>{tr('ตะกร้าสินค้า', 'Shopping Cart')}</button>
+              <button className="active" onClick={() => navigate('/account')}>{tr('จัดการบัญชี', 'Account Management')}</button>
+              <button className="customer-sidebar-logout" onClick={handleLogout}>{tr('ออกจากระบบ', 'Sign Out')}</button>
+            </div>
+            <section className="hero customer-account-dashboard">
+              <span className="gold-text">MICKEY MEMBERSHIP · ACCOUNT</span>
+              <h2>{tr('จัดการบัญชี', 'Account Management')}</h2>
+              <p>{tr('ยินดีต้อนรับ', 'Welcome')}, {customer.full_name}</p>
+              <div className="customer-account-details">
+                <p><b>{tr('ชื่อ-นามสกุล', 'Full Name')}:</b> {customer.full_name}</p>
+                <p><b>{tr('เบอร์โทรศัพท์', 'Phone')}:</b> {customer.phone}</p>
+                <p><b>{tr('อีเมล', 'Email')}:</b> {customer.email || user.email}</p>
+              </div>
+              <p>{tr('เข้าสู่ระบบเรียบร้อยแล้ว', 'You are signed in.')}</p>
+            </section>
+          </>
+        )}
         {user && !isOwner && customer && ['/products', '/cart'].includes(route) && <CustomerShopPage tr={tr} navigate={navigate} route={route} onLogout={handleLogout} />}
 
         {selectedStaffBooking && (
