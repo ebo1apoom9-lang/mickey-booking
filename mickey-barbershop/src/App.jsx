@@ -2,8 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from './supabase'
 import './styles.css'
 import './staff-redesign.css'
+import './frontend-refresh.css'
 import ProductsPage from './ProductsPage'
 import CustomerShopPage from './CustomerShopPage'
+import StaffPageSkeleton from './StaffPageSkeleton'
+import AnimatedNumber from './AnimatedNumber'
+import './motion.css'
 const money = (value) =>
   new Intl.NumberFormat('th-TH').format(Number(value) || 0) + ' บาท'
 
@@ -54,6 +58,16 @@ function App() {
   const [profileLoading, setProfileLoading] = useState(true)
 
  const [route, setRoute] = useState(window.location.pathname || '/login')
+const [showBrandSplash, setShowBrandSplash] = useState(() => sessionStorage.getItem('mickey-splash-seen') !== '1')
+
+useEffect(() => {
+  if (!showBrandSplash) return
+  const timer = window.setTimeout(() => {
+    setShowBrandSplash(false)
+    sessionStorage.setItem('mickey-splash-seen', '1')
+  }, 950)
+  return () => window.clearTimeout(timer)
+}, [showBrandSplash])
 
 const [activeStaffPage, setActiveStaffPage] = useState('schedule')
 const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
@@ -1206,6 +1220,8 @@ const renderStaffScheduleCell = (barber, hour) => {
   const todayOwnerBookings = ownerBookings.filter(
     (booking) => bangkokDate(new Date(booking.starts_at)) === today
   )
+  const todayWalkInBookings = todayOwnerBookings.filter((booking) => booking.source === 'Walk-in')
+  const todayOnlineBookings = todayOwnerBookings.filter((booking) => booking.source !== 'Walk-in')
   const confirmedOwnerBookings = ownerBookings.filter(
     (booking) => booking.status === 'Confirmed'
   )
@@ -1246,10 +1262,10 @@ const renderStaffScheduleCell = (barber, hour) => {
       <div className="app-shell">
         <header><p>MICKEY BARBERSHOP EXPERIENCE</p></header>
         <main className="main">
-          <section className="hero">
-            <p>กำลังตรวจสอบบัญชีของคุณ...</p>
-          </section>
+          <StaffPageSkeleton />
+          <p className="sr-only" role="status">กำลังตรวจสอบบัญชีของคุณ...</p>
         </main>
+        {showBrandSplash && <div className="mickey-splash" aria-hidden="true"><strong>MICKEY BARBERSHOP</strong></div>}
         <footer>MICKEY BARBERSHOP © 2026</footer>
       </div>
     )
@@ -1260,7 +1276,7 @@ const renderStaffScheduleCell = (barber, hour) => {
 <header className="app-header">
   <p>MICKEY BARBERSHOP EXPERIENCE</p>
 
-  {(route === '/booking' || route === '/login' || route === '/reset-password') && (
+  {(['/', '/login', '/reset-password', '/booking', '/products', '/cart', '/account', '/owner', '/barber'].includes(route)) && (
     <div className="language-switch">
       <button
         type="button"
@@ -1280,7 +1296,7 @@ const renderStaffScheduleCell = (barber, hour) => {
     </div>
   )}
 </header>
-      <main className="main">
+      <main key={`${route}-${isStaffDashboard ? activeStaffPage : 'customer'}`} className="main">
         {route === '/reset-password' && recoveryReady && (
           <section className="auth-card">
             <span className="gold-text">MICKEY MEMBERSHIP</span>
@@ -1527,6 +1543,17 @@ const renderStaffScheduleCell = (barber, hour) => {
     {tr('ออกจากระบบ', 'Sign Out')}
   </button>
 </aside>
+          <section className="staff-workspace-heading">
+            <div>
+              <span className="gold-text">MICKEY BARBERSHOP · {isOwner ? 'OWNER CONSOLE' : 'BARBER WORKSPACE'}</span>
+              <h1>{isOwner ? tr('ระบบจัดการร้าน', 'Management Dashboard') : tr('พื้นที่ทำงานช่าง', 'Barber Workspace')}</h1>
+              <p>{tr('ยินดีต้อนรับ', 'Welcome')}, {staffProfile?.full_name || user.email}</p>
+            </div>
+            <div className="workspace-meta">
+              <span className="workspace-live"><i />{tr('ระบบพร้อมใช้งาน', 'SYSTEM ONLINE')}</span>
+              <span>{new Date().toLocaleDateString(language === 'th' ? 'th-TH' : 'en-GB', { timeZone: 'Asia/Bangkok', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+            </div>
+          </section>
           </>
         )}
 
@@ -1534,6 +1561,15 @@ const renderStaffScheduleCell = (barber, hour) => {
           <>
             {activeStaffPage === 'schedule' && (
               <>
+            <section className="owner-kpi-grid motion-stagger" aria-label={tr('ภาพรวมวันนี้', 'Today at a glance')}>
+              <article className="owner-kpi-card"><span>{tr('คิวทั้งหมดวันนี้', "Today's Bookings")}</span><strong><AnimatedNumber value={todayOwnerBookings.length} /></strong><small>{tr('รายการจอง', 'appointments')}</small></article>
+              <article className="owner-kpi-card"><span>ONLINE</span><strong><AnimatedNumber value={todayOnlineBookings.length} /></strong><small>{tr('การจองออนไลน์', 'online bookings')}</small></article>
+              <article className="owner-kpi-card"><span>WALK-IN</span><strong><AnimatedNumber value={todayWalkInBookings.length} /></strong><small>{tr('ลูกค้าหน้าร้าน', 'walk-in visits')}</small></article>
+              <article className="owner-kpi-card"><span>{tr('เสร็จสิ้น', 'COMPLETED')}</span><strong><AnimatedNumber value={todayCompletedBookings.length} /></strong><small>{tr('ให้บริการแล้ว', 'served today')}</small></article>
+              <article className="owner-kpi-card"><span>{tr('ยกเลิก', 'CANCELLED')}</span><strong><AnimatedNumber value={todayCancelledBookings.length} /></strong><small>{tr('รายการ', 'appointments')}</small></article>
+              <article className="owner-kpi-card"><span>{tr('ไม่มาตามนัด', 'NO SHOW')}</span><strong><AnimatedNumber value={todayNoShowBookings.length} /></strong><small>{tr('รายการ', 'appointments')}</small></article>
+              <article className="owner-kpi-card owner-kpi-revenue"><span>{tr('รายได้วันนี้', "TODAY'S REVENUE")}</span><strong>{money(todayRevenue)}</strong><small>{tr('เฉพาะบริการที่เสร็จสิ้น', 'completed services only')}</small></article>
+            </section>
             <section id="staff-schedule" className="auth-card staff-schedule-section">
               <span className="gold-text">SHOP DAILY SCHEDULE</span>
               <div className="staff-schedule-heading">
@@ -1623,8 +1659,20 @@ const renderStaffScheduleCell = (barber, hour) => {
                 </div>
                 <div className="summary-row">
                   <span>{tr('จำนวนบริการที่เสร็จสิ้นเดือนนี้', 'Completed Services This Month')}</span>
-                  <strong>{monthCompletedBookings.length}</strong>
+                  <strong><AnimatedNumber value={monthCompletedBookings.length} /></strong>
                 </div>
+              </div>
+              <h3>{tr('ภาพรวมจำนวนบริการที่เสร็จสิ้น', 'Completed Service Activity')}</h3>
+              <div className="motion-service-bars" aria-label={tr('กราฟแท่งจำนวนบริการที่เสร็จสิ้น', 'Completed services bar chart')}>
+                {completedServicePerformance.slice(0, 8).map((item, index) => {
+                  const maxCount = Math.max(1, ...completedServicePerformance.map((entry) => entry.count))
+                  return <div className="motion-service-bar-row" key={`${item.service}-${item.barber}-bar`}>
+                    <span>{item.service} · {item.barber}</span>
+                    <div className="motion-service-bar-track"><i className="motion-bar" style={{ width: `${(item.count / maxCount) * 100}%`, animationDelay: `${index * 70}ms` }} /></div>
+                    <b>{item.count}</b>
+                  </div>
+                })}
+                {!completedServicePerformance.length && <p className="booking-note">{tr('กราฟจะแสดงเมื่อมีรายการ Completed', 'The chart will appear when completed services are recorded.')}</p>}
               </div>
               <h3>{tr('บริการยอดนิยมแยกตามช่าง', 'Popular Services by Barber')}</h3>
               <div className="owner-table-wrap">
@@ -2019,7 +2067,7 @@ const renderStaffScheduleCell = (barber, hour) => {
 
         {user && !isOwner && route === '/booking' && customer && (
           <>
-            <div className="customer-main-nav" aria-label={tr('\u0e40\u0e21\u0e19\u0e39\u0e2b\u0e25\u0e31\u0e01', 'Main navigation')}>
+            <div className="customer-main-nav booking-customer-nav" aria-label={tr('\u0e40\u0e21\u0e19\u0e39\u0e2b\u0e25\u0e31\u0e01', 'Main navigation')}>
               <button className={route === '/booking' ? 'active' : ''} onClick={() => navigate('/booking')}>{tr('\u0e08\u0e2d\u0e07\u0e04\u0e34\u0e27', 'Book Appointment')}</button>
               <button className={route === '/products' ? 'active' : ''} onClick={() => navigate('/products')}>{tr('\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32', 'Products')}</button>
               <button className={route === '/cart' ? 'active' : ''} onClick={() => navigate('/cart')}>{tr('\u0e15\u0e30\u0e01\u0e23\u0e49\u0e32\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32', 'Shopping Cart')}</button>
@@ -2258,7 +2306,7 @@ const renderStaffScheduleCell = (barber, hour) => {
 
         {user && !isOwner && route === '/account' && customer && (
           <>
-            <div className="customer-main-nav" aria-label={tr('เมนูหลัก', 'Main navigation')}>
+            <div className="customer-main-nav booking-customer-nav" aria-label={tr('เมนูหลัก', 'Main navigation')}>
               <button onClick={() => navigate('/booking')}>{tr('จองคิว', 'Book Appointment')}</button>
               <button onClick={() => navigate('/products')}>{tr('สินค้า', 'Products')}</button>
               <button onClick={() => navigate('/cart')}>{tr('ตะกร้าสินค้า', 'Shopping Cart')}</button>
@@ -2360,6 +2408,7 @@ const renderStaffScheduleCell = (barber, hour) => {
         {message && <div className="auth-message" role="status">{message}</div>}
       </main>
 
+      {showBrandSplash && <div className="mickey-splash" aria-hidden="true"><strong>MICKEY BARBERSHOP</strong></div>}
       <footer>MICKEY BARBERSHOP © 2026</footer>
     </div>
   )

@@ -73,15 +73,16 @@ export default function CustomerShopPage({ tr, navigate, route, onLogout }) {
   const removeItem = (id) => setCart(current => current.filter(item => item.id !== id))
   const openDetail = (product) => { setDetail(product); setDetailQty(1) }
 
-  return <main className="customer-shop bbr-shop-layout">
-    <aside className="shop-sidebar">
-      <button className="shop-logo" onClick={() => navigate('/products')}><span>MICKEY</span><small>BARBERSHOP</small></button>
-      <div className="shop-sidebar-caption">{tr('ร้านค้า', 'SHOP')}</div>
-      <button className={route === '/products' ? 'shop-side-link active' : 'shop-side-link'} onClick={() => navigate('/products')}><span>▦</span>{tr('สินค้า', 'Products')}</button>
-      <div className="shop-sidebar-spacer"/>
-      <button className="shop-side-link shop-back-link" onClick={() => navigate('/booking')}><span>←</span>{tr('กลับไปหน้าจองคิว', 'Back to Booking')}</button>
-      <div className="shop-sidebar-foot">MICKEY BARBERSHOP EXPERIENCE</div>
-    </aside>
+  return <div className="customer-shop bbr-shop-layout">
+    <nav className="customer-main-nav shop-customer-nav" aria-label={tr('เมนูหลัก', 'Main navigation')}>
+      <button type="button" className={route === '/booking' ? 'active' : ''} onClick={() => navigate('/booking')}>{tr('จองคิว', 'Book Appointment')}</button>
+      <button type="button" className={route === '/products' ? 'active' : ''} onClick={() => navigate('/products')}>{tr('สินค้า', 'Products')}</button>
+      <button type="button" className={route === '/cart' ? 'active' : ''} onClick={() => navigate('/cart')}>
+        {tr('ตะกร้าสินค้า', 'Shopping Cart')}{cartCount > 0 && <b className="shop-nav-cart-count">{cartCount}</b>}
+      </button>
+      <button type="button" className={route === '/account' ? 'active' : ''} onClick={() => navigate('/account')}>{tr('จัดการบัญชี', 'Account Management')}</button>
+      {onLogout && <button type="button" className="customer-sidebar-logout" onClick={onLogout}>{tr('ออกจากระบบ', 'Sign Out')}</button>}
+    </nav>
 
     <section className="shop-main-area">
       <header className="shop-toolbar">
@@ -134,5 +135,5 @@ export default function CustomerShopPage({ tr, navigate, route, onLogout }) {
       <div className="shop-detail-image">{detail.image_path ? <img src={imageUrl(detail.image_path)} alt={detail.name}/> : <span>MICKEY<br/>BARBERSHOP</span>}</div>
       <div className="shop-detail-copy"><small>{detail.category || 'MICKEY BARBERSHOP'}{detail.brand ? ' · '+detail.brand : ''}</small><h2>{detail.name}</h2><strong>{money(detail.price)}</strong><p>{detail.description || tr('ไม่มีรายละเอียดสินค้าเพิ่มเติม', 'No additional product details.')}</p><div className="shop-detail-stock">{tr('คงเหลือ', 'In stock')} {detail.stock} {tr('ชิ้น', 'items')}</div><div className="shop-qty shop-detail-qty"><button onClick={() => setDetailQty(q => Math.max(1,q-1))}>−</button><span>{detailQty}</span><button onClick={() => setDetailQty(q => Math.min(Number(detail.stock),q+1))} disabled={detailQty >= detail.stock}>＋</button></div><button className="shop-detail-add" onClick={() => { addToCart(detail,detailQty); setDetail(null) }}>{tr('เพิ่มลงตะกร้า', 'Add to Cart')}</button></div>
     </section></div>}
-  </main>
+  </div>
 }
