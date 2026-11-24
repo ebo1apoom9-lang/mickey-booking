@@ -366,3 +366,62 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
  .customer-profile-section-title { align-items:flex-start; flex-direction:column; gap:4px; }
  .customer-profile-history-row { align-items:flex-start; }
 }
+
+
+/* Customer account role management */
+.customer-profile-role-field {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.customer-role-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(201, 164, 92, .45);
+  border-radius: 999px;
+  padding: 6px 12px;
+  color: #d8bd80;
+  background: rgba(201, 164, 92, .10);
+  font-size: 11px;
+  letter-spacing: .12em;
+}
+.customer-role-badge.role-owner {
+  color: #f0d58d;
+  border-color: rgba(240, 213, 141, .65);
+  background: rgba(240, 213, 141, .14);
+}
+.customer-role-badge.role-barber {
+  color: #d8d8d8;
+  border-color: rgba(210, 210, 210, .35);
+  background: rgba(210, 210, 210, .08);
+}
+.customer-role-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  width: 100%;
+}
+.customer-role-controls select {
+  min-width: 160px;
+  flex: 1 1 160px;
+  border: 1px solid rgba(201, 164, 92, .35);
+  border-radius: 9px;
+  padding: 10px 12px;
+  color: #f4ead4;
+  background: #171513;
+}
+.customer-role-controls button {
+  border: 1px solid rgba(201, 164, 92, .65);
+  border-radius: 9px;
+  padding: 10px 16px;
+  color: #17130c;
+  background: linear-gradient(135deg, #e0c17d, #b58b42);
+  font-weight: 700;
+  cursor: pointer;
+}
+.customer-role-controls button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}

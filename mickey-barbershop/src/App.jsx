@@ -412,6 +412,7 @@ const loadOwnerCustomers = useCallback(async () => {
       email,
       notes,
       favorite_barber_id,
+      auth_user_id,
       created_at
     `)
     .order('created_at', { ascending: false })
@@ -422,7 +423,24 @@ const loadOwnerCustomers = useCallback(async () => {
     return
   }
 
-  setOwnerCustomers(data || [])
+  const linkedUserIds = (data || []).map(item => item.auth_user_id).filter(Boolean)
+  let roleByUserId = {}
+  if (linkedUserIds.length) {
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, role')
+      .in('id', linkedUserIds)
+    if (profilesError) {
+      setMessage('โหลด Role ลูกค้าไม่สำเร็จ: ' + profilesError.message)
+    } else {
+      roleByUserId = Object.fromEntries((profiles || []).map(profile => [profile.id, profile.role]))
+    }
+  }
+
+  setOwnerCustomers((data || []).map(item => ({
+    ...item,
+    role: item.auth_user_id ? (roleByUserId[item.auth_user_id] || 'customer') : 'customer',
+  })))
 }, [])
 
 const loadStaffAvailability = useCallback(async () => {
@@ -758,6 +776,36 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     }
   }
 
+
+  async function handleCustomerRoleChange(customer, nextRole) {
+    if (!isOwner || !customer?.id || !customer.auth_user_id) return
+    const currentRole = customer.role || 'customer'
+    if (!['customer', 'barber', 'owner'].includes(nextRole) || nextRole === currentRole) return
+    const roleNames = { customer: 'Customer', barber: 'Barber', owner: 'Owner' }
+    if (!window.confirm(tr(
+      `ยืนยันเปลี่ยน Role จาก ${roleNames[currentRole]} เป็น ${roleNames[nextRole]} ใช่หรือไม่?`,
+      `Change role from ${roleNames[currentRole]} to ${roleNames[nextRole]}?`
+    ))) return
+
+    setCustomerEditSaving(true)
+    try {
+      const { data, error } = await supabase.rpc('owner_set_customer_role', {
+        p_customer_id: customer.id,
+        p_role: nextRole,
+      })
+      if (error) throw error
+      const updatedRole = Array.isArray(data) ? data[0]?.role : data?.role
+      if (updatedRole !== nextRole) throw new Error(tr('ระบบไม่สามารถยืนยัน Role ใหม่ได้', 'The new role could not be verified.'))
+      setSelectedCustomer(prev => prev && String(prev.id) === String(customer.id) ? { ...prev, role: nextRole } : prev)
+      setOwnerCustomers(prev => prev.map(item => String(item.id) === String(customer.id) ? { ...item, role: nextRole } : item))
+      alert(tr('เปลี่ยน Role สำเร็จแล้ว', 'Account role updated successfully.'))
+    } catch (error) {
+      console.error('handleCustomerRoleChange:', error)
+      alert(error.message || tr('ไม่สามารถเปลี่ยน Role ได้', 'Could not update account role.'))
+    } finally {
+      setCustomerEditSaving(false)
+    }
+  }
 
   function startCustomerEdit(customer) {
     if (!customer?.id) return
@@ -1908,6 +1956,33 @@ const renderStaffScheduleCell = (barber, hour) => {
                         <div className="customer-profile-section">
                           <div className="customer-profile-section-title"><span>{tr('ข้อมูลลูกค้า', 'CUSTOMER INFORMATION')}</span><small>{tr('ข้อมูลติดต่อและบันทึกส่วนตัว', 'Contact details and personal notes')}</small></div>
                           <div className="customer-profile-fields">
+                            <div className="customer-profile-field customer-profile-role-field">
+                              <span>{tr('สิทธิ์บัญชี (ROLE)', 'ACCOUNT ROLE')}</span>
+                              <strong className={`customer-role-badge role-${selectedCustomer.role || 'customer'}`}>{({ customer: 'CUSTOMER', barber: 'BARBER', owner: 'OWNER' })[selectedCustomer.role || 'customer']}</strong>
+                              {isOwner && selectedCustomer.auth_user_id ? (
+                                <div className="customer-role-controls">
+                                  <select
+                                    value={selectedCustomer.role || 'customer'}
+                                    disabled={customerEditSaving}
+                                    onChange={event => setSelectedCustomer(prev => ({ ...prev, role: event.target.value }))}
+                                  >
+                                    <option value="customer">Customer</option>
+                                    <option value="barber">Barber</option>
+                                    <option value="owner">Owner</option>
+                                  </select>
+                                  <button
+                                    type="button"
+                                    disabled={customerEditSaving || (selectedCustomer.role || 'customer') === (ownerCustomers.find(item => String(item.id) === String(selectedCustomer.id))?.role || 'customer')}
+                                    onClick={() => {
+                                      const originalRole = ownerCustomers.find(item => String(item.id) === String(selectedCustomer.id))?.role || 'customer'
+                                      handleCustomerRoleChange({ ...selectedCustomer, role: originalRole }, selectedCustomer.role || 'customer')
+                                    }}
+                                  >{customerEditSaving ? tr('กำลังบันทึก...', 'Saving...') : tr('บันทึก Role', 'Save Role')}</button>
+                                </div>
+                              ) : (
+                                <small>{selectedCustomer.auth_user_id ? tr('เปลี่ยนได้โดย Owner เท่านั้น', 'Only the Owner can change roles') : tr('บัญชีนี้ยังไม่ได้เชื่อมกับบัญชีเข้าสู่ระบบ', 'This customer is not linked to a login account')}</small>
+                              )}
+                            </div>
                             <div className="customer-profile-field"><span>{tr('ชื่อลูกค้า', 'CUSTOMER NAME')}</span><strong>{selectedCustomer.full_name || '-'}</strong></div>
                             <div className="customer-profile-field"><span>{tr('เบอร์โทรศัพท์', 'PHONE NUMBER')}</span><strong>{selectedCustomer.phone || '-'}</strong></div>
                             <div className="customer-profile-field"><span>{tr('อีเมล', 'EMAIL ADDRESS')}</span><strong>{selectedCustomer.email || '-'}</strong></div>
