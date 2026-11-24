@@ -1257,6 +1257,25 @@ const renderStaffScheduleCell = (barber, hour) => {
     }, {})
   ).sort((a, b) => b.count - a.count)
 
+  const selectedCustomerBookings = selectedCustomer
+    ? ownerBookings.filter((booking) => String(booking.customer?.id) === String(selectedCustomer.id))
+    : []
+  const selectedCustomerCompleted = selectedCustomerBookings.filter((booking) => booking.status === 'Completed')
+  const selectedCustomerSpend = selectedCustomerCompleted.reduce((sum, booking) => sum + Number(booking.price_thb_snapshot || 0), 0)
+  const selectedCustomerLastVisit = selectedCustomerCompleted
+    .slice().sort((a, b) => new Date(b.starts_at) - new Date(a.starts_at))[0]
+  const selectedCustomerServices = Object.values(selectedCustomerCompleted.reduce((groups, booking) => {
+    const name = booking.service_name_snapshot || 'Service'
+    groups[name] = (groups[name] || 0) + 1
+    return groups
+  }, {})).length
+    ? Object.entries(selectedCustomerCompleted.reduce((groups, booking) => {
+        const name = booking.service_name_snapshot || 'Service'
+        groups[name] = (groups[name] || 0) + 1
+        return groups
+      }, {})).sort((a, b) => b[1] - a[1])[0][0]
+    : '-'
+
   if (!authInitialized || (user && profileLoading)) {
     return (
       <div className="app-shell">
@@ -1810,123 +1829,163 @@ const renderStaffScheduleCell = (barber, hour) => {
               )}
 
               {selectedCustomer && (
-  <div className="customer-details-panel">
-    {selectedCustomer?.id && (
-      <div className="customer-edit-entry">
-        {String(editingCustomerId) === String(selectedCustomer.id)
-          ? renderCustomerEditForm(selectedCustomer.id)
-          : (
-            <button type="button" onClick={() => startCustomerEdit(selectedCustomer)}>
-              {tr('แก้ไขข้อมูลลูกค้า', 'Edit customer details')}
-            </button>
-          )}
-      </div>
-    )}
-
-    <div className="customer-details-header">
-      <span className="gold-text">CUSTOMER PROFILE</span>
-      <h3>{tr('รายละเอียดข้อมูลลูกค้า', 'Customer Details')}</h3>
-    </div>
-
-    <div className="customer-details-list">
-      <div className="customer-detail-item">
-        <span className="customer-detail-label">   {tr('ชื่อลูกค้า', 'Customer Name')} </span>
-        <span className="customer-detail-value">
-          {selectedCustomer.full_name || '-'}
-        </span>
-      </div>
-
-      <div className="customer-detail-item">
-        <span className="customer-detail-label">
-          {tr('เบอร์โทรศัพท์', 'Phone Number')} </span>
-        <span className="customer-detail-value">
-          {selectedCustomer.phone || '-'}
-        </span>
-      </div>
-
-      <div className="customer-detail-item">
-        <span className="customer-detail-label">
-         {tr('อีเมล', 'Email')}
-        </span>
-        <span className="customer-detail-value">
-          {selectedCustomer.email || '-'}
-        </span>
-      </div>
-
-      <div className="customer-detail-item">
-        <span className="customer-detail-label">
-  {tr('บันทึกเพิ่มเติม', 'Additional Notes')}
-</span>
-        <span className="customer-detail-value">
-          {selectedCustomer.notes || '-'}
-        </span>
-      </div>
-    </div>
-
-         <button
-        type="button"
-        className="customer-close-button"
-        onClick={() => setSelectedCustomer(null)}
-      >
-        {tr('ปิดรายละเอียด', 'Close Details')}
-      </button>
-    </div>
-  )}
+                <div className="customer-modal-backdrop" onMouseDown={(event) => {
+                  if (event.target === event.currentTarget && !customerEditSaving) {
+                    setEditingCustomerId('');
+                    setSelectedCustomer(null);
+                  }
+                }}>
+                  <section className="customer-profile-modal" role="dialog" aria-modal="true" aria-labelledby="customer-profile-title">
+                    <button
+                      type="button"
+                      className="customer-profile-close"
+                      aria-label="Close"
+                      onClick={() => {
+                        if (!customerEditSaving) {
+                          setEditingCustomerId('');
+                          setSelectedCustomer(null);
+                        }
+                      }}
+                    >×</button>
+                    {String(editingCustomerId) === String(selectedCustomer.id) ? (
+                      <>
+                        <div className="customer-profile-modal-heading">
+                          <span className="gold-text">CUSTOMER PROFILE · EDIT</span>
+                          <h3 id="customer-profile-title">{tr('แก้ไขข้อมูลลูกค้า', 'Edit Customer Details')}</h3>
+                          <p>{tr('แก้ไขข้อมูลที่ต้องการ แล้วกดบันทึกเพื่ออัปเดตข้อมูลลูกค้า', 'Update the customer information and save your changes.')}</p>
+                        </div>
+                        {renderCustomerEditForm(selectedCustomer.id)}
+                      </>
+                    ) : (
+                      <>
+                        <div className="customer-profile-modal-heading">
+                          <span className="gold-text">MICKEY BARBERSHOP · CUSTOMER PROFILE</span>
+                          <h3 id="customer-profile-title">{tr('โปรไฟล์ลูกค้า', 'Customer Profile')}</h3>
+                          <p>{tr('ภาพรวมข้อมูล ประวัติการใช้บริการ และยอดใช้จ่ายของลูกค้า', 'A complete overview of customer details, visits and spending.')}</p>
+                        </div>
+                        <div className="customer-profile-identity">
+                          <div className="customer-profile-avatar">{(selectedCustomer.full_name || 'M').trim().charAt(0).toUpperCase()}</div>
+                          <div><strong>{selectedCustomer.full_name || '-'}</strong><span>{tr('สมาชิก MICKEY BARBERSHOP', 'MICKEY BARBERSHOP CUSTOMER')}</span><small>{selectedCustomer.phone || '-'}</small></div>
+                          {selectedCustomerCompleted.length >= 5 && <b className="customer-profile-loyalty">{tr('ลูกค้าประจำ', 'FREQUENT')}</b>}
+                        </div>
+                        <div className="customer-profile-stats">
+                          <div><span>{tr('ใช้บริการแล้ว', 'TOTAL VISITS')}</span><strong>{selectedCustomerCompleted.length}</strong><small>{tr('ครั้ง', 'visits')}</small></div>
+                          <div><span>{tr('ยอดใช้จ่ายสะสม', 'TOTAL SPENT')}</span><strong>{money(selectedCustomerSpend)}</strong><small>{tr('เฉพาะบริการที่เสร็จสิ้น', 'Completed services only')}</small></div>
+                          <div><span>{tr('ใช้บริการล่าสุด', 'LAST VISIT')}</span><strong>{selectedCustomerLastVisit ? formatDateTime(selectedCustomerLastVisit.starts_at, language) : '-'}</strong><small>{tr('วันที่มาใช้บริการ', 'Most recent completed visit')}</small></div>
+                        </div>
+                        <div className="customer-profile-section">
+                          <div className="customer-profile-section-title"><span>{tr('ข้อมูลลูกค้า', 'CUSTOMER INFORMATION')}</span><small>{tr('ข้อมูลติดต่อและบันทึกส่วนตัว', 'Contact details and personal notes')}</small></div>
+                          <div className="customer-profile-fields">
+                            <div className="customer-profile-field"><span>{tr('ชื่อลูกค้า', 'CUSTOMER NAME')}</span><strong>{selectedCustomer.full_name || '-'}</strong></div>
+                            <div className="customer-profile-field"><span>{tr('เบอร์โทรศัพท์', 'PHONE NUMBER')}</span><strong>{selectedCustomer.phone || '-'}</strong></div>
+                            <div className="customer-profile-field"><span>{tr('อีเมล', 'EMAIL ADDRESS')}</span><strong>{selectedCustomer.email || '-'}</strong></div>
+                            <div className="customer-profile-field"><span>{tr('บริการที่ใช้บ่อยที่สุด', 'MOST USED SERVICE')}</span><strong>{selectedCustomerServices}</strong></div>
+                            <div className="customer-profile-field customer-profile-note"><span>{tr('บันทึกเพิ่มเติม / ความต้องการของลูกค้า', 'CUSTOMER NOTES & PREFERENCES')}</span><strong>{selectedCustomer.notes || tr('ยังไม่มีบันทึก', 'No notes yet')}</strong></div>
+                          </div>
+                        </div>
+                        <div className="customer-profile-section">
+                          <div className="customer-profile-section-title"><span>{tr('ประวัติการใช้บริการ', 'BOOKING HISTORY')}</span><small>{tr('แสดงรายการล่าสุด 8 รายการ', 'Latest 8 records')}</small></div>
+                          {selectedCustomerBookings.length ? (
+                            <div className="customer-profile-history">
+                              {selectedCustomerBookings.slice().sort((a, b) => new Date(b.starts_at) - new Date(a.starts_at)).slice(0, 8).map((booking) => (
+                                <div className="customer-profile-history-row" key={booking.id}>
+                                  <div><strong>{booking.service_name_snapshot || '-'}</strong><small>{formatDateTime(booking.starts_at, language)} · {booking.barber?.full_name || '-'}</small></div>
+                                  <div className="customer-profile-history-meta"><strong>{money(booking.price_thb_snapshot)}</strong><span className={`customer-profile-status status-${String(booking.status || '').toLowerCase().replace(/\\s+/g, '-')}`}>{statusLabel(booking.status, language)}</span></div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : <p className="customer-profile-empty">{tr('ยังไม่มีประวัติการจอง', 'No booking history yet.')}</p>}
+                        </div>
+                        <div className="customer-profile-actions">
+                          <button type="button" className="customer-profile-edit" onClick={() => startCustomerEdit(selectedCustomer)}>{tr('แก้ไขข้อมูลลูกค้า', 'Edit Customer Details')}</button>
+                          <button type="button" className="customer-profile-cancel" onClick={() => setSelectedCustomer(null)}>{tr('ปิด', 'Close')}</button>
+                        </div>
+                      </>
+                    )}
+                  </section>
+                </div>
+              )}
               </section>
             )}
             {activeStaffPage === 'barbers' && (
-              <section className="auth-card">
-                <span className="gold-text">BARBER MANAGEMENT</span>
-                <h2>{tr('จัดการช่างตัดผม', 'Barber Management')}</h2>
-                <p>{tr('จัดการวันหยุดประจำสัปดาห์ของช่างแต่ละคน', 'Manage each barber’s recurring weekly days off.')}</p>
-    {isOwner && (<section className="staff-dayoff-manager">
-                  <div className="staff-dayoff-heading">
-                    <div>
-                      <h3>{tr('กำหนดวันหยุดประจำสัปดาห์ของช่าง', 'Set recurring barber days off')}</h3>
-                      <p>{tr('เลือกช่างและติ๊กวันที่หยุดประจำ ระบบจะแสดงวันหยุดเป็นช่องสีดำในตาราง', 'Choose a barber and select recurring days off. These appear as black day-off cells.')}</p>
-                    </div>
-                    <select
-                      value={selectedDayOffBarberId || barbers[0]?.id || ''}
-                      onChange={(event) => setSelectedDayOffBarberId(event.target.value)}
-                      disabled={!barbers.length}
-                    >
-                      {barbers.map((barber) => (
-                        <option key={barber.id} value={barber.id}>{barber.full_name}</option>
-                      ))}
-                    </select>
+              <section className="barber-admin-page">
+                <div className="barber-admin-hero">
+                  <div>
+                    <span className="gold-text">THE MICKEY TEAM · MANAGEMENT</span>
+                    <h2>{tr('จัดการทีมช่าง', 'Barber Management')}</h2>
+                    <p>{tr('ภาพรวมทีมช่าง ตารางวันหยุด และการจัดการเวลาทำงาน', 'A refined overview of your team, recurring days off and working availability.')}</p>
                   </div>
-                  <div className="staff-dayoff-days">
+                  <div className="barber-admin-total">
+                    <span>{tr('ช่างที่ใช้งาน', 'ACTIVE BARBERS')}</span>
+                    <strong>{barbers.length.toString().padStart(2, '0')}</strong>
+                    <small>{tr('ทีม MICKEY BARBERSHOP', 'MICKEY BARBERSHOP TEAM')}</small>
+                  </div>
+                </div>
+
+                <div className="barber-admin-section-head">
+                  <div><span className="gold-text">OUR PROFESSIONALS</span><h3>{tr('รายชื่อทีมช่าง', 'The Barber Team')}</h3></div>
+                  <span className="barber-admin-caption">{tr('จัดการวันหยุดรายบุคคล', 'INDIVIDUAL AVAILABILITY')}</span>
+                </div>
+
+                {barbers.length ? (
+                  <div className="barber-admin-grid">
+                    {barbers.map((barber, index) => {
+                      const days = weeklyDaysOff
+                        .filter(item => String(item.barber_id) === String(barber.id))
+                        .map(item => Number(item.weekday))
+                        .sort((a, b) => a - b);
+                      const dayNames = language === 'en'
+                        ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                        : ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+                      const selected = String(selectedDayOffBarberId || barbers[0]?.id) === String(barber.id);
+                      return (
+                        <button
+                          type="button"
+                          className={`barber-admin-card ${selected ? 'selected' : ''}`}
+                          key={barber.id}
+                          onClick={() => setSelectedDayOffBarberId(String(barber.id))}
+                        >
+                          <span className="barber-admin-avatar">{(barber.full_name || 'M').trim().charAt(0).toUpperCase()}</span>
+                          <span className="barber-admin-card-copy">
+                            <strong>{barber.full_name}</strong>
+                            <small>{tr('ช่างตัดผม', 'BARBER')} · {String(index + 1).padStart(2, '0')}</small>
+                            <span className="barber-admin-days">
+                              {days.length ? days.map(day => dayNames[day]).join(' · ') : tr('ไม่มีวันหยุดประจำ', 'No recurring day off')}
+                            </span>
+                          </span>
+                          <span className="barber-admin-arrow">↗</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="barber-admin-empty"><strong>{tr('ยังไม่มีช่างในระบบ', 'No barbers found')}</strong><span>{tr('เพิ่มบัญชีช่างและกำหนด role เป็น barber ก่อน', 'Add a barber account and assign the barber role first.')}</span></div>
+                )}
+
+                <section className="barber-dayoff-panel">
+                  <div className="barber-dayoff-panel-head">
+                    <div><span className="gold-text">WEEKLY ROUTINE</span><h3>{tr('ตั้งค่าวันหยุดประจำสัปดาห์', 'Weekly Days Off')}</h3><p>{tr('เลือกช่างจากการ์ดด้านบน แล้วเปิดหรือปิดวันหยุดได้ทันที', 'Select a barber above, then toggle their recurring days off.')}</p></div>
+                    <div className="barber-selected-name">{barbers.find(item => String(item.id) === String(selectedDayOffBarberId || barbers[0]?.id))?.full_name || '—'}</div>
+                  </div>
+                  <div className="barber-weekday-grid">
                     {[
-                      tr('อาทิตย์', 'Sunday'),
-                      tr('จันทร์', 'Monday'),
-                      tr('อังคาร', 'Tuesday'),
-                      tr('พุธ', 'Wednesday'),
-                      tr('พฤหัสบดี', 'Thursday'),
-                      tr('ศุกร์', 'Friday'),
-                      tr('เสาร์', 'Saturday'),
-                    ].map((label, weekday) => (
-                      <label key={weekday}>
-                        <input
-                          type="checkbox"
-                          checked={weeklyDaysOff.some(
-                            (item) =>
-                              String(item.barber_id) === String(selectedDayOffBarberId || barbers[0]?.id) &&
-                              Number(item.weekday) === weekday
-                          )}
-                          onChange={(event) =>
-                            handleWeeklyDayOffChange(
-                              selectedDayOffBarberId || barbers[0]?.id,
-                              weekday,
-                              event.target.checked
-                            )
-                          }
-                          disabled={loading || !barbers.length}
-                        />
-                        {label}
-                      </label>
-                    ))}
+                      tr('อาทิตย์', 'Sunday'), tr('จันทร์', 'Monday'), tr('อังคาร', 'Tuesday'),
+                      tr('พุธ', 'Wednesday'), tr('พฤหัสบดี', 'Thursday'), tr('ศุกร์', 'Friday'), tr('เสาร์', 'Saturday'),
+                    ].map((label, weekday) => {
+                      const barberId = selectedDayOffBarberId || barbers[0]?.id || '';
+                      const checked = weeklyDaysOff.some(item => String(item.barber_id) === String(barberId) && Number(item.weekday) === weekday);
+                      return (
+                        <label className={`barber-weekday-option ${checked ? 'is-off' : ''}`} key={weekday}>
+                          <input type="checkbox" checked={checked} onChange={event => handleWeeklyDayOffChange(barberId, weekday, event.target.checked)} disabled={loading || !barbers.length} />
+                          <span className="barber-weekday-check">{checked ? '✓' : '+'}</span>
+                          <strong>{label}</strong>
+                          <small>{checked ? tr('วันหยุด', 'DAY OFF') : tr('วันทำงาน', 'WORKING')}</small>
+                        </label>
+                      );
+                    })}
                   </div>
-                </section>)}
+                  <div className="barber-dayoff-footnote"><span>✦</span>{tr('วันหยุดประจำจะแสดงเป็น CLOSED ในตารางจองของลูกค้าโดยอัตโนมัติ', 'Recurring days off automatically appear as CLOSED in the customer booking schedule.')}</div>
+                </section>
               </section>
             )}
             {activeStaffPage === 'settings' && (
