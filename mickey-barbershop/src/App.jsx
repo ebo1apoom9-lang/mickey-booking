@@ -2173,7 +2173,7 @@ const renderStaffScheduleCell = (barber, hour) => {
               <th>{barber.full_name}</th>
 
               {scheduleHours.map((hour) => (
-                <td key={hour}>{renderStaffScheduleCell(barber, hour)}</td>
+                <td key={hour} data-hour={String(hour).padStart(2, '0') + ':00'}>{renderStaffScheduleCell(barber, hour)}</td>
               ))}
             </tr>
           ))}
