@@ -3,6 +3,7 @@ import { supabase } from './supabase'
 import './styles.css'
 import './staff-redesign.css'
 import ProductsPage from './ProductsPage'
+import CustomerShopPage from './CustomerShopPage'
 const money = (value) =>
   new Intl.NumberFormat('th-TH').format(Number(value) || 0) + ' บาท'
 
@@ -263,7 +264,7 @@ useEffect(() => {
     return
   }
 
-  if (route !== '/booking') {
+  if (!['/booking', '/products', '/cart'].includes(route)) {
     navigate('/booking', true)
   }
 }, [
@@ -1967,6 +1968,11 @@ const renderStaffScheduleCell = (barber, hour) => {
 
         {user && !isOwner && route === '/booking' && customer && (
           <>
+            <div className="customer-main-nav">
+              <button className={route === '/booking' ? 'active' : ''} onClick={() => navigate('/booking')}>{tr('??????','Book Appointment')}</button>
+              <button onClick={() => navigate('/products')}>{tr('??????','Products')}</button>
+              <button onClick={() => navigate('/cart')}>{tr('????????????','Cart')}</button>
+            </div>
             <section className="hero">
               <span className="gold-text">MICKEY MEMBERSHIP</span>
               <h2>ยินดีต้อนรับ</h2>
@@ -2208,6 +2214,8 @@ const renderStaffScheduleCell = (barber, hour) => {
           </section>
           </>
         )}
+
+        {user && !isOwner && customer && ['/products', '/cart'].includes(route) && <CustomerShopPage tr={tr} navigate={navigate} route={route} />}
 
         {selectedStaffBooking && (
           <div className="staff-booking-overlay" onClick={(event) => { if (event.target === event.currentTarget) setSelectedStaffBooking(null) }}>
