@@ -1,0 +1,386 @@
+/* MICKEY BARBERSHOP — Customer Experience / Quiet Luxury refresh */
+:root {
+  --cx-gold: #c9a86a;
+  --cx-gold-soft: #e8d5a8;
+  --cx-ink: #090a09;
+  --cx-panel: rgba(21, 21, 19, .92);
+  --cx-line: rgba(201, 168, 106, .22);
+  --cx-muted: #a69c88;
+}
+.app-shell:has(.booking-customer-nav) .main {
+  padding-top: 28px;
+}
+.app-shell .booking-customer-nav {
+  border: 1px solid var(--cx-line);
+  border-radius: 18px;
+  padding: 13px;
+  background: linear-gradient(165deg, rgba(27,25,21,.97), rgba(10,11,10,.97));
+  box-shadow: 0 22px 60px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.055);
+}
+.app-shell .booking-customer-nav::before {
+  content: "MICKEY";
+  display: block;
+  padding: 10px 12px 2px;
+  color: var(--cx-gold-soft);
+  font: 600 18px/1.2 Georgia, serif;
+  letter-spacing: 4px;
+}
+.app-shell .booking-customer-nav::after {
+  content: "BARBERSHOP EXPERIENCE";
+  display: block;
+  padding: 0 12px 13px;
+  color: #82765d;
+  font-size: 8px;
+  letter-spacing: 2.1px;
+}
+.app-shell .booking-customer-nav button {
+  min-height: 46px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  color: #c9c0ae;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+}
+.app-shell .booking-customer-nav button:hover {
+  background: rgba(201,168,106,.08);
+  border-color: rgba(201,168,106,.18);
+  transform: translateX(2px);
+}
+.app-shell .booking-customer-nav button.active {
+  color: #17130c;
+  border-color: #e4ca91;
+  background: linear-gradient(115deg,#e1c78e,#b89455);
+  box-shadow: 0 8px 24px rgba(174,137,72,.2);
+}
+.app-shell .booking-customer-nav .customer-sidebar-logout {
+  margin-top: 12px;
+  border: 1px solid rgba(201,168,106,.25);
+  background: rgba(201,168,106,.045);
+  color: #d0b77e;
+}
+.unified-booking-card,
+.customer-booking-history,
+.customer-account-dashboard {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--cx-line) !important;
+  border-radius: 24px !important;
+  background:
+    radial-gradient(ellipse at 92% 0%, rgba(201,168,106,.12), transparent 32rem),
+    linear-gradient(145deg, rgba(29,28,24,.97), rgba(12,13,12,.97)) !important;
+  box-shadow: 0 28px 80px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06) !important;
+}
+.unified-booking-card {
+  padding: clamp(24px, 4vw, 48px) !important;
+}
+.unified-booking-card > .gold-text,
+.customer-booking-history > .gold-text,
+.customer-account-dashboard > .gold-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--cx-gold-soft);
+  font-size: 10px;
+  letter-spacing: 3px;
+}
+.unified-booking-card > .gold-text::before,
+.customer-booking-history > .gold-text::before,
+.customer-account-dashboard > .gold-text::before {
+  content: "";
+  width: 26px;
+  height: 1px;
+  background: var(--cx-gold);
+}
+.unified-booking-card > h2,
+.customer-booking-history > h2,
+.customer-account-dashboard > h2 {
+  margin: 14px 0 9px !important;
+  color: #f4eddf !important;
+  font: 500 clamp(29px, 3.3vw, 42px)/1.12 Georgia, "Times New Roman", serif !important;
+  letter-spacing: -.5px;
+}
+.unified-booking-card > .auth-description {
+  max-width: 650px;
+  color: #aaa18f !important;
+  font-size: 14px;
+  line-height: 1.8;
+}
+.customer-date-first {
+  margin-top: 30px;
+  padding: clamp(16px, 2.4vw, 26px);
+  border: 1px solid rgba(201,168,106,.2);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(255,255,255,.035), rgba(255,255,255,.012));
+}
+.customer-date-first > label {
+  display: flex;
+  width: min(100%, 360px);
+  flex-direction: column;
+  gap: 10px;
+  color: #e6d8bb;
+  font-size: 13px;
+  font-weight: 600;
+}
+.customer-date-first > label input {
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid rgba(201,168,106,.32);
+  border-radius: 11px;
+  background: rgba(7,8,7,.82);
+  color: #f3ead7;
+  color-scheme: dark;
+}
+.unified-schedule-heading {
+  align-items: flex-end;
+  margin: 28px 0 15px;
+  gap: 16px;
+}
+.unified-schedule-heading h3 {
+  color: #f0e7d5;
+  font: 500 24px/1.2 Georgia, serif;
+}
+.unified-schedule-heading p {
+  color: #9e9584;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.schedule-refresh-button {
+  border: 1px solid rgba(201,168,106,.35) !important;
+  border-radius: 10px !important;
+  background: rgba(201,168,106,.08) !important;
+  color: #e4cd9b !important;
+}
+.schedule-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  padding: 13px 15px;
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 12px;
+  background: rgba(0,0,0,.18);
+  color: #c3b9a6;
+  font-size: 11px;
+}
+.schedule-legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  box-shadow: 0 0 10px currentColor;
+}
+.customer-schedule-scroll {
+  margin-top: 15px;
+  border: 1px solid rgba(201,168,106,.18) !important;
+  border-radius: 14px;
+  background: rgba(5,6,5,.56) !important;
+}
+.customer-schedule-table thead th {
+  color: #d8c18e !important;
+  background: #242118 !important;
+  font-size: 11px;
+  letter-spacing: .4px;
+}
+.customer-schedule-table tbody th {
+  color: #eee3cd !important;
+  background: #171713 !important;
+  font-size: 12px;
+  font-weight: 600;
+}
+.customer-schedule-table td { padding: 6px 4px !important; }
+.customer-schedule-table .schedule-slot {
+  min-height: 43px;
+  border-radius: 8px !important;
+  font-size: 10px;
+  letter-spacing: .4px;
+}
+.customer-schedule-table .schedule-slot.is-open {
+  animation: none !important;
+  background: linear-gradient(145deg,#277a4a,#185b37) !important;
+  border: 1px solid rgba(115,190,140,.55) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+.customer-schedule-table .schedule-slot.is-open:hover:not(:disabled) {
+  background: linear-gradient(145deg,#36935d,#1e7044) !important;
+  transform: translateY(-2px);
+}
+.customer-booking-history {
+  margin-top: 24px;
+  padding: clamp(22px, 3vw, 34px) !important;
+}
+.customer-booking-history .refresh-button {
+  border: 1px solid rgba(201,168,106,.32);
+  border-radius: 10px;
+  background: rgba(201,168,106,.08);
+  color: #e4cd9b;
+}
+.customer-history-wrap {
+  margin-top: 18px;
+  border: 1px solid rgba(201,168,106,.2) !important;
+  border-radius: 14px;
+  overflow-x: auto;
+}
+.customer-history-table th {
+  color: #dfc995 !important;
+  background: #252218 !important;
+  font-size: 11px;
+  letter-spacing: .5px;
+}
+.customer-history-table td {
+  color: #ded5c4;
+  border-color: rgba(255,255,255,.055) !important;
+  font-size: 12px;
+}
+.customer-history-table tbody tr:hover { background: rgba(201,168,106,.055) !important; }
+.customer-status {
+  display: inline-flex;
+  padding: 5px 9px;
+  border: 1px solid rgba(201,168,106,.25);
+  border-radius: 30px;
+  background: rgba(201,168,106,.08);
+  color: #e2cc9d;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.booking-modal {
+  border: 1px solid rgba(201,168,106,.4) !important;
+  border-radius: 22px !important;
+  background: linear-gradient(145deg,#242219,#10110f) !important;
+  box-shadow: 0 30px 100px rgba(0,0,0,.65) !important;
+}
+.booking-modal h3 {
+  color: #f3ead8;
+  font: 500 30px Georgia,serif;
+}
+.booking-modal label { color: #d9c9a8; }
+.booking-modal select {
+  min-height: 48px;
+  border: 1px solid rgba(201,168,106,.3);
+  border-radius: 10px;
+  background: #11120f;
+}
+.unified-service-summary {
+  border: 1px solid rgba(201,168,106,.22) !important;
+  border-radius: 12px;
+  background: rgba(201,168,106,.07) !important;
+}
+.booking-modal-actions button[type="submit"],
+.booking-modal-actions button:last-child {
+  border-radius: 11px;
+  background: linear-gradient(115deg,#e0c78f,#b48e50);
+  color: #17130c;
+}
+.customer-account-dashboard {
+  padding: clamp(24px,4vw,44px) !important;
+}
+.customer-account-dashboard > p {
+  color: #aaa18f;
+}
+.customer-account-details {
+  max-width: 760px;
+  margin: 24px 0;
+  padding: 8px 22px;
+  border: 1px solid rgba(201,168,106,.2);
+  border-radius: 16px;
+  background: rgba(0,0,0,.2);
+}
+.customer-account-details p {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  color: #ded5c4;
+}
+.customer-account-details p:last-child { border-bottom: 0; }
+.customer-account-details b { color: #d9c18b; }
+.customer-account-dashboard button,
+.customer-account-dashboard input {
+  border-radius: 10px;
+}
+.customer-shop.bbr-shop-layout {
+  --shop-bg:#090a09;
+  --shop-card:#171714;
+  --shop-card-2:#1d1b16;
+  --shop-text:#f2ecdf;
+  --shop-muted:#a69c88;
+  --shop-line:rgba(201,168,106,.22);
+  --shop-gold:#c9a86a;
+  --shop-gold-bright:#ead5a5;
+  background:
+    radial-gradient(ellipse at 85% 0%,rgba(201,168,106,.11),transparent 34rem),
+    linear-gradient(145deg,#090a09,#11120f 55%,#090a09);
+}
+.customer-shop .shop-customer-nav {
+  background: linear-gradient(165deg,rgba(27,25,21,.98),rgba(10,11,10,.98));
+  border: 1px solid rgba(201,168,106,.24);
+  border-radius: 18px;
+  box-shadow: 0 20px 55px rgba(0,0,0,.38);
+}
+.customer-shop .shop-customer-nav button {
+  border-radius: 10px;
+  color: #c9c0ae;
+  transition: .2s ease;
+}
+.customer-shop .shop-customer-nav button.active {
+  background: linear-gradient(115deg,#e1c78e,#b89455);
+  color: #17130c;
+}
+.customer-shop .shop-toolbar {
+  border-color: rgba(201,168,106,.16);
+}
+.customer-shop .shop-search,
+.customer-shop .shop-toolbar-cart {
+  border-color: rgba(201,168,106,.25);
+  border-radius: 12px;
+  background: rgba(19,19,16,.88);
+}
+.customer-shop .shop-page-heading h1 {
+  color: #f3ead8;
+  font: 500 clamp(30px,3.4vw,42px)/1.1 Georgia,serif;
+}
+.customer-shop .shop-products-panel,
+.customer-shop .shop-full-cart-items,
+.customer-shop .shop-order-summary {
+  border: 1px solid rgba(201,168,106,.2);
+  border-radius: 18px;
+  background: linear-gradient(145deg,rgba(29,28,24,.94),rgba(12,13,12,.94));
+  box-shadow: 0 20px 55px rgba(0,0,0,.28);
+}
+.customer-shop .shop-product-card {
+  overflow: hidden;
+  border: 1px solid rgba(201,168,106,.16);
+  border-radius: 15px;
+  background: linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.012));
+}
+.customer-shop .shop-product-image {
+  border-radius: 12px;
+  background: linear-gradient(145deg,#28251d,#11120f);
+}
+.customer-shop .shop-product-copy h3 { color: #eee4d2; }
+.customer-shop .shop-product-card-bottom strong { color: #e2c88f; }
+.customer-shop .shop-product-card-bottom button,
+.customer-shop .shop-detail-add {
+  border-radius: 10px;
+  background: linear-gradient(115deg,#e1c78e,#b89455);
+  color: #17130c;
+}
+.customer-shop .shop-cart-drawer,
+.customer-shop .shop-detail-modal {
+  border: 1px solid rgba(201,168,106,.32);
+  border-radius: 20px;
+  background: linear-gradient(145deg,#242219,#10110f);
+}
+@media (max-width: 760px) {
+  .app-shell .booking-customer-nav::before { padding-top: 3px; }
+  .app-shell .booking-customer-nav::after { padding-bottom: 8px; }
+  .app-shell .booking-customer-nav button { min-height: 42px; }
+  .unified-booking-card { padding: 22px 16px !important; border-radius: 18px !important; }
+  .customer-date-first { padding: 14px 10px; }
+  .unified-schedule-heading { align-items: flex-start; flex-direction: column; }
+  .unified-schedule-heading h3 { font-size: 21px; }
+  .customer-booking-history { padding: 20px 14px !important; }
+  .customer-account-dashboard { padding: 22px 16px !important; }
+  .customer-account-details { padding: 6px 14px; }
+  .customer-shop .shop-main-area { padding: 0 14px 22px; }
+  .customer-shop .shop-toolbar { margin-bottom: 20px; }
+  .customer-shop .shop-page-heading { align-items: flex-start; flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell .booking-customer-nav button,
+  .customer-schedule-table .schedule-slot { transition: none !important; }
+}
