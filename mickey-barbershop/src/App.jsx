@@ -2267,33 +2267,33 @@ const renderStaffScheduleCell = (barber, hour) => {
             </div>
             <section className="hero customer-account-dashboard">
               <span className="gold-text">MICKEY MEMBERSHIP · ACCOUNT</span>
-              <h2>{tr('จัดการบัญชี', 'Account Management')}</h2>
-              <p>{tr('ยินดีต้อนรับ', 'Welcome')}, {customer.full_name}</p>
+              <h2>{tr("จัดการบัญชี", 'Account Management')}</h2>
+              <p>{tr("ยินดีต้อนรับ", 'Welcome')}, {customer.full_name}</p>
               {!accountEditing ? (
                 <>
                   <div className="customer-account-details">
-                    <p><b>{tr('ชื่อ-นามสกุล', 'Full Name')}:</b> {customer.full_name || '-'}</p>
-                    <p><b>{tr('เบอร์โทรศัพท์', 'Phone')}:</b> {customer.phone || '-'}</p>
-                    <p><b>{tr('อีเมล', 'Email')}:</b> {customer.email || user.email}</p>
+                    <p><b>{tr("ชื่อ-นามสกุล", 'Full Name')}:</b> {customer.full_name || '-'}</p>
+                    <p><b>{tr("เบอร์โทรศัพท์", 'Phone')}:</b> {customer.phone || '-'}</p>
+                    <p><b>{tr("อีเมล", 'Email')}:</b> {customer.email || user.email}</p>
                   </div>
-                  <button type="button" onClick={startAccountEdit}>{tr('แก้ไขข้อมูลส่วนตัว', 'Edit Personal Information')}</button>
+                  <button type="button" onClick={startAccountEdit}>{tr("แก้ไขข้อมูลส่วนตัว", 'Edit Personal Information')}</button>
                 </>
               ) : (
                 <form className="customer-account-details" onSubmit={saveAccountDetails}>
-                  <label>{tr('ชื่อ-นามสกุล', 'Full Name')}
+                  <label>{tr("ชื่อ-นามสกุล", 'Full Name')}
                     <input value={accountEditName} onChange={(event) => setAccountEditName(event.target.value)} disabled={accountSaving} required />
                   </label>
-                  <label>{tr('เบอร์โทรศัพท์', 'Phone Number')}
+                  <label>{tr("เบอร์โทรศัพท์", 'Phone Number')}
                     <input type="tel" value={accountEditPhone} onChange={(event) => setAccountEditPhone(event.target.value)} disabled={accountSaving} required />
                   </label>
-                  <p><b>{tr('อีเมล', 'Email')}:</b> {customer.email || user.email}</p>
+                  <p><b>{tr("อีเมล", 'Email')}:</b> {customer.email || user.email}</p>
                   <div className="staff-modal-actions">
-                    <button type="submit" disabled={accountSaving}>{accountSaving ? tr('กำลังบันทึก...', 'Saving...') : tr('บันทึกการแก้ไข', 'Save Changes')}</button>
-                    <button type="button" className="secondary" onClick={() => setAccountEditing(false)} disabled={accountSaving}>{tr('ยกเลิก', 'Cancel')}</button>
+                    <button type="submit" disabled={accountSaving}>{accountSaving ? tr("กำลังบันทึก...", 'Saving...') : tr("บันทึกการเปลี่ยนแปลง", 'Save Changes')}</button>
+                    <button type="button" className="secondary" onClick={() => setAccountEditing(false)} disabled={accountSaving}>{tr("ยกเลิก", 'Cancel')}</button>
                   </div>
                 </form>
               )}
-              <p>{tr('เข้าสู่ระบบเรียบร้อยแล้ว', 'You are signed in.')}</p>
+              <p>{tr("คุณเข้าสู่ระบบเรียบร้อยแล้ว", 'You are signed in.')}</p>
             </section>
           </>
         )}
