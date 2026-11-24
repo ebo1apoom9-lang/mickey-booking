@@ -103,6 +103,7 @@ const [recoveryReady, setRecoveryReady] = useState(false)
 const [ownerCustomers, setOwnerCustomers] = useState([])
 const [staffTimeBlocks, setStaffTimeBlocks] = useState([])
 const [weeklyDaysOff, setWeeklyDaysOff] = useState([])
+const [shopClosedDays, setShopClosedDays] = useState([])
 const [selectedDayOffBarberId, setSelectedDayOffBarberId] = useState('')
 const [customerSearch, setCustomerSearch] = useState('')
 const [selectedCustomer, setSelectedCustomer] = useState(null)
@@ -329,9 +330,11 @@ const loadPublicAvailability = useCallback(async () => {
   if (!user || !selectedDate) return
   setAvailabilityLoading(true)
   setAvailabilityError('')
-  const { data, error } = await supabase.rpc('get_public_booking_availability', {
-    p_date: selectedDate,
-  })
+  const [{ data, error }, shopDaysResult] = await Promise.all([
+    supabase.rpc('get_public_booking_availability', { p_date: selectedDate }),
+    supabase.from('shop_weekly_closed_days').select('weekday'),
+  ])
+  if (!shopDaysResult.error) setShopClosedDays((shopDaysResult.data || []).map(item => Number(item.weekday)))
   if (error) {
     setAvailabilityError(tr('โหลดตารางคิวไม่สำเร็จ: ', 'Could not load the schedule: ') + error.message)
     setPublicAvailability([])
@@ -423,7 +426,7 @@ const loadOwnerCustomers = useCallback(async () => {
 }, [])
 
 const loadStaffAvailability = useCallback(async () => {
-  const [blocksResult, daysOffResult] = await Promise.all([
+  const [blocksResult, daysOffResult, shopDaysResult] = await Promise.all([
     supabase
       .from('barber_time_blocks')
       .select('id, barber_id, starts_at, ends_at')
@@ -431,6 +434,10 @@ const loadStaffAvailability = useCallback(async () => {
     supabase
       .from('barber_weekly_days_off')
       .select('id, barber_id, weekday')
+      .order('weekday'),
+    supabase
+      .from('shop_weekly_closed_days')
+      .select('weekday')
       .order('weekday'),
   ])
 
@@ -444,6 +451,11 @@ const loadStaffAvailability = useCallback(async () => {
     setMessage(tr('โหลดวันหยุดช่างไม่สำเร็จ: ', 'Could not load barber days off: ') + daysOffResult.error.message)
   } else {
     setWeeklyDaysOff(daysOffResult.data || [])
+  }
+  if (shopDaysResult.error) {
+    setMessage(tr('โหลดวันปิดร้านไม่สำเร็จ: ', 'Could not load shop closed days: ') + shopDaysResult.error.message)
+  } else {
+    setShopClosedDays((shopDaysResult.data || []).map(item => Number(item.weekday)))
   }
 }, [])
 
@@ -679,6 +691,10 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
 
     if (!selectedDate || !selectedTime) {
       throw new Error(tr('กรุณาเลือกวันที่และเวลา', 'Please select a date and time.'))
+    }
+    const bookingWeekday = new Date(`${selectedDate}T12:00:00+07:00`).getUTCDay()
+    if (shopClosedDays.includes(bookingWeekday)) {
+      throw new Error(tr('ร้านปิดให้บริการในวันที่เลือก', 'The shop is closed on the selected date.'))
     }
 
     const startsAt = new Date(`${selectedDate}T${selectedTime}:00+07:00`)
@@ -917,6 +933,17 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     setLoading(false)
   }
 
+  async function handleShopClosedDayChange(weekday, enabled) {
+    setLoading(true)
+    const result = enabled
+      ? await supabase.from('shop_weekly_closed_days').upsert({ weekday: Number(weekday) })
+      : await supabase.from('shop_weekly_closed_days').delete().eq('weekday', Number(weekday))
+    if (result.error) setMessage(result.error.message)
+    else setMessage(tr('บันทึกวันปิดร้านแล้ว', 'Shop closed day saved.'))
+    await loadStaffAvailability()
+    setLoading(false)
+  }
+
   async function handleWeeklyDayOffChange(barberId, weekday, enabled) {
     const existing = weeklyDaysOff.find(
       (item) =>
@@ -1117,8 +1144,11 @@ const scheduleHours = Array.from(
   (_, index) => index + 10
 )
 
+const selectedWeekday = new Date(`${selectedDate}T12:00:00+07:00`).getUTCDay()
+const isSelectedDateShopClosed = shopClosedDays.includes(selectedWeekday)
+
 const isCustomerSlotAvailable = (barberId, hour) => {
-  if (availabilityLoading || availabilityError) return false
+  if (isSelectedDateShopClosed || availabilityLoading || availabilityError) return false
   const duration = Number(chosenService?.duration_minutes || 60)
   const start = new Date(`${selectedDate}T${String(hour).padStart(2, '0')}:00:00+07:00`)
   const end = new Date(start.getTime() + duration * 60 * 1000)
@@ -1160,7 +1190,9 @@ const getScheduleBlock = (barberId, hour) => {
   })
 }
 
-const isScheduleDayOff = (barberId) => weeklyDaysOff.some(
+const scheduleIsShopClosed = shopClosedDays.includes(scheduleWeekday)
+
+const isScheduleDayOff = (barberId) => scheduleIsShopClosed || weeklyDaysOff.some(
   (dayOff) =>
     String(dayOff.barber_id) === String(barberId) &&
     Number(dayOff.weekday) === scheduleWeekday
@@ -1992,7 +2024,24 @@ const renderStaffScheduleCell = (barber, hour) => {
               <section className="auth-card">
                 <span className="gold-text">SHOP SETTINGS</span>
                 <h2>{tr('ตั้งค่าร้าน', 'Shop Settings')}</h2>
-                <p>{tr('หน้านี้ยังอยู่ระหว่างพัฒนา', 'This page is not implemented yet.')}</p>
+                <p>{tr('กำหนดวันปิดประจำสัปดาห์ของร้าน วันดังกล่าวจะปิดรับจองลูกค้าทุกช่างโดยอัตโนมัติ', 'Choose recurring weekly shop-closure days. The shop will be unavailable for all barbers on these days.')}</p>
+                <div className="barber-weekday-grid shop-closed-weekday-grid">
+                  {[
+                    tr('อาทิตย์', 'Sunday'), tr('จันทร์', 'Monday'), tr('อังคาร', 'Tuesday'),
+                    tr('พุธ', 'Wednesday'), tr('พฤหัสบดี', 'Thursday'), tr('ศุกร์', 'Friday'), tr('เสาร์', 'Saturday'),
+                  ].map((label, weekday) => {
+                    const checked = shopClosedDays.includes(weekday)
+                    return (
+                      <label className={`barber-weekday-option ${checked ? 'is-off' : ''}`} key={weekday}>
+                        <input type="checkbox" checked={checked} disabled={loading} onChange={event => handleShopClosedDayChange(weekday, event.target.checked)} />
+                        <span className="barber-weekday-check">{checked ? '✓' : '+'}</span>
+                        <strong>{label}</strong>
+                        <small>{checked ? tr('ร้านปิด', 'SHOP CLOSED') : tr('เปิดทำการ', 'OPEN')}</small>
+                      </label>
+                    )
+                  })}
+                </div>
+                <div className="barber-dayoff-footnote"><span>!</span>{tr('วันปิดร้านจะแสดงเป็น CLOSED ในตารางจองคิวของลูกค้า และปิดทุกช่างในวันนั้น', 'Shop closure days appear as CLOSED in customer booking and close every barber for that day.')}</div>
               </section>
             )}
             </>
@@ -2174,6 +2223,7 @@ const renderStaffScheduleCell = (barber, hour) => {
                   <span><i className="legend-busy" />{tr('ไม่ว่าง', 'Unavailable')}</span>
                   <span><i className="legend-closed" />{tr('ปิด', 'Closed')}</span>
                 </div>
+                {isSelectedDateShopClosed && <p className="schedule-error">{tr('ร้านปิดให้บริการในวันนี้ ไม่สามารถจองคิวได้', 'The shop is closed on this day. Bookings are unavailable.')}</p>}
                 {availabilityError && <p className="schedule-error">{availabilityError}</p>}
                 <div className="customer-schedule-scroll">
                   <table className="customer-schedule-table">
