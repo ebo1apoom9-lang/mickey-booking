@@ -421,7 +421,7 @@ body.shop-overlay-open { overflow:hidden; }
 
 /* Keep Products and Shopping Cart navigation visually identical to Booking/Account. */
 .customer-shop .shop-customer-nav::before {
-  content: "MICKEY";
+  content: "MICKEY BARBERSHOP";
   display: block;
   padding: 10px 12px 2px;
   color: #e0c98f;
@@ -482,4 +482,56 @@ body.shop-overlay-open { overflow:hidden; }
     min-height: 42px;
     border-radius: 9px;
   }
+}
+/* Match the customer Products/Cart sidebar brand to the Owner/Barber sidebar. */
+.customer-shop .shop-customer-nav::before {
+  display:block;
+  padding:5px 9px 8px;
+  margin:0 0 8px;
+  border-bottom:1px solid rgba(205,166,83,.25);
+  color:#d7b56d;
+  font-family:Georgia,serif;
+  font-size:14px;
+  font-style:normal;
+  font-variant:normal;
+  font-weight:800;
+  line-height:1.25;
+  letter-spacing:.16em;
+  text-transform:uppercase !important;
+  font-feature-settings:normal;
+  animation:mickeyFadeUp .45s ease both;
+}
+.customer-shop .shop-customer-nav::after {
+  padding:0 9px 13px;
+  color:#f3eee3;
+  font-family:Arial,sans-serif;
+  font-size:10px;
+  font-weight:500;
+  line-height:1.35;
+  letter-spacing:.2em;
+  text-transform:uppercase !important;
+  animation:mickeyFadeUp .5s ease both;
+  animation-delay:.06s;
+}
+.customer-shop .shop-customer-nav button.active {
+  transform-origin:center;
+  animation:menuPageBounce .48s cubic-bezier(.2,.75,.25,1) both;
+}
+@media (max-width:760px) {
+  .customer-shop .shop-customer-nav::before {
+    padding:3px 5px 6px;
+    margin-bottom:5px;
+    font-size:13px;
+    letter-spacing:.16em;
+  }
+  .customer-shop .shop-customer-nav::after {
+    padding:0 5px 8px;
+    font-size:8px;
+    letter-spacing:.16em;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  .customer-shop .shop-customer-nav::before,
+  .customer-shop .shop-customer-nav::after,
+  .customer-shop .shop-customer-nav button.active { animation:none !important; }
 }
