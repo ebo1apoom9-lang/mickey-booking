@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+﻿import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from './supabase'
 import './styles.css'
 import './staff-redesign.css'
 import ProductsPage from './ProductsPage'
 import CustomerShopPage from './CustomerShopPage'
 const money = (value) =>
-  new Intl.NumberFormat('th-TH').format(Number(value) || 0) + ' บาท'
+  new Intl.NumberFormat('th-TH').format(Number(value) || 0) + ' เธเธฒเธ—'
 
 const bangkokDate = (date = new Date()) => {
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -34,12 +34,12 @@ const formatDateTime = (value, language = 'th') => {
 
 const statusLabel = (status, language = 'th') => {
   const labels = {
-    Confirmed: ['ยืนยันแล้ว', 'Confirmed'],
-    'Checked In': ['เช็กอินแล้ว', 'Checked In'],
-    'In Progress': ['กำลังให้บริการ', 'In Progress'],
-    Completed: ['เสร็จสิ้น', 'Completed'],
-    Cancelled: ['ยกเลิกแล้ว', 'Cancelled'],
-    'No Show': ['ไม่มาตามนัด', 'No Show'],
+    Confirmed: ['เธขเธทเธเธขเธฑเธเนเธฅเนเธง', 'Confirmed'],
+    'Checked In': ['เน€เธเนเธเธญเธดเธเนเธฅเนเธง', 'Checked In'],
+    'In Progress': ['เธเธณเธฅเธฑเธเนเธซเนเธเธฃเธดเธเธฒเธฃ', 'In Progress'],
+    Completed: ['เน€เธชเธฃเนเธเธชเธดเนเธ', 'Completed'],
+    Cancelled: ['เธขเธเน€เธฅเธดเธเนเธฅเนเธง', 'Cancelled'],
+    'No Show': ['เนเธกเนเธกเธฒเธ•เธฒเธกเธเธฑเธ”', 'No Show'],
   }
 
   return labels[status]
@@ -98,6 +98,10 @@ const [selectedCustomer, setSelectedCustomer] = useState(null)
   const [customerEditPhone, setCustomerEditPhone] = useState('')
   const [customerEditNotes, setCustomerEditNotes] = useState('')
   const [customerEditSaving, setCustomerEditSaving] = useState(false)
+const [accountEditing, setAccountEditing] = useState(false)
+const [accountEditName, setAccountEditName] = useState('')
+const [accountEditPhone, setAccountEditPhone] = useState('')
+const [accountSaving, setAccountSaving] = useState(false)
 
   const [selectedService, setSelectedService] = useState('')
   const [selectedBarber, setSelectedBarber] = useState('')
@@ -193,7 +197,7 @@ return () => {
       if (!active) return
 
       if (profileError) {
-        setMessage('ตรวจสอบตำแหน่งบัญชีไม่สำเร็จ: ' + profileError.message)
+        setMessage('เธ•เธฃเธงเธเธชเธญเธเธ•เธณเนเธซเธเนเธเธเธฑเธเธเธตเนเธกเนเธชเธณเน€เธฃเนเธ: ' + profileError.message)
         setProfileLoading(false)
         return
       }
@@ -215,7 +219,7 @@ if (profile?.role === 'owner' || ['barber', 'baber'].includes(profile?.role)) {
       if (!active) return
 
       if (customerError) {
-        setMessage('ตรวจสอบข้อมูลสมาชิกไม่สำเร็จ: ' + customerError.message)
+        setMessage('เธ•เธฃเธงเธเธชเธญเธเธเนเธญเธกเธนเธฅเธชเธกเธฒเธเธดเธเนเธกเนเธชเธณเน€เธฃเนเธ: ' + customerError.message)
         setCustomer(null)
       } else {
         setCustomer(customerData)
@@ -264,7 +268,7 @@ useEffect(() => {
     return
   }
 
-  if (!['/booking', '/products', '/cart'].includes(route)) {
+  if (!['/booking', '/products', '/cart', '/account'].includes(route)) {
     navigate('/booking', true)
   }
 }, [
@@ -294,13 +298,13 @@ const loadBookingData = useCallback(async () => {
   ])
 
 if (serviceResult.error) {
-  setMessage(tr('โหลดบริการไม่สำเร็จ: ', 'Failed to load services: ') + serviceResult.error.message)
+  setMessage(tr('เนเธซเธฅเธ”เธเธฃเธดเธเธฒเธฃเนเธกเนเธชเธณเน€เธฃเนเธ: ', 'Failed to load services: ') + serviceResult.error.message)
 } else {
   setServices(serviceResult.data || [])
 }
 
 if (barberResult.error) {
-  setMessage(tr('โหลดรายชื่อช่างไม่สำเร็จ: ', 'Failed to load barbers: ') + barberResult.error.message)
+  setMessage(tr('เนเธซเธฅเธ”เธฃเธฒเธขเธเธทเนเธญเธเนเธฒเธเนเธกเนเธชเธณเน€เธฃเนเธ: ', 'Failed to load barbers: ') + barberResult.error.message)
 } else {
   setBarbers(barberResult.data || [])
 }
@@ -315,7 +319,7 @@ const loadPublicAvailability = useCallback(async () => {
     p_date: selectedDate,
   })
   if (error) {
-    setAvailabilityError(tr('โหลดตารางคิวไม่สำเร็จ: ', 'Could not load the schedule: ') + error.message)
+    setAvailabilityError(tr('เนเธซเธฅเธ”เธ•เธฒเธฃเธฒเธเธเธดเธงเนเธกเนเธชเธณเน€เธฃเนเธ: ', 'Could not load the schedule: ') + error.message)
     setPublicAvailability([])
   } else {
     setPublicAvailability(data || [])
@@ -346,7 +350,7 @@ const loadBookings = useCallback(async () => {
     .limit(50)
 
   if (error) {
-    setMessage('โหลดประวัติการจองไม่สำเร็จ: ' + error.message)
+    setMessage('เนเธซเธฅเธ”เธเธฃเธฐเธงเธฑเธ•เธดเธเธฒเธฃเธเธญเธเนเธกเนเธชเธณเน€เธฃเนเธ: ' + error.message)
     return
   }
 
@@ -374,7 +378,7 @@ const loadBookings = useCallback(async () => {
       .limit(1000)
 
     if (error) {
-      setMessage('โหลดรายการจองของร้านไม่สำเร็จ: ' + error.message)
+      setMessage('เนเธซเธฅเธ”เธฃเธฒเธขเธเธฒเธฃเธเธญเธเธเธญเธเธฃเนเธฒเธเนเธกเนเธชเธณเน€เธฃเนเธ: ' + error.message)
       return
     }
 
@@ -397,7 +401,7 @@ const loadOwnerCustomers = useCallback(async () => {
     .limit(500)
 
   if (error) {
-    setMessage('โหลดรายชื่อลูกค้าไม่สำเร็จ: ' + error.message)
+    setMessage('เนเธซเธฅเธ”เธฃเธฒเธขเธเธทเนเธญเธฅเธนเธเธเนเธฒเนเธกเนเธชเธณเน€เธฃเนเธ: ' + error.message)
     return
   }
 
@@ -417,13 +421,13 @@ const loadStaffAvailability = useCallback(async () => {
   ])
 
   if (blocksResult.error) {
-    setMessage(tr('โหลดช่วงเวลาที่ Block ไม่สำเร็จ: ', 'Could not load blocked times: ') + blocksResult.error.message)
+    setMessage(tr('เนเธซเธฅเธ”เธเนเธงเธเน€เธงเธฅเธฒเธ—เธตเน Block เนเธกเนเธชเธณเน€เธฃเนเธ: ', 'Could not load blocked times: ') + blocksResult.error.message)
   } else {
     setStaffTimeBlocks(blocksResult.data || [])
   }
 
   if (daysOffResult.error) {
-    setMessage(tr('โหลดวันหยุดช่างไม่สำเร็จ: ', 'Could not load barber days off: ') + daysOffResult.error.message)
+    setMessage(tr('เนเธซเธฅเธ”เธงเธฑเธเธซเธขเธธเธ”เธเนเธฒเธเนเธกเนเธชเธณเน€เธฃเนเธ: ', 'Could not load barber days off: ') + daysOffResult.error.message)
   } else {
     setWeeklyDaysOff(daysOffResult.data || [])
   }
@@ -471,13 +475,13 @@ const loadStaffAvailability = useCallback(async () => {
         const normalizedPhone = phone.replace(/[^0-9]/g, '')
 
         if (!fullName.trim()) {
-          throw new Error(tr('กรุณากรอกชื่อ-นามสกุล', 'Please enter your full name.'))
+          throw new Error(tr('เธเธฃเธธเธ“เธฒเธเธฃเธญเธเธเธทเนเธญ-เธเธฒเธกเธชเธเธธเธฅ', 'Please enter your full name.'))
         }
         if (normalizedPhone.length < 9 || normalizedPhone.length > 15) {
-          throw new Error(   tr('กรุณากรอกเบอร์โทรศัพท์ 9–15 หลัก', 'Please enter a phone number with 9–15 digits.') )
+          throw new Error(   tr('เธเธฃเธธเธ“เธฒเธเธฃเธญเธเน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เน 9โ€“15 เธซเธฅเธฑเธ', 'Please enter a phone number with 9โ€“15 digits.') )
         }
         if (password.length < 6) {
-          throw new Error(   tr('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', 'Password must be at least 6 characters.') )
+          throw new Error(   tr('เธฃเธซเธฑเธชเธเนเธฒเธเธ•เนเธญเธเธกเธตเธญเธขเนเธฒเธเธเนเธญเธข 6 เธ•เธฑเธงเธญเธฑเธเธฉเธฃ', 'Password must be at least 6 characters.') )
         }
 
         const { data, error } = await supabase.auth.signUp({
@@ -495,9 +499,9 @@ const loadStaffAvailability = useCallback(async () => {
 
       setMessage(
   data.session
-    ? tr('สมัครสมาชิกสำเร็จ', 'Registration successful')
+    ? tr('เธชเธกเธฑเธเธฃเธชเธกเธฒเธเธดเธเธชเธณเน€เธฃเนเธ', 'Registration successful')
     : tr(
-        'สมัครสมาชิกสำเร็จ กรุณาตรวจสอบอีเมลเพื่อยืนยันบัญชี',
+        'เธชเธกเธฑเธเธฃเธชเธกเธฒเธเธดเธเธชเธณเน€เธฃเนเธ เธเธฃเธธเธ“เธฒเธ•เธฃเธงเธเธชเธญเธเธญเธตเน€เธกเธฅเน€เธเธทเนเธญเธขเธทเธเธขเธฑเธเธเธฑเธเธเธต',
         'Registration successful. Please check your email to confirm your account.'
       )
 )
@@ -507,11 +511,11 @@ const loadStaffAvailability = useCallback(async () => {
     password,
   })
   if (error) throw error
-  setMessage(tr('เข้าสู่ระบบสำเร็จ', 'Login successful'))
+  setMessage(tr('เน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธเธชเธณเน€เธฃเนเธ', 'Login successful'))
 }
 } catch (error) {
   setMessage(
-    error.message || tr('เกิดข้อผิดพลาด กรุณาลองใหม่', 'Something went wrong. Please try again.')
+    error.message || tr('เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ” เธเธฃเธธเธ“เธฒเธฅเธญเธเนเธซเธกเน', 'Something went wrong. Please try again.')
   )
 }finally {
   setLoading(false)
@@ -532,7 +536,7 @@ const loadStaffAvailability = useCallback(async () => {
    if (error) {
   setMessage(
     tr(
-      `เข้าสู่ระบบด้วย Google ไม่สำเร็จ: ${error.message}`,
+      `เน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธเธ”เนเธงเธข Google เนเธกเนเธชเธณเน€เธฃเนเธ: ${error.message}`,
       `Google sign-in failed: ${error.message}`
     )
   )
@@ -551,9 +555,9 @@ const loadStaffAvailability = useCallback(async () => {
       const normalizedPhone = phone.replace(/[^0-9]/g, '')
       const normalizedName = fullName.trim()
 
-      if (!normalizedName) throw new Error(tr('กรุณากรอกชื่อ-นามสกุล', 'Please enter your full name.'))
+      if (!normalizedName) throw new Error(tr('เธเธฃเธธเธ“เธฒเธเธฃเธญเธเธเธทเนเธญ-เธเธฒเธกเธชเธเธธเธฅ', 'Please enter your full name.'))
       if (normalizedPhone.length < 9 || normalizedPhone.length > 15) {
-        throw new Error(   tr('กรุณากรอกเบอร์โทรศัพท์ 9–15 หลัก', 'Please enter a phone number with 9–15 digits.') )
+        throw new Error(   tr('เธเธฃเธธเธ“เธฒเธเธฃเธญเธเน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เน 9โ€“15 เธซเธฅเธฑเธ', 'Please enter a phone number with 9โ€“15 digits.') )
       }
 
       const { data, error } = await supabase
@@ -579,7 +583,7 @@ const loadStaffAvailability = useCallback(async () => {
           if (readError) throw readError
           if (existing) {
   setCustomer(existing)
-  setMessage(tr('พบข้อมูลสมาชิกเดิมแล้ว', 'Existing member information found.'))
+  setMessage(tr('เธเธเธเนเธญเธกเธนเธฅเธชเธกเธฒเธเธดเธเน€เธ”เธดเธกเนเธฅเนเธง', 'Existing member information found.'))
   return
 }
 }
@@ -587,15 +591,62 @@ throw error
 }
 
 setCustomer(data)
-setMessage(tr('บันทึกข้อมูลสมาชิกเรียบร้อยแล้ว', 'Member information saved successfully.'))
+setMessage(tr('เธเธฑเธเธ—เธถเธเธเนเธญเธกเธนเธฅเธชเธกเธฒเธเธดเธเน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธง', 'Member information saved successfully.'))
 } catch (error) {
   setMessage(
-    error.message || tr('บันทึกข้อมูลไม่สำเร็จ', 'Failed to save member information.')
+    error.message || tr('เธเธฑเธเธ—เธถเธเธเนเธญเธกเธนเธฅเนเธกเนเธชเธณเน€เธฃเนเธ', 'Failed to save member information.')
   )
 } finally {
   setLoading(false)
 }
 }
+
+  function startAccountEdit() {
+    setAccountEditName(customer?.full_name || '')
+    setAccountEditPhone(customer?.phone || '')
+    setAccountEditing(true)
+    setMessage('')
+  }
+
+  async function saveAccountDetails(event) {
+    event.preventDefault()
+    if (!user || !customer?.id) return
+    const normalizedName = accountEditName.trim()
+    const normalizedPhone = accountEditPhone.replace(/[^0-9]/g, '')
+    if (!normalizedName) {
+      setMessage(tr('กรุณากรอกชื่อ-นามสกุล', 'Please enter your full name.'))
+      return
+    }
+    if (normalizedPhone.length < 9 || normalizedPhone.length > 15) {
+      setMessage(tr('กรุณากรอกเบอร์โทรศัพท์ 9–15 หลัก', 'Please enter a phone number with 9–15 digits.'))
+      return
+    }
+    setAccountSaving(true)
+    setMessage('')
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .update({ full_name: normalizedName, phone: normalizedPhone })
+        .eq('id', customer.id)
+        .eq('auth_user_id', user.id)
+        .select('id, full_name, phone, email')
+        .single()
+      if (error) throw error
+      if (!data) throw new Error(tr('ไม่พบข้อมูลสมาชิกที่ต้องการแก้ไข', 'Member profile could not be found.'))
+      setCustomer(data)
+      setAccountEditing(false)
+      const { error: metadataError } = await supabase.auth.updateUser({
+        data: { ...user.user_metadata, full_name: normalizedName, phone: normalizedPhone },
+      })
+      if (metadataError) console.warn('Could not sync account metadata:', metadataError.message)
+      setMessage(tr('อัปเดตชื่อและเบอร์โทรศัพท์ในระบบเรียบร้อยแล้ว', 'Your name and phone number have been updated.'))
+    } catch (error) {
+      console.error('saveAccountDetails:', error)
+      setMessage(error.message || tr('ไม่สามารถอัปเดตข้อมูลบัญชีได้', 'Could not update account details.'))
+    } finally {
+      setAccountSaving(false)
+    }
+  }
 
  async function handleBooking(event) {
   event.preventDefault()
@@ -605,28 +656,28 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
 
   try {
     if (!user || !customer) {
-      throw new Error(tr('กรุณาเข้าสู่ระบบก่อนจองคิว', 'Please log in before booking.'))
+      throw new Error(tr('เธเธฃเธธเธ“เธฒเน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธเธเนเธญเธเธเธญเธเธเธดเธง', 'Please log in before booking.'))
     }
 
     if (!selectedService) {
-      throw new Error(tr('กรุณาเลือกบริการ', 'Please select a service.'))
+      throw new Error(tr('เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเธเธฃเธดเธเธฒเธฃ', 'Please select a service.'))
     }
 
     if (!selectedDate || !selectedTime) {
-      throw new Error(tr('กรุณาเลือกวันที่และเวลา', 'Please select a date and time.'))
+      throw new Error(tr('เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเธงเธฑเธเธ—เธตเนเนเธฅเธฐเน€เธงเธฅเธฒ', 'Please select a date and time.'))
     }
 
     const startsAt = new Date(`${selectedDate}T${selectedTime}:00+07:00`)
 
     if (Number.isNaN(startsAt.getTime()) || startsAt <= new Date()) {
-      throw new Error(tr('กรุณาเลือกเวลาในอนาคต', 'Please select a future time.'))
+      throw new Error(tr('เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเน€เธงเธฅเธฒเนเธเธญเธเธฒเธเธ•', 'Please select a future time.'))
     }
 
     const maxDate = new Date()
     maxDate.setDate(maxDate.getDate() + 14)
 
     if (startsAt > maxDate) {
-      throw new Error(tr('จองล่วงหน้าได้ไม่เกิน 14 วัน', 'Bookings can be made up to 14 days in advance.'))
+      throw new Error(tr('เธเธญเธเธฅเนเธงเธเธซเธเนเธฒเนเธ”เนเนเธกเนเน€เธเธดเธ 14 เธงเธฑเธ', 'Bookings can be made up to 14 days in advance.'))
     }
 
     const { data, error } = await supabase.rpc('create_customer_booking', {
@@ -640,24 +691,24 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     const result = Array.isArray(data) ? data[0] : data
 
     if (!result) {
-      throw new Error(tr('ระบบไม่ได้ส่งข้อมูลยืนยันการจองกลับมา', 'The booking system did not return confirmation details.'))
+      throw new Error(tr('เธฃเธฐเธเธเนเธกเนเนเธ”เนเธชเนเธเธเนเธญเธกเธนเธฅเธขเธทเธเธขเธฑเธเธเธฒเธฃเธเธญเธเธเธฅเธฑเธเธกเธฒ', 'The booking system did not return confirmation details.'))
     }
 
     setBookingResult(result)
     setShowBookingModal(false)
     await loadPublicAvailability()
-    setMessage(tr('จองคิวสำเร็จแล้ว!', 'Booking successful!'))
+    setMessage(tr('เธเธญเธเธเธดเธงเธชเธณเน€เธฃเนเธเนเธฅเนเธง!', 'Booking successful!'))
 
     await loadBookings()
   } catch (error) {
-    setMessage(error.message || tr('จองคิวไม่สำเร็จ', 'Booking failed.'))
+    setMessage(error.message || tr('เธเธญเธเธเธดเธงเนเธกเนเธชเธณเน€เธฃเนเธ', 'Booking failed.'))
   } finally {
     setLoading(false)
   }
 }
 
   async function handleCancelBooking(bookingId) {
-    if (!window.confirm(tr('ต้องการยกเลิกการจองคิวนี้ใช่หรือไม่?', 'Are you sure you want to cancel this booking?'))) return
+    if (!window.confirm(tr('เธ•เนเธญเธเธเธฒเธฃเธขเธเน€เธฅเธดเธเธเธฒเธฃเธเธญเธเธเธดเธงเธเธตเนเนเธเนเธซเธฃเธทเธญเนเธกเน?', 'Are you sure you want to cancel this booking?'))) return
 
     setLoading(true)
     setMessage('')
@@ -668,10 +719,10 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
       })
       if (error) throw error
 
-      setMessage(tr('ยกเลิกการจองเรียบร้อยแล้ว', 'Booking cancelled successfully.'))
+      setMessage(tr('เธขเธเน€เธฅเธดเธเธเธฒเธฃเธเธญเธเน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธง', 'Booking cancelled successfully.'))
       await loadBookings()
     } catch (error) {
-      setMessage(error.message || tr('ยกเลิกการจองไม่สำเร็จ', 'Failed to cancel booking.'))
+      setMessage(error.message || tr('เธขเธเน€เธฅเธดเธเธเธฒเธฃเธเธญเธเนเธกเนเธชเธณเน€เธฃเนเธ', 'Failed to cancel booking.'))
     } finally {
       setLoading(false)
     }
@@ -688,7 +739,7 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
 
   async function saveCustomerDetails(customerId) {
     if (!customerId || !customerEditName.trim() || !customerEditPhone.trim()) {
-      alert(tr('กรุณากรอกชื่อลูกค้าและเบอร์โทรศัพท์', 'Please enter the customer name and phone number.'))
+      alert(tr('เธเธฃเธธเธ“เธฒเธเธฃเธญเธเธเธทเนเธญเธฅเธนเธเธเนเธฒเนเธฅเธฐเน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เน', 'Please enter the customer name and phone number.'))
       return
     }
 
@@ -729,10 +780,10 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
       )
 
       setEditingCustomerId('')
-      alert(tr('บันทึกข้อมูลลูกค้าเรียบร้อยแล้ว', 'Customer details saved successfully.'))
+      alert(tr('เธเธฑเธเธ—เธถเธเธเนเธญเธกเธนเธฅเธฅเธนเธเธเนเธฒเน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธง', 'Customer details saved successfully.'))
     } catch (error) {
       console.error('saveCustomerDetails:', error)
-      alert(error.message || tr('ไม่สามารถบันทึกข้อมูลลูกค้าได้', 'Could not save customer details.'))
+      alert(error.message || tr('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธเธฑเธเธ—เธถเธเธเนเธญเธกเธนเธฅเธฅเธนเธเธเนเธฒเนเธ”เน', 'Could not save customer details.'))
     } finally {
       setCustomerEditSaving(false)
     }
@@ -742,7 +793,7 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     return (
       <div className="customer-edit-form">
         <label>
-          {tr('ชื่อลูกค้า', 'Customer name')}
+          {tr('เธเธทเนเธญเธฅเธนเธเธเนเธฒ', 'Customer name')}
           <input
             value={customerEditName}
             onChange={event => setCustomerEditName(event.target.value)}
@@ -750,7 +801,7 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
           />
         </label>
         <label>
-          {tr('เบอร์โทรศัพท์', 'Phone number')}
+          {tr('เน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เน', 'Phone number')}
           <input
             value={customerEditPhone}
             onChange={event => setCustomerEditPhone(event.target.value)}
@@ -759,8 +810,8 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
         </label>
         <label>
           {customerEditNotes.trim()
-            ? tr('✏️ แก้ไขบันทึก', '✏️ Edit notes')
-            : tr('+ เพิ่มบันทึกเพิ่มเติม', '+ Add notes')}
+            ? tr('โ๏ธ เนเธเนเนเธเธเธฑเธเธ—เธถเธ', 'โ๏ธ Edit notes')
+            : tr('+ เน€เธเธดเนเธกเธเธฑเธเธ—เธถเธเน€เธเธดเนเธกเน€เธ•เธดเธก', '+ Add notes')}
           <textarea
             value={customerEditNotes}
             onChange={event => setCustomerEditNotes(event.target.value)}
@@ -774,14 +825,14 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
             onClick={() => saveCustomerDetails(customerId)}
             disabled={customerEditSaving}
           >
-            {customerEditSaving ? tr('กำลังบันทึก...', 'Saving...') : tr('บันทึก', 'Save')}
+            {customerEditSaving ? tr('เธเธณเธฅเธฑเธเธเธฑเธเธ—เธถเธ...', 'Saving...') : tr('เธเธฑเธเธ—เธถเธ', 'Save')}
           </button>
           <button
             type="button"
             onClick={() => setEditingCustomerId('')}
             disabled={customerEditSaving}
           >
-            {tr('ยกเลิก', 'Cancel')}
+            {tr('เธขเธเน€เธฅเธดเธ', 'Cancel')}
           </button>
         </div>
       </div>
@@ -794,10 +845,10 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     try {
       const { error } = await supabase.from('bookings').update(updates).eq('id', bookingId)
       if (error) throw error
-      setMessage(tr('อัปเดตคิวเรียบร้อยแล้ว', 'Booking updated.'))
+      setMessage(tr('เธญเธฑเธเน€เธ”เธ•เธเธดเธงเน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธง', 'Booking updated.'))
       await loadOwnerBookings()
     } catch (error) {
-      setMessage(error.message || tr('ไม่สามารถอัปเดตคิวได้', 'Could not update booking.'))
+      setMessage(error.message || tr('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธญเธฑเธเน€เธ”เธ•เธเธดเธงเนเธ”เน', 'Could not update booking.'))
     } finally {
       setLoading(false)
     }
@@ -807,7 +858,7 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     const existingBlock = getScheduleBlock(barberId, hour)
 
     if (existingBlock) {
-      if (!window.confirm(tr('ต้องการปลด Block ช่วงเวลานี้ใช่หรือไม่?', 'Unblock this time slot?'))) return
+      if (!window.confirm(tr('เธ•เนเธญเธเธเธฒเธฃเธเธฅเธ” Block เธเนเธงเธเน€เธงเธฅเธฒเธเธตเนเนเธเนเธซเธฃเธทเธญเนเธกเน?', 'Unblock this time slot?'))) return
       setLoading(true)
       const { error } = await supabase
         .from('barber_time_blocks')
@@ -816,7 +867,7 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
       if (error) {
         setMessage(error.message)
       } else {
-        setMessage(tr('เปิดช่วงเวลากลับมาแล้ว', 'Time slot is open again.'))
+        setMessage(tr('เน€เธเธดเธ”เธเนเธงเธเน€เธงเธฅเธฒเธเธฅเธฑเธเธกเธฒเนเธฅเนเธง', 'Time slot is open again.'))
       }
       await loadStaffAvailability()
       setLoading(false)
@@ -824,7 +875,7 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     }
 
     if (getScheduleBooking(barberId, hour) || isScheduleDayOff(barberId)) {
-      setMessage(tr('ช่วงเวลานี้มีคิวหรือเป็นวันหยุดอยู่แล้ว', 'This slot is already booked or is a day off.'))
+      setMessage(tr('เธเนเธงเธเน€เธงเธฅเธฒเธเธตเนเธกเธตเธเธดเธงเธซเธฃเธทเธญเน€เธเนเธเธงเธฑเธเธซเธขเธธเธ”เธญเธขเธนเนเนเธฅเนเธง', 'This slot is already booked or is a day off.'))
       return
     }
 
@@ -833,7 +884,7 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     )
     const endsAt = new Date(startsAt.getTime() + 60 * 60 * 1000)
     if (startsAt <= new Date()) {
-      setMessage(tr('ไม่สามารถ Block เวลาในอดีตได้', 'Past time slots cannot be blocked.'))
+      setMessage(tr('เนเธกเนเธชเธฒเธกเธฒเธฃเธ– Block เน€เธงเธฅเธฒเนเธเธญเธ”เธตเธ•เนเธ”เน', 'Past time slots cannot be blocked.'))
       return
     }
 
@@ -846,7 +897,7 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     if (error) {
       setMessage(error.message)
     } else {
-      setMessage(tr('Block ช่วงเวลาเรียบร้อยแล้ว', 'Time slot blocked.'))
+      setMessage(tr('Block เธเนเธงเธเน€เธงเธฅเธฒเน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธง', 'Time slot blocked.'))
     }
     await loadStaffAvailability()
     setLoading(false)
@@ -878,7 +929,7 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     if (error) {
       setMessage(error.message)
     } else {
-      setMessage(tr('บันทึกวันหยุดประจำสัปดาห์แล้ว', 'Weekly day off saved.'))
+      setMessage(tr('เธเธฑเธเธ—เธถเธเธงเธฑเธเธซเธขเธธเธ”เธเธฃเธฐเธเธณเธชเธฑเธเธ”เธฒเธซเนเนเธฅเนเธง', 'Weekly day off saved.'))
     }
     await loadStaffAvailability()
     setLoading(false)
@@ -888,12 +939,12 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     const current = new Date(booking.starts_at)
     const currentLocal = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit' }).format(current)
     const currentTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', hour12: false }).format(current)
-    const nextDate = window.prompt(tr('วันที่ใหม่ (YYYY-MM-DD)', 'New date (YYYY-MM-DD)'), currentLocal)
+    const nextDate = window.prompt(tr('เธงเธฑเธเธ—เธตเนเนเธซเธกเน (YYYY-MM-DD)', 'New date (YYYY-MM-DD)'), currentLocal)
     if (!nextDate) return
-    const nextTime = window.prompt(tr('เวลาใหม่ (HH:MM)', 'New time (HH:MM)'), currentTime)
+    const nextTime = window.prompt(tr('เน€เธงเธฅเธฒเนเธซเธกเน (HH:MM)', 'New time (HH:MM)'), currentTime)
     if (!nextTime) return
     if (!/^\d{4}-\d{2}-\d{2}$/.test(nextDate) || !/^([01]\d|2[0-3]):00$/.test(nextTime)) {
-      setMessage(tr('รูปแบบวันที่หรือเวลาไม่ถูกต้อง', 'Invalid date or time format.'))
+      setMessage(tr('เธฃเธนเธเนเธเธเธงเธฑเธเธ—เธตเนเธซเธฃเธทเธญเน€เธงเธฅเธฒเนเธกเนเธ–เธนเธเธ•เนเธญเธ', 'Invalid date or time format.'))
       return
     }
     const starts = new Date(`${nextDate}T${nextTime}:00+07:00`)
@@ -902,7 +953,7 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     const closing = new Date(`${nextDate}T20:00:00+07:00`)
     const opening = new Date(`${nextDate}T10:00:00+07:00`)
     if (starts < opening || starts <= new Date() || ends > closing) {
-      setMessage(tr('เวลาใหม่ต้องอยู่ในเวลาทำการ 10:00–20:00 และเป็นเวลาในอนาคต', 'New time must be in the future and within business hours (10:00–20:00).'))
+      setMessage(tr('เน€เธงเธฅเธฒเนเธซเธกเนเธ•เนเธญเธเธญเธขเธนเนเนเธเน€เธงเธฅเธฒเธ—เธณเธเธฒเธฃ 10:00โ€“20:00 เนเธฅเธฐเน€เธเนเธเน€เธงเธฅเธฒเนเธเธญเธเธฒเธเธ•', 'New time must be in the future and within business hours (10:00โ€“20:00).'))
       return
     }
     const conflict = ownerBookings.some((other) => {
@@ -910,7 +961,7 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
       return starts < new Date(other.ends_at) && ends > new Date(other.starts_at)
     })
     if (conflict) {
-      setMessage(tr('ช่างมีคิวอื่นในช่วงเวลานี้แล้ว กรุณาเลือกเวลาใหม่', 'This barber already has another booking during that time. Choose another time.'))
+      setMessage(tr('เธเนเธฒเธเธกเธตเธเธดเธงเธญเธทเนเธเนเธเธเนเธงเธเน€เธงเธฅเธฒเธเธตเนเนเธฅเนเธง เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเน€เธงเธฅเธฒเนเธซเธกเน', 'This barber already has another booking during that time. Choose another time.'))
       return
     }
     await handleStaffBookingUpdate(booking.id, { starts_at: starts.toISOString(), ends_at: ends.toISOString() })
@@ -937,7 +988,7 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
 
  async function handleForgotPassword() {
   if (!email.trim()) {
-    setMessage(tr('กรุณากรอกอีเมลก่อน', 'Please enter your email address first.'))
+    setMessage(tr('เธเธฃเธธเธ“เธฒเธเธฃเธญเธเธญเธตเน€เธกเธฅเธเนเธญเธ', 'Please enter your email address first.'))
     return
   }
 
@@ -953,7 +1004,7 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     error
       ? error.message
       : tr(
-          'ส่งลิงก์ตั้งรหัสผ่านใหม่ไปยังอีเมลแล้ว',
+          'เธชเนเธเธฅเธดเธเธเนเธ•เธฑเนเธเธฃเธซเธฑเธชเธเนเธฒเธเนเธซเธกเนเนเธเธขเธฑเธเธญเธตเน€เธกเธฅเนเธฅเนเธง',
           'A password reset link has been sent to your email.'
         )
   )
@@ -965,12 +1016,12 @@ async function handleUpdatePassword() {
   setMessage('')
 
   if (newPassword.length < 6) {
-    setMessage(tr('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', 'Password must be at least 6 characters.'))
+    setMessage(tr('เธฃเธซเธฑเธชเธเนเธฒเธเธ•เนเธญเธเธกเธตเธญเธขเนเธฒเธเธเนเธญเธข 6 เธ•เธฑเธงเธญเธฑเธเธฉเธฃ', 'Password must be at least 6 characters.'))
     return
   }
 
   if (newPassword !== confirmPassword) {
-    setMessage(tr('รหัสผ่านทั้งสองช่องไม่ตรงกัน', 'The passwords do not match.'))
+    setMessage(tr('เธฃเธซเธฑเธชเธเนเธฒเธเธ—เธฑเนเธเธชเธญเธเธเนเธญเธเนเธกเนเธ•เธฃเธเธเธฑเธ', 'The passwords do not match.'))
     return
   }
 
@@ -989,7 +1040,7 @@ async function handleUpdatePassword() {
   const { error: signOutError } = await supabase.auth.signOut()
 
   if (signOutError) {
-    setMessage(tr('เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบใหม่', 'Password changed successfully. Please sign in again.'))
+    setMessage(tr('เน€เธเธฅเธตเนเธขเธเธฃเธซเธฑเธชเธเนเธฒเธเธชเธณเน€เธฃเนเธ เธเธฃเธธเธ“เธฒเน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธเนเธซเธกเน', 'Password changed successfully. Please sign in again.'))
     setLoading(false)
     return
   }
@@ -997,7 +1048,7 @@ async function handleUpdatePassword() {
   setNewPassword('')
   setConfirmPassword('')
   setRecoveryReady(false)
-  setMessage(tr('เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่', 'Password changed successfully. Please sign in with your new password.'))
+  setMessage(tr('เน€เธเธฅเธตเนเธขเธเธฃเธซเธฑเธชเธเนเธฒเธเธชเธณเน€เธฃเนเธ เธเธฃเธธเธ“เธฒเน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธเธ”เนเธงเธขเธฃเธซเธฑเธชเธเนเธฒเธเนเธซเธกเน', 'Password changed successfully. Please sign in with your new password.'))
 
   navigate('/login', true)
   setLoading(false)
@@ -1110,7 +1161,7 @@ const renderStaffScheduleCell = (barber, hour) => {
         className={`staff-booking-cell status-${String(booking.status || '').toLowerCase().replace(/\s+/g, '-')}`}
         onClick={() => setSelectedStaffBooking(booking)}
       >
-        <strong>{booking.customer?.full_name || tr('ลูกค้า', 'Customer')}</strong>
+        <strong>{booking.customer?.full_name || tr('เธฅเธนเธเธเนเธฒ', 'Customer')}</strong>
         <small>{booking.service_name_snapshot || '-'}</small>
         {booking.source === 'Walk-in' && <small>{tr('Walk-in', 'Walk-in')}</small>}
       </button>
@@ -1118,7 +1169,7 @@ const renderStaffScheduleCell = (barber, hour) => {
   }
 
   if (isScheduleDayOff(barber.id)) {
-    return <span className="staff-day-off-slot">{tr('วันหยุด', 'DAY OFF')}</span>
+    return <span className="staff-day-off-slot">{tr('เธงเธฑเธเธซเธขเธธเธ”', 'DAY OFF')}</span>
   }
 
   const block = getScheduleBlock(barber.id, hour)
@@ -1129,9 +1180,9 @@ const renderStaffScheduleCell = (barber, hour) => {
         className="staff-blocked-slot"
         onClick={() => handleToggleScheduleBlock(barber.id, hour)}
         disabled={loading}
-        title={tr('กดเพื่อปลด Block', 'Click to unblock this time')}
+        title={tr('เธเธ”เน€เธเธทเนเธญเธเธฅเธ” Block', 'Click to unblock this time')}
       >
-        {tr('BLOCKED · ปลด', 'BLOCKED · OPEN')}
+        {tr('BLOCKED ยท เธเธฅเธ”', 'BLOCKED ยท OPEN')}
       </button>
     )
   }
@@ -1142,7 +1193,7 @@ const renderStaffScheduleCell = (barber, hour) => {
       className="staff-open-slot"
       onClick={() => handleToggleScheduleBlock(barber.id, hour)}
       disabled={loading}
-      title={tr('กดเพื่อ Block เวลานี้', 'Click to block this time')}
+      title={tr('เธเธ”เน€เธเธทเนเธญ Block เน€เธงเธฅเธฒเธเธตเน', 'Click to block this time')}
     >
       +
     </button>
@@ -1196,10 +1247,10 @@ const renderStaffScheduleCell = (barber, hour) => {
         <header><p>MICKEY BARBERSHOP EXPERIENCE</p></header>
         <main className="main">
           <section className="hero">
-            <p>กำลังตรวจสอบบัญชีของคุณ...</p>
+            <p>เธเธณเธฅเธฑเธเธ•เธฃเธงเธเธชเธญเธเธเธฑเธเธเธตเธเธญเธเธเธธเธ“...</p>
           </section>
         </main>
-        <footer>MICKEY BARBERSHOP © 2026</footer>
+        <footer>MICKEY BARBERSHOP ยฉ 2026</footer>
       </div>
     )
   }
@@ -1233,9 +1284,9 @@ const renderStaffScheduleCell = (barber, hour) => {
         {route === '/reset-password' && recoveryReady && (
           <section className="auth-card">
             <span className="gold-text">MICKEY MEMBERSHIP</span>
-            <h2>{tr('ตั้งรหัสผ่านใหม่', 'Reset Password')}</h2>
+            <h2>{tr('เธ•เธฑเนเธเธฃเธซเธฑเธชเธเนเธฒเธเนเธซเธกเน', 'Reset Password')}</h2>
 <p className="auth-description">
-  {tr('กรุณากรอกรหัสผ่านใหม่ของคุณ', 'Please enter your new password.')}
+  {tr('เธเธฃเธธเธ“เธฒเธเธฃเธญเธเธฃเธซเธฑเธชเธเนเธฒเธเนเธซเธกเนเธเธญเธเธเธธเธ“', 'Please enter your new password.')}
 </p>
 
             <form
@@ -1244,7 +1295,7 @@ const renderStaffScheduleCell = (barber, hour) => {
                 handleUpdatePassword()
               }}
             >
-              <label>{tr('รหัสผ่านใหม่', 'New Password')}</label>
+              <label>{tr('เธฃเธซเธฑเธชเธเนเธฒเธเนเธซเธกเน', 'New Password')}</label>
               <input
                 type="password"
                 value={newPassword}
@@ -1254,7 +1305,7 @@ const renderStaffScheduleCell = (barber, hour) => {
                 required
               />
 
-              <label>{tr('ยืนยันรหัสผ่านใหม่', 'Confirm New Password')}</label>
+              <label>{tr('เธขเธทเธเธขเธฑเธเธฃเธซเธฑเธชเธเนเธฒเธเนเธซเธกเน', 'Confirm New Password')}</label>
               <input
                 type="password"
                 value={confirmPassword}
@@ -1268,8 +1319,8 @@ const renderStaffScheduleCell = (barber, hour) => {
 
               <button type="submit" disabled={loading}>
               {loading
-  ? tr('กำลังบันทึก...', 'Saving...')
-  : tr('บันทึกรหัสผ่านใหม่', 'Save New Password')}
+  ? tr('เธเธณเธฅเธฑเธเธเธฑเธเธ—เธถเธ...', 'Saving...')
+  : tr('เธเธฑเธเธ—เธถเธเธฃเธซเธฑเธชเธเนเธฒเธเนเธซเธกเน', 'Save New Password')}
               </button>
             </form>
           </section>
@@ -1280,25 +1331,25 @@ const renderStaffScheduleCell = (barber, hour) => {
             <span className="gold-text">MICKEY MEMBERSHIP</span>
            <h2>
   {mode === 'login'
-    ? tr('เข้าสู่ระบบ', 'Sign In')
-    : tr('สมัครสมาชิก', 'Create Account')}
+    ? tr('เน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธ', 'Sign In')
+    : tr('เธชเธกเธฑเธเธฃเธชเธกเธฒเธเธดเธ', 'Create Account')}
 </h2>
 
 <p className="auth-description">
-  {tr('เข้าสู่ระบบเพื่อจองคิวร้านตัดผม', 'Sign in to book your appointment.')}
+  {tr('เน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธเน€เธเธทเนเธญเธเธญเธเธเธดเธงเธฃเนเธฒเธเธ•เธฑเธ”เธเธก', 'Sign in to book your appointment.')}
 </p>
 
             <form onSubmit={handleSubmit}>
               {mode === 'register' && (
                 <>
-                  <label>{tr('ชื่อ-นามสกุล', 'Full Name')}</label>
+                  <label>{tr('เธเธทเนเธญ-เธเธฒเธกเธชเธเธธเธฅ', 'Full Name')}</label>
                   <input
                     value={fullName}
                     onChange={(event) => setFullName(event.target.value)}
                     autoComplete="name"
                     required
                   />
-                  <label>{tr('เบอร์โทรศัพท์', 'Phone Number')}</label>
+                  <label>{tr('เน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เน', 'Phone Number')}</label>
                   <input
                     type="tel"
                     value={phone}
@@ -1309,7 +1360,7 @@ const renderStaffScheduleCell = (barber, hour) => {
                 </>
               )}
 
-              <label>{tr('อีเมล', 'Email')}</label>
+              <label>{tr('เธญเธตเน€เธกเธฅ', 'Email')}</label>
               <input
                 type="email"
                 value={email}
@@ -1317,7 +1368,7 @@ const renderStaffScheduleCell = (barber, hour) => {
                 autoComplete="email"
                 required
               />
-            <label>{tr('รหัสผ่าน', 'Password')}</label>
+            <label>{tr('เธฃเธซเธฑเธชเธเนเธฒเธ', 'Password')}</label>
 <input
   type="password"
   value={password}
@@ -1328,10 +1379,10 @@ const renderStaffScheduleCell = (barber, hour) => {
 
 <button type="submit" disabled={loading}>
   {loading
-    ? tr('กำลังดำเนินการ...', 'Please wait...')
+    ? tr('เธเธณเธฅเธฑเธเธ”เธณเน€เธเธดเธเธเธฒเธฃ...', 'Please wait...')
     : mode === 'login'
-      ? tr('เข้าสู่ระบบ', 'Sign In')
-      : tr('สมัครสมาชิก', 'Create Account')}
+      ? tr('เน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธ', 'Sign In')
+      : tr('เธชเธกเธฑเธเธฃเธชเธกเธฒเธเธดเธ', 'Create Account')}
 </button>
 </form>
 {mode === 'login' && (
@@ -1342,7 +1393,7 @@ const renderStaffScheduleCell = (barber, hour) => {
                   onClick={handleForgotPassword}
                   disabled={loading}
                 >
-                  {tr('ลืมรหัสผ่าน?', 'Forgot Password?')}
+                  {tr('เธฅเธทเธกเธฃเธซเธฑเธชเธเนเธฒเธ?', 'Forgot Password?')}
                 </button>
                 <button
                   type="button"
@@ -1350,15 +1401,15 @@ const renderStaffScheduleCell = (barber, hour) => {
                   onClick={handleGoogleLogin}
                   disabled={loading}
                 >
-                  {tr('เข้าสู่ระบบด้วย Google', 'Sign in with Google')}
+                  {tr('เน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธเธ”เนเธงเธข Google', 'Sign in with Google')}
                 </button>
               </>
             )}
 
            <div className="auth-switch">
   {mode === 'login'
-    ? tr('ยังไม่มีบัญชีสมาชิก?', "Don't have an account?")
-    : tr('มีบัญชีสมาชิกแล้ว?', 'Already have an account?')}
+    ? tr('เธขเธฑเธเนเธกเนเธกเธตเธเธฑเธเธเธตเธชเธกเธฒเธเธดเธ?', "Don't have an account?")
+    : tr('เธกเธตเธเธฑเธเธเธตเธชเธกเธฒเธเธดเธเนเธฅเนเธง?', 'Already have an account?')}
 
   <button
     type="button"
@@ -1368,8 +1419,8 @@ const renderStaffScheduleCell = (barber, hour) => {
     }}
   >
     {mode === 'login'
-      ? tr('สมัครสมาชิก', 'Sign Up')
-      : tr('เข้าสู่ระบบ', 'Sign In')}
+      ? tr('เธชเธกเธฑเธเธฃเธชเธกเธฒเธเธดเธ', 'Sign Up')
+      : tr('เน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธ', 'Sign In')}
   </button>
 </div>
           </section>
@@ -1377,7 +1428,7 @@ const renderStaffScheduleCell = (barber, hour) => {
 
         {user && (isOwner || isBarber) && (route === '/owner' || route === '/barber') && (
           <>
-          <button type="button" className="mobile-sidebar-toggle" aria-label="Open navigation menu" aria-expanded={mobileSidebarOpen} onClick={() => setMobileSidebarOpen(true)}>☰</button>
+          <button type="button" className="mobile-sidebar-toggle" aria-label="Open navigation menu" aria-expanded={mobileSidebarOpen} onClick={() => setMobileSidebarOpen(true)}>โฐ</button>
           {mobileSidebarOpen && <button type="button" className="staff-sidebar-backdrop" aria-label="Close navigation menu" onClick={() => setMobileSidebarOpen(false)} />}
           <aside className={"staff-sidebar " + (mobileSidebarOpen ? "is-open" : "")} onClick={() => setMobileSidebarOpen(false)}>
   <div className="sidebar-brand">
@@ -1393,7 +1444,7 @@ const renderStaffScheduleCell = (barber, hour) => {
       setActiveStaffPage('schedule')
     }}
   >
-    {tr('ตารางคิวร้าน', 'Shop Schedule')}
+    {tr('เธ•เธฒเธฃเธฒเธเธเธดเธงเธฃเนเธฒเธ', 'Shop Schedule')}
   </a>
 
   {!isOwner && (
@@ -1405,7 +1456,7 @@ const renderStaffScheduleCell = (barber, hour) => {
         setActiveStaffPage('my-schedule')
       }}
     >
-      {tr('ตารางงานของฉัน', 'My Schedule')}
+      {tr('เธ•เธฒเธฃเธฒเธเธเธฒเธเธเธญเธเธเธฑเธ', 'My Schedule')}
     </a>
   )}
 
@@ -1419,7 +1470,7 @@ const renderStaffScheduleCell = (barber, hour) => {
           setActiveStaffPage('reports')
         }}
       >
-        {tr('รายงานร้าน', 'Reports')}
+        {tr('เธฃเธฒเธขเธเธฒเธเธฃเนเธฒเธ', 'Reports')}
       </a>
 
       <a
@@ -1430,7 +1481,7 @@ const renderStaffScheduleCell = (barber, hour) => {
           setActiveStaffPage('customers')
         }}
       >
-        {tr('จัดการลูกค้า', 'Customers')}
+        {tr('เธเธฑเธ”เธเธฒเธฃเธฅเธนเธเธเนเธฒ', 'Customers')}
       </a>
 
       <a
@@ -1452,7 +1503,7 @@ const renderStaffScheduleCell = (barber, hour) => {
           setActiveStaffPage('barbers')
         }}
       >
-        {tr('จัดการช่างตัดผม', 'Barbers')}
+        {tr('เธเธฑเธ”เธเธฒเธฃเธเนเธฒเธเธ•เธฑเธ”เธเธก', 'Barbers')}
       </a>
 
       <a
@@ -1463,7 +1514,7 @@ const renderStaffScheduleCell = (barber, hour) => {
           setActiveStaffPage('settings')
         }}
       >
-        {tr('ตั้งค่าร้าน', 'Settings')}
+        {tr('เธ•เธฑเนเธเธเนเธฒเธฃเนเธฒเธ', 'Settings')}
       </a>
     </>
   )}
@@ -1473,7 +1524,7 @@ const renderStaffScheduleCell = (barber, hour) => {
     onClick={() => setShowLogoutConfirm(true)}
     disabled={loading}
   >
-    {tr('ออกจากระบบ', 'Sign Out')}
+    {tr('เธญเธญเธเธเธฒเธเธฃเธฐเธเธ', 'Sign Out')}
   </button>
 </aside>
           </>
@@ -1487,16 +1538,16 @@ const renderStaffScheduleCell = (barber, hour) => {
               <span className="gold-text">SHOP DAILY SCHEDULE</span>
               <div className="staff-schedule-heading">
                 <div>
-                  <h2>{tr('ตารางงานช่างทุกคน', 'All Barbers Schedule')}</h2>
-                  <p>{tr('ภาพรวมคิวของร้าน แยกตามช่างและช่วงเวลา · ช่อง — คือไม่มีรายการจอง', 'Shop-wide bookings by barber and time. — means no booking is listed.')}</p>
+                  <h2>{tr('เธ•เธฒเธฃเธฒเธเธเธฒเธเธเนเธฒเธเธ—เธธเธเธเธ', 'All Barbers Schedule')}</h2>
+                  <p>{tr('เธ เธฒเธเธฃเธงเธกเธเธดเธงเธเธญเธเธฃเนเธฒเธ เนเธขเธเธ•เธฒเธกเธเนเธฒเธเนเธฅเธฐเธเนเธงเธเน€เธงเธฅเธฒ ยท เธเนเธญเธ โ€” เธเธทเธญเนเธกเนเธกเธตเธฃเธฒเธขเธเธฒเธฃเธเธญเธ', 'Shop-wide bookings by barber and time. โ€” means no booking is listed.')}</p>
                 </div>
-                <label>{tr('วันที่', 'Date')}
+                <label>{tr('เธงเธฑเธเธ—เธตเน', 'Date')}
                   <input type="date" value={scheduleDate} onChange={(event) => setScheduleDate(event.target.value)} />
                 </label>
               </div>
               <div className="customer-schedule-scroll">
                 <table className="staff-schedule-table">
-                  <thead><tr><th>{tr('ช่าง', 'Barber')}</th>{scheduleHours.map((hour) => <th key={hour}>{String(hour).padStart(2, '0')}:00</th>)}</tr></thead>
+                  <thead><tr><th>{tr('เธเนเธฒเธ', 'Barber')}</th>{scheduleHours.map((hour) => <th key={hour}>{String(hour).padStart(2, '0')}:00</th>)}</tr></thead>
                   <tbody>
                     {barbers.map((barber) => (
                       <tr key={barber.id}>
@@ -1506,7 +1557,7 @@ const renderStaffScheduleCell = (barber, hour) => {
                         ))}
                       </tr>
                     ))}
-                    {!barbers.length && <tr><td colSpan={11}>{tr('ไม่พบรายชื่อช่าง', 'No barbers found.')}</td></tr>}
+                    {!barbers.length && <tr><td colSpan={11}>{tr('เนเธกเนเธเธเธฃเธฒเธขเธเธทเนเธญเธเนเธฒเธ', 'No barbers found.')}</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -1522,35 +1573,35 @@ const renderStaffScheduleCell = (barber, hour) => {
               <>
             <section id="owner-reports" className="auth-card owner-reports-section">
               <span className="gold-text">OWNER REPORTS</span>
-              <h2>{tr('รายงานยอดขายและบริการ', 'Sales & Service Reports')}</h2>
+              <h2>{tr('เธฃเธฒเธขเธเธฒเธเธขเธญเธ”เธเธฒเธขเนเธฅเธฐเธเธฃเธดเธเธฒเธฃ', 'Sales & Service Reports')}</h2>
 <section className="auth-card today-overview">
   <span className="gold-text">TODAY OVERVIEW</span>
-  <h2>{tr('ภาพรวมวันนี้', 'Today Overview')}</h2>
+  <h2>{tr('เธ เธฒเธเธฃเธงเธกเธงเธฑเธเธเธตเน', 'Today Overview')}</h2>
 
   <div className="booking-summary">
 
     <div className="summary-row">
-      <span>{tr('คิววันนี้', "Today's Bookings")}</span>
+      <span>{tr('เธเธดเธงเธงเธฑเธเธเธตเน', "Today's Bookings")}</span>
      <strong>
-        {todayOwnerBookings.length} {tr('รายการ', 'bookings')}
+        {todayOwnerBookings.length} {tr('เธฃเธฒเธขเธเธฒเธฃ', 'bookings')}
      </strong>
     </div>
 
     <div className="summary-row">
-      <span>{tr('คิวที่เสร็จสิ้นวันนี้', 'Completed Today')}</span>
-      <strong>{todayCompletedBookings.length} {tr('รายการ', 'bookings')}</strong>
+      <span>{tr('เธเธดเธงเธ—เธตเนเน€เธชเธฃเนเธเธชเธดเนเธเธงเธฑเธเธเธตเน', 'Completed Today')}</span>
+      <strong>{todayCompletedBookings.length} {tr('เธฃเธฒเธขเธเธฒเธฃ', 'bookings')}</strong>
     </div>
     <div className="summary-row">
-      <span>{tr('ยกเลิกวันนี้', 'Cancelled Today')}</span>
-      <strong>{todayCancelledBookings.length} {tr('รายการ', 'bookings')}</strong>
+      <span>{tr('เธขเธเน€เธฅเธดเธเธงเธฑเธเธเธตเน', 'Cancelled Today')}</span>
+      <strong>{todayCancelledBookings.length} {tr('เธฃเธฒเธขเธเธฒเธฃ', 'bookings')}</strong>
     </div>
     <div className="summary-row">
-      <span>{tr('ไม่มาตามนัดวันนี้', 'No-show Today')}</span>
-      <strong>{todayNoShowBookings.length} {tr('รายการ', 'bookings')}</strong>
+      <span>{tr('เนเธกเนเธกเธฒเธ•เธฒเธกเธเธฑเธ”เธงเธฑเธเธเธตเน', 'No-show Today')}</span>
+      <strong>{todayNoShowBookings.length} {tr('เธฃเธฒเธขเธเธฒเธฃ', 'bookings')}</strong>
     </div>
 
     <div className="summary-row summary-revenue">
-      <span>{tr('ยอดบริการที่เสร็จสิ้นวันนี้', "Today's Revenue")}</span>
+      <span>{tr('เธขเธญเธ”เธเธฃเธดเธเธฒเธฃเธ—เธตเนเน€เธชเธฃเนเธเธชเธดเนเธเธงเธฑเธเธเธตเน', "Today's Revenue")}</span>
       <strong>{money(todayRevenue)}</strong>
     </div>
 
@@ -1562,34 +1613,34 @@ const renderStaffScheduleCell = (barber, hour) => {
     onClick={loadOwnerBookings}
     disabled={loading}
   >
-    {tr('รีเฟรชข้อมูล', 'Refresh Data')}
+    {tr('เธฃเธตเน€เธเธฃเธเธเนเธญเธกเธนเธฅ', 'Refresh Data')}
   </button>
 </section>
               <div className="booking-summary">
                 <div className="summary-row">
-                  <span>{tr('รายได้เดือนนี้ (เฉพาะ Completed)', 'Monthly Revenue (Completed Only)')}</span>
+                  <span>{tr('เธฃเธฒเธขเนเธ”เนเน€เธ”เธทเธญเธเธเธตเน (เน€เธเธเธฒเธฐ Completed)', 'Monthly Revenue (Completed Only)')}</span>
                   <strong>{money(monthRevenue)}</strong>
                 </div>
                 <div className="summary-row">
-                  <span>{tr('จำนวนบริการที่เสร็จสิ้นเดือนนี้', 'Completed Services This Month')}</span>
+                  <span>{tr('เธเธณเธเธงเธเธเธฃเธดเธเธฒเธฃเธ—เธตเนเน€เธชเธฃเนเธเธชเธดเนเธเน€เธ”เธทเธญเธเธเธตเน', 'Completed Services This Month')}</span>
                   <strong>{monthCompletedBookings.length}</strong>
                 </div>
               </div>
-              <h3>{tr('บริการยอดนิยมแยกตามช่าง', 'Popular Services by Barber')}</h3>
+              <h3>{tr('เธเธฃเธดเธเธฒเธฃเธขเธญเธ”เธเธดเธขเธกเนเธขเธเธ•เธฒเธกเธเนเธฒเธ', 'Popular Services by Barber')}</h3>
               <div className="owner-table-wrap">
                 <table className="owner-booking-table">
-                  <thead><tr><th>{tr('บริการ', 'Service')}</th><th>{tr('ช่าง', 'Barber')}</th><th>{tr('จำนวนที่ให้บริการจริง', 'Completed')}</th><th>{tr('รายได้', 'Revenue')}</th></tr></thead>
+                  <thead><tr><th>{tr('เธเธฃเธดเธเธฒเธฃ', 'Service')}</th><th>{tr('เธเนเธฒเธ', 'Barber')}</th><th>{tr('เธเธณเธเธงเธเธ—เธตเนเนเธซเนเธเธฃเธดเธเธฒเธฃเธเธฃเธดเธ', 'Completed')}</th><th>{tr('เธฃเธฒเธขเนเธ”เน', 'Revenue')}</th></tr></thead>
                   <tbody>
                     {completedServicePerformance.map((item) => (
                       <tr key={`${item.service}-${item.barber}`}>
                         <td>{item.service}</td><td>{item.barber}</td><td>{item.count}</td><td>{money(item.revenue)}</td>
                       </tr>
                     ))}
-                    {!completedServicePerformance.length && <tr><td colSpan={4}>{tr('ยังไม่มีรายการ Completed สำหรับรายงาน', 'No completed bookings available for reports yet.')}</td></tr>}
+                    {!completedServicePerformance.length && <tr><td colSpan={4}>{tr('เธขเธฑเธเนเธกเนเธกเธตเธฃเธฒเธขเธเธฒเธฃ Completed เธชเธณเธซเธฃเธฑเธเธฃเธฒเธขเธเธฒเธ', 'No completed bookings available for reports yet.')}</td></tr>}
                   </tbody>
                 </table>
               </div>
-              <p className="booking-note">{tr('รายงานนี้นับเฉพาะคิว Completed และอ้างอิงรายการจองที่โหลดจากระบบ', 'Reports count Completed bookings only and use bookings currently loaded from the system.')}</p>
+              <p className="booking-note">{tr('เธฃเธฒเธขเธเธฒเธเธเธตเนเธเธฑเธเน€เธเธเธฒเธฐเธเธดเธง Completed เนเธฅเธฐเธญเนเธฒเธเธญเธดเธเธฃเธฒเธขเธเธฒเธฃเธเธญเธเธ—เธตเนเนเธซเธฅเธ”เธเธฒเธเธฃเธฐเธเธ', 'Reports count Completed bookings only and use bookings currently loaded from the system.')}</p>
             </section>
 
               </>
@@ -1598,11 +1649,11 @@ const renderStaffScheduleCell = (barber, hour) => {
             {activeStaffPage === 'schedule' && (
             <section className="auth-card booking-history">
               <span className="gold-text">ALL BOOKINGS</span>
-              <h2>{tr('รายการจองของร้าน', 'All Shop Bookings')}</h2>
+              <h2>{tr('เธฃเธฒเธขเธเธฒเธฃเธเธญเธเธเธญเธเธฃเนเธฒเธ', 'All Shop Bookings')}</h2>
               {ownerBookings.length === 0 && (
                <p className="booking-note">
   {tr(
-    'ยังไม่พบรายการจอง หรือบัญชีไม่มีสิทธิ์อ่านข้อมูล',
+    'เธขเธฑเธเนเธกเนเธเธเธฃเธฒเธขเธเธฒเธฃเธเธญเธ เธซเธฃเธทเธญเธเธฑเธเธเธตเนเธกเนเธกเธตเธชเธดเธ—เธเธดเนเธญเนเธฒเธเธเนเธญเธกเธนเธฅ',
     'No bookings found, or this account does not have permission to view them.'
   )}
 </p>
@@ -1615,14 +1666,14 @@ const renderStaffScheduleCell = (barber, hour) => {
 
 <thead>
   <tr>
-    <th>{tr('ชื่อลูกค้า', 'Customer')}</th>
-    <th>{tr('การบริการ', 'Service')}</th>
-    <th>{tr('ชื่อช่าง', 'Barber')}</th>
-    <th>{tr('วันเวลา', 'Date & Time')}</th>
-    <th>{tr('รหัสจอง', 'Booking ID')}</th>
-    <th>{tr('สถานะ', 'Status')}</th>
-    <th>{tr('การชำระเงิน', 'Payment')}</th>
-    <th>{tr('ราคา', 'Price')}</th>
+    <th>{tr('เธเธทเนเธญเธฅเธนเธเธเนเธฒ', 'Customer')}</th>
+    <th>{tr('เธเธฒเธฃเธเธฃเธดเธเธฒเธฃ', 'Service')}</th>
+    <th>{tr('เธเธทเนเธญเธเนเธฒเธ', 'Barber')}</th>
+    <th>{tr('เธงเธฑเธเน€เธงเธฅเธฒ', 'Date & Time')}</th>
+    <th>{tr('เธฃเธซเธฑเธชเธเธญเธ', 'Booking ID')}</th>
+    <th>{tr('เธชเธ–เธฒเธเธฐ', 'Status')}</th>
+    <th>{tr('เธเธฒเธฃเธเธณเธฃเธฐเน€เธเธดเธ', 'Payment')}</th>
+    <th>{tr('เธฃเธฒเธเธฒ', 'Price')}</th>
   </tr>
 </thead>
 <tbody>
@@ -1649,15 +1700,15 @@ const renderStaffScheduleCell = (barber, hour) => {
             {activeStaffPage === 'customers' && (
               <section className="auth-card customer-management">
               <span id="owner-customers" className="gold-text">CUSTOMER MANAGEMENT</span>
-              <h2>{tr('จัดการข้อมูลลูกค้า', 'Customer Management')}</h2>
+              <h2>{tr('เธเธฑเธ”เธเธฒเธฃเธเนเธญเธกเธนเธฅเธฅเธนเธเธเนเธฒ', 'Customer Management')}</h2>
 
               <p>
-                {tr('ลูกค้าทั้งหมด', 'Total Customers')} {ownerCustomers.length} {tr('คน', 'customers')}
+                {tr('เธฅเธนเธเธเนเธฒเธ—เธฑเนเธเธซเธกเธ”', 'Total Customers')} {ownerCustomers.length} {tr('เธเธ', 'customers')}
               </p>
 
               <input
                 type="search"
-                placeholder={tr('ค้นหาชื่อหรือเบอร์โทรศัพท์...', 'Search name or phone number...')}
+                placeholder={tr('เธเนเธเธซเธฒเธเธทเนเธญเธซเธฃเธทเธญเน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เน...', 'Search name or phone number...')}
                 value={customerSearch}
                 onChange={(event) =>
                   setCustomerSearch(event.target.value)
@@ -1668,10 +1719,10 @@ const renderStaffScheduleCell = (barber, hour) => {
                 <table className="owner-booking-table">
                   <thead>
                     <tr>
-    <th>{tr('ชื่อลูกค้า', 'Customer Name')}</th>
-    <th>{tr('เบอร์โทรศัพท์', 'Phone Number')}</th>
-    <th>{tr('อีเมล', 'Email')}</th>
-    <th>{tr('รายละเอียด', 'Details')}</th>
+    <th>{tr('เธเธทเนเธญเธฅเธนเธเธเนเธฒ', 'Customer Name')}</th>
+    <th>{tr('เน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เน', 'Phone Number')}</th>
+    <th>{tr('เธญเธตเน€เธกเธฅ', 'Email')}</th>
+    <th>{tr('เธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”', 'Details')}</th>
   </tr>
 </thead>
 
@@ -1695,7 +1746,7 @@ const renderStaffScheduleCell = (barber, hour) => {
                               className="refresh-button"
                               onClick={() => setSelectedCustomer(item)}
                             >
-                              {tr('ดูข้อมูล', 'View Details')}
+                              {tr('เธ”เธนเธเนเธญเธกเธนเธฅ', 'View Details')}
                             </button>
                           </td>
                         </tr>
@@ -1706,7 +1757,7 @@ const renderStaffScheduleCell = (barber, hour) => {
 
               {ownerCustomers.length === 0 && (
                 <p className="booking-note">
-                  {tr('ยังไม่พบข้อมูลลูกค้า', 'No customer information found.')}
+                  {tr('เธขเธฑเธเนเธกเนเธเธเธเนเธญเธกเธนเธฅเธฅเธนเธเธเนเธฒ', 'No customer information found.')}
                 </p>
               )}
 
@@ -1718,7 +1769,7 @@ const renderStaffScheduleCell = (barber, hour) => {
           ? renderCustomerEditForm(selectedCustomer.id)
           : (
             <button type="button" onClick={() => startCustomerEdit(selectedCustomer)}>
-              {tr('แก้ไขข้อมูลลูกค้า', 'Edit customer details')}
+              {tr('เนเธเนเนเธเธเนเธญเธกเธนเธฅเธฅเธนเธเธเนเธฒ', 'Edit customer details')}
             </button>
           )}
       </div>
@@ -1726,12 +1777,12 @@ const renderStaffScheduleCell = (barber, hour) => {
 
     <div className="customer-details-header">
       <span className="gold-text">CUSTOMER PROFILE</span>
-      <h3>{tr('รายละเอียดข้อมูลลูกค้า', 'Customer Details')}</h3>
+      <h3>{tr('เธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เธเนเธญเธกเธนเธฅเธฅเธนเธเธเนเธฒ', 'Customer Details')}</h3>
     </div>
 
     <div className="customer-details-list">
       <div className="customer-detail-item">
-        <span className="customer-detail-label">   {tr('ชื่อลูกค้า', 'Customer Name')} </span>
+        <span className="customer-detail-label">   {tr('เธเธทเนเธญเธฅเธนเธเธเนเธฒ', 'Customer Name')} </span>
         <span className="customer-detail-value">
           {selectedCustomer.full_name || '-'}
         </span>
@@ -1739,7 +1790,7 @@ const renderStaffScheduleCell = (barber, hour) => {
 
       <div className="customer-detail-item">
         <span className="customer-detail-label">
-          {tr('เบอร์โทรศัพท์', 'Phone Number')} </span>
+          {tr('เน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เน', 'Phone Number')} </span>
         <span className="customer-detail-value">
           {selectedCustomer.phone || '-'}
         </span>
@@ -1747,7 +1798,7 @@ const renderStaffScheduleCell = (barber, hour) => {
 
       <div className="customer-detail-item">
         <span className="customer-detail-label">
-         {tr('อีเมล', 'Email')}
+         {tr('เธญเธตเน€เธกเธฅ', 'Email')}
         </span>
         <span className="customer-detail-value">
           {selectedCustomer.email || '-'}
@@ -1756,7 +1807,7 @@ const renderStaffScheduleCell = (barber, hour) => {
 
       <div className="customer-detail-item">
         <span className="customer-detail-label">
-  {tr('บันทึกเพิ่มเติม', 'Additional Notes')}
+  {tr('เธเธฑเธเธ—เธถเธเน€เธเธดเนเธกเน€เธ•เธดเธก', 'Additional Notes')}
 </span>
         <span className="customer-detail-value">
           {selectedCustomer.notes || '-'}
@@ -1769,7 +1820,7 @@ const renderStaffScheduleCell = (barber, hour) => {
         className="customer-close-button"
         onClick={() => setSelectedCustomer(null)}
       >
-        {tr('ปิดรายละเอียด', 'Close Details')}
+        {tr('เธเธดเธ”เธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”', 'Close Details')}
       </button>
     </div>
   )}
@@ -1778,13 +1829,13 @@ const renderStaffScheduleCell = (barber, hour) => {
             {activeStaffPage === 'barbers' && (
               <section className="auth-card">
                 <span className="gold-text">BARBER MANAGEMENT</span>
-                <h2>{tr('จัดการช่างตัดผม', 'Barber Management')}</h2>
-                <p>{tr('จัดการวันหยุดประจำสัปดาห์ของช่างแต่ละคน', 'Manage each barber’s recurring weekly days off.')}</p>
+                <h2>{tr('เธเธฑเธ”เธเธฒเธฃเธเนเธฒเธเธ•เธฑเธ”เธเธก', 'Barber Management')}</h2>
+                <p>{tr('เธเธฑเธ”เธเธฒเธฃเธงเธฑเธเธซเธขเธธเธ”เธเธฃเธฐเธเธณเธชเธฑเธเธ”เธฒเธซเนเธเธญเธเธเนเธฒเธเนเธ•เนเธฅเธฐเธเธ', 'Manage each barberโ€s recurring weekly days off.')}</p>
     {isOwner && (<section className="staff-dayoff-manager">
                   <div className="staff-dayoff-heading">
                     <div>
-                      <h3>{tr('กำหนดวันหยุดประจำสัปดาห์ของช่าง', 'Set recurring barber days off')}</h3>
-                      <p>{tr('เลือกช่างและติ๊กวันที่หยุดประจำ ระบบจะแสดงวันหยุดเป็นช่องสีดำในตาราง', 'Choose a barber and select recurring days off. These appear as black day-off cells.')}</p>
+                      <h3>{tr('เธเธณเธซเธเธ”เธงเธฑเธเธซเธขเธธเธ”เธเธฃเธฐเธเธณเธชเธฑเธเธ”เธฒเธซเนเธเธญเธเธเนเธฒเธ', 'Set recurring barber days off')}</h3>
+                      <p>{tr('เน€เธฅเธทเธญเธเธเนเธฒเธเนเธฅเธฐเธ•เธดเนเธเธงเธฑเธเธ—เธตเนเธซเธขเธธเธ”เธเธฃเธฐเธเธณ เธฃเธฐเธเธเธเธฐเนเธชเธ”เธเธงเธฑเธเธซเธขเธธเธ”เน€เธเนเธเธเนเธญเธเธชเธตเธ”เธณเนเธเธ•เธฒเธฃเธฒเธ', 'Choose a barber and select recurring days off. These appear as black day-off cells.')}</p>
                     </div>
                     <select
                       value={selectedDayOffBarberId || barbers[0]?.id || ''}
@@ -1798,13 +1849,13 @@ const renderStaffScheduleCell = (barber, hour) => {
                   </div>
                   <div className="staff-dayoff-days">
                     {[
-                      tr('อาทิตย์', 'Sunday'),
-                      tr('จันทร์', 'Monday'),
-                      tr('อังคาร', 'Tuesday'),
-                      tr('พุธ', 'Wednesday'),
-                      tr('พฤหัสบดี', 'Thursday'),
-                      tr('ศุกร์', 'Friday'),
-                      tr('เสาร์', 'Saturday'),
+                      tr('เธญเธฒเธ—เธดเธ•เธขเน', 'Sunday'),
+                      tr('เธเธฑเธเธ—เธฃเน', 'Monday'),
+                      tr('เธญเธฑเธเธเธฒเธฃ', 'Tuesday'),
+                      tr('เธเธธเธ', 'Wednesday'),
+                      tr('เธเธคเธซเธฑเธชเธเธ”เธต', 'Thursday'),
+                      tr('เธจเธธเธเธฃเน', 'Friday'),
+                      tr('เน€เธชเธฒเธฃเน', 'Saturday'),
                     ].map((label, weekday) => (
                       <label key={weekday}>
                         <input
@@ -1833,8 +1884,8 @@ const renderStaffScheduleCell = (barber, hour) => {
             {activeStaffPage === 'settings' && (
               <section className="auth-card">
                 <span className="gold-text">SHOP SETTINGS</span>
-                <h2>{tr('ตั้งค่าร้าน', 'Shop Settings')}</h2>
-                <p>{tr('หน้านี้ยังอยู่ระหว่างพัฒนา', 'This page is not implemented yet.')}</p>
+                <h2>{tr('เธ•เธฑเนเธเธเนเธฒเธฃเนเธฒเธ', 'Shop Settings')}</h2>
+                <p>{tr('เธซเธเนเธฒเธเธตเนเธขเธฑเธเธญเธขเธนเนเธฃเธฐเธซเธงเนเธฒเธเธเธฑเธ’เธเธฒ', 'This page is not implemented yet.')}</p>
               </section>
             )}
             </>
@@ -1845,8 +1896,8 @@ const renderStaffScheduleCell = (barber, hour) => {
           <>
             {activeStaffPage === 'overview' && (
               <section className="hero">
-              <span className="gold-text">MICKEY BARBERSHOP · BARBER</span>
-              <h2>{tr('ตารางงานช่าง', 'Barber Dashboard')}</h2>
+              <span className="gold-text">MICKEY BARBERSHOP ยท BARBER</span>
+              <h2>{tr('เธ•เธฒเธฃเธฒเธเธเธฒเธเธเนเธฒเธ', 'Barber Dashboard')}</h2>
               <p>{staffProfile?.full_name || user.email}</p>
 
               </section>
@@ -1862,18 +1913,18 @@ const renderStaffScheduleCell = (barber, hour) => {
       <div>
         <h2>
           {activeStaffPage === 'my-schedule'
-            ? tr('ตารางงานของฉัน', 'My Schedule')
-            : tr('ตารางงานช่างทุกคน', 'All Barbers Schedule')}
+            ? tr('เธ•เธฒเธฃเธฒเธเธเธฒเธเธเธญเธเธเธฑเธ', 'My Schedule')
+            : tr('เธ•เธฒเธฃเธฒเธเธเธฒเธเธเนเธฒเธเธ—เธธเธเธเธ', 'All Barbers Schedule')}
         </h2>
         <p>
           {activeStaffPage === 'my-schedule'
-            ? tr('แสดงเฉพาะคิวของคุณ', 'Showing only your bookings.')
-            : tr('ภาพรวมคิวของร้าน แยกตามช่างและช่วงเวลา · ช่อง — คือไม่มีรายการจอง', 'Shop-wide bookings by barber and time. — means no booking is listed.')}
+            ? tr('เนเธชเธ”เธเน€เธเธเธฒเธฐเธเธดเธงเธเธญเธเธเธธเธ“', 'Showing only your bookings.')
+            : tr('เธ เธฒเธเธฃเธงเธกเธเธดเธงเธเธญเธเธฃเนเธฒเธ เนเธขเธเธ•เธฒเธกเธเนเธฒเธเนเธฅเธฐเธเนเธงเธเน€เธงเธฅเธฒ ยท เธเนเธญเธ โ€” เธเธทเธญเนเธกเนเธกเธตเธฃเธฒเธขเธเธฒเธฃเธเธญเธ', 'Shop-wide bookings by barber and time. โ€” means no booking is listed.')}
         </p>
       </div>
 
       <label>
-        {tr('วันที่', 'Date')}
+        {tr('เธงเธฑเธเธ—เธตเน', 'Date')}
         <input
           type="date"
           value={scheduleDate}
@@ -1886,7 +1937,7 @@ const renderStaffScheduleCell = (barber, hour) => {
       <table className="staff-schedule-table">
         <thead>
           <tr>
-            <th>{tr('ช่าง', 'Barber')}</th>
+            <th>{tr('เธเนเธฒเธ', 'Barber')}</th>
             {scheduleHours.map((hour) => (
               <th key={hour}>{String(hour).padStart(2, '0')}:00</th>
             ))}
@@ -1918,8 +1969,8 @@ const renderStaffScheduleCell = (barber, hour) => {
             <tr>
               <td colSpan={scheduleHours.length + 1}>
                 {activeStaffPage === 'my-schedule'
-                  ? tr('ไม่พบข้อมูลช่างของบัญชีนี้', 'Your barber profile was not found.')
-                  : tr('ไม่พบรายชื่อช่าง', 'No barbers found.')}
+                  ? tr('เนเธกเนเธเธเธเนเธญเธกเธนเธฅเธเนเธฒเธเธเธญเธเธเธฑเธเธเธตเธเธตเน', 'Your barber profile was not found.')
+                  : tr('เนเธกเนเธเธเธฃเธฒเธขเธเธทเนเธญเธเนเธฒเธ', 'No barbers found.')}
               </td>
             </tr>
           )}
@@ -1934,34 +1985,34 @@ const renderStaffScheduleCell = (barber, hour) => {
         {user && !isOwner && route === '/booking' && !customer && (
           <section className="auth-card">
             <span className="gold-text">MICKEY MEMBERSHIP</span>
-            <h2>กรอกข้อมูลสมาชิก</h2>
+            <h2>เธเธฃเธญเธเธเนเธญเธกเธนเธฅเธชเธกเธฒเธเธดเธ</h2>
             <p className="auth-description">
-              กรุณากรอกชื่อและเบอร์โทรศัพท์ก่อนเริ่มใช้งาน
+              เธเธฃเธธเธ“เธฒเธเธฃเธญเธเธเธทเนเธญเนเธฅเธฐเน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เนเธเนเธญเธเน€เธฃเธดเนเธกเนเธเนเธเธฒเธ
             </p>
 
             <form onSubmit={handleCompleteProfile}>
-              <label>{tr('ชื่อ-นามสกุล', 'Full Name')}</label>
+              <label>{tr('เธเธทเนเธญ-เธเธฒเธกเธชเธเธธเธฅ', 'Full Name')}</label>
               <input
                 value={fullName}
                 onChange={(event) => setFullName(event.target.value)}
                 required
               />
-              <label>เบอร์โทรศัพท์</label>
+              <label>เน€เธเธญเธฃเนเนเธ—เธฃเธจเธฑเธเธ—เน</label>
               <input
                 type="tel"
                 value={phone}
                 onChange={(event) => setPhone(event.target.value)}
                 required
               />
-              <label>อีเมล</label>
+              <label>เธญเธตเน€เธกเธฅ</label>
               <input value={user.email || ''} disabled />
               <button type="submit" disabled={loading}>
-                {loading ? 'กำลังบันทึก...' : 'บันทึกข้อมูลสมาชิก'}
+                {loading ? 'เธเธณเธฅเธฑเธเธเธฑเธเธ—เธถเธ...' : 'เธเธฑเธเธ—เธถเธเธเนเธญเธกเธนเธฅเธชเธกเธฒเธเธดเธ'}
               </button>
             </form>
 
             <button className="text-button" onClick={handleLogout}>
-              ออกจากระบบ
+              เธญเธญเธเธเธฒเธเธฃเธฐเธเธ
             </button>
           </section>
         )}
@@ -1972,21 +2023,21 @@ const renderStaffScheduleCell = (barber, hour) => {
               <button className={route === '/booking' ? 'active' : ''} onClick={() => navigate('/booking')}>{tr('\u0e08\u0e2d\u0e07\u0e04\u0e34\u0e27', 'Book Appointment')}</button>
               <button className={route === '/products' ? 'active' : ''} onClick={() => navigate('/products')}>{tr('\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32', 'Products')}</button>
               <button className={route === '/cart' ? 'active' : ''} onClick={() => navigate('/cart')}>{tr('\u0e15\u0e30\u0e01\u0e23\u0e49\u0e32\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32', 'Shopping Cart')}</button>
-              <button className={route === '/account' ? 'active' : ''} onClick={() => navigate('/account')}>{tr('จัดการบัญชี', 'Account Management')}</button>
+              <button className={route === '/account' ? 'active' : ''} onClick={() => navigate('/account')}>{tr('เธเธฑเธ”เธเธฒเธฃเธเธฑเธเธเธต', 'Account Management')}</button>
               <button className="customer-sidebar-logout" onClick={handleLogout}>{tr('\u0e2d\u0e2d\u0e01\u0e08\u0e32\u0e01\u0e23\u0e30\u0e1a\u0e1a', 'Sign Out')}</button>
             </div><section className="auth-card customer-schedule-card unified-booking-card">
-              <span className="gold-text">MICKEY BARBERSHOP · LIVE BOOKING</span>
-              <h2>{tr('เลือกบริการและจองคิว', 'Choose Service & Book')}</h2>
+              <span className="gold-text">MICKEY BARBERSHOP ยท LIVE BOOKING</span>
+              <h2>{tr('เน€เธฅเธทเธญเธเธเธฃเธดเธเธฒเธฃเนเธฅเธฐเธเธญเธเธเธดเธง', 'Choose Service & Book')}</h2>
               <p className="auth-description">
                 {tr(
-                  'เลือกวันที่ก่อน แล้วดูตารางเวลาของช่างทุกคนและกด OPEN เพื่อเริ่มจอง',
-                  'Choose a date, view every barber’s schedule, and tap OPEN to start booking.'
+                  'เน€เธฅเธทเธญเธเธงเธฑเธเธ—เธตเนเธเนเธญเธ เนเธฅเนเธงเธ”เธนเธ•เธฒเธฃเธฒเธเน€เธงเธฅเธฒเธเธญเธเธเนเธฒเธเธ—เธธเธเธเธเนเธฅเธฐเธเธ” OPEN เน€เธเธทเนเธญเน€เธฃเธดเนเธกเธเธญเธ',
+                  'Choose a date, view every barberโ€s schedule, and tap OPEN to start booking.'
                 )}
               </p>
 
               <div className="customer-date-first">
                 <label>
-                  {tr('เลือกวันที่ต้องการจอง', 'Choose Booking Date')}
+                  {tr('เน€เธฅเธทเธญเธเธงเธฑเธเธ—เธตเนเธ•เนเธญเธเธเธฒเธฃเธเธญเธ', 'Choose Booking Date')}
                   <input
                     type="date"
                     value={selectedDate}
@@ -2004,24 +2055,24 @@ const renderStaffScheduleCell = (barber, hour) => {
                 </label>
                 <div className="unified-schedule-heading">
                   <div>
-                    <h3>{tr('ตารางเวลาของช่างทุกคน', 'All Barbers Schedule')}</h3>
-                    <p>{tr('เลือกวันที่ แล้วกด OPEN ในช่วงเวลาที่ต้องการ จากนั้นเลือกบริการและช่าง', 'Choose a date, tap OPEN, then select your service and preferred barber.')}</p>
+                    <h3>{tr('เธ•เธฒเธฃเธฒเธเน€เธงเธฅเธฒเธเธญเธเธเนเธฒเธเธ—เธธเธเธเธ', 'All Barbers Schedule')}</h3>
+                    <p>{tr('เน€เธฅเธทเธญเธเธงเธฑเธเธ—เธตเน เนเธฅเนเธงเธเธ” OPEN เนเธเธเนเธงเธเน€เธงเธฅเธฒเธ—เธตเนเธ•เนเธญเธเธเธฒเธฃ เธเธฒเธเธเธฑเนเธเน€เธฅเธทเธญเธเธเธฃเธดเธเธฒเธฃเนเธฅเธฐเธเนเธฒเธ', 'Choose a date, tap OPEN, then select your service and preferred barber.')}</p>
                   </div>
                   <button type="button" className="schedule-refresh-button" onClick={loadPublicAvailability} disabled={availabilityLoading}>
-                    {availabilityLoading ? tr('กำลังโหลด...', 'Loading...') : tr('รีเฟรช', 'Refresh')}
+                    {availabilityLoading ? tr('เธเธณเธฅเธฑเธเนเธซเธฅเธ”...', 'Loading...') : tr('เธฃเธตเน€เธเธฃเธ', 'Refresh')}
                   </button>
                 </div>
                 <div className="schedule-legend">
                   <span><i className="legend-open" />OPEN</span>
-                  <span><i className="legend-busy" />{tr('ไม่ว่าง', 'Unavailable')}</span>
-                  <span><i className="legend-closed" />{tr('ปิด', 'Closed')}</span>
+                  <span><i className="legend-busy" />{tr('เนเธกเนเธงเนเธฒเธ', 'Unavailable')}</span>
+                  <span><i className="legend-closed" />{tr('เธเธดเธ”', 'Closed')}</span>
                 </div>
                 {availabilityError && <p className="schedule-error">{availabilityError}</p>}
                 <div className="customer-schedule-scroll">
                   <table className="customer-schedule-table">
                     <thead>
                       <tr>
-                        <th>{tr('ช่าง', 'Barber')}</th>
+                        <th>{tr('เธเนเธฒเธ', 'Barber')}</th>
                         {scheduleHours.map((hour) => <th key={hour}>{String(hour).padStart(2, '0')}:00</th>)}
                       </tr>
                     </thead>
@@ -2048,14 +2099,14 @@ const renderStaffScheduleCell = (barber, hour) => {
                                   }}
                                   aria-label={`${barber.full_name} ${time} ${open ? 'OPEN' : 'Unavailable'}`}
                                 >
-                                  {open && !isPast ? 'OPEN' : '—'}
+                                  {open && !isPast ? 'OPEN' : 'โ€”'}
                                 </button>
                               </td>
                             )
                           })}
                         </tr>
                       ))}
-                      {!barbers.length && <tr><td colSpan={11}>{tr('ไม่พบรายชื่อช่างที่เปิดใช้งาน', 'No active barbers found.')}</td></tr>}
+                      {!barbers.length && <tr><td colSpan={11}>{tr('เนเธกเนเธเธเธฃเธฒเธขเธเธทเนเธญเธเนเธฒเธเธ—เธตเนเน€เธเธดเธ”เนเธเนเธเธฒเธ', 'No active barbers found.')}</td></tr>}
                     </tbody>
                   </table>
                 </div>
@@ -2066,26 +2117,26 @@ const renderStaffScheduleCell = (barber, hour) => {
                   if (event.target === event.currentTarget) setShowBookingModal(false)
                 }}>
                   <section className="booking-modal" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
-                    <button type="button" className="booking-modal-close" onClick={() => setShowBookingModal(false)} aria-label={tr('ปิด', 'Close')}>×</button>
+                    <button type="button" className="booking-modal-close" onClick={() => setShowBookingModal(false)} aria-label={tr('เธเธดเธ”', 'Close')}>ร—</button>
                     <span className="gold-text">BOOK YOUR APPOINTMENT</span>
-                    <h3 id="booking-modal-title">{tr('รายละเอียดการจอง', 'Booking Details')}</h3>
-                    <p className="booking-modal-time">{selectedDate} · {selectedTime}</p>
+                    <h3 id="booking-modal-title">{tr('เธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”เธเธฒเธฃเธเธญเธ', 'Booking Details')}</h3>
+                    <p className="booking-modal-time">{selectedDate} ยท {selectedTime}</p>
                     <form onSubmit={handleBooking}>
                       <label>
-                        {tr('เลือกบริการ', 'Choose Service')}
+                        {tr('เน€เธฅเธทเธญเธเธเธฃเธดเธเธฒเธฃ', 'Choose Service')}
                         <select value={selectedService} onChange={(event) => setSelectedService(event.target.value)} required>
-                          <option value="">{tr('-- เลือกบริการ --', '-- Select Service --')}</option>
+                          <option value="">{tr('-- เน€เธฅเธทเธญเธเธเธฃเธดเธเธฒเธฃ --', '-- Select Service --')}</option>
                           {services.map((service) => (
                             <option key={service.id} value={service.id}>
-                              {service.name} — {money(service.price_thb)} ({service.duration_minutes} {tr('นาที', 'min')})
+                              {service.name} โ€” {money(service.price_thb)} ({service.duration_minutes} {tr('เธเธฒเธ—เธต', 'min')})
                             </option>
                           ))}
                         </select>
                       </label>
                       <label>
-                        {tr('เลือกช่าง', 'Choose Barber')}
+                        {tr('เน€เธฅเธทเธญเธเธเนเธฒเธ', 'Choose Barber')}
                         <select value={selectedBarber} onChange={(event) => setSelectedBarber(event.target.value)}>
-                          <option value="">{tr('ช่างคนไหนก็ได้ · ให้ระบบจัดสรร', 'Any Barber · Auto-assign')}</option>
+                          <option value="">{tr('เธเนเธฒเธเธเธเนเธซเธเธเนเนเธ”เน ยท เนเธซเนเธฃเธฐเธเธเธเธฑเธ”เธชเธฃเธฃ', 'Any Barber ยท Auto-assign')}</option>
                           {barbers.map((barber) => <option key={barber.id} value={barber.id}>{barber.full_name}</option>)}
                         </select>
                       </label>
@@ -2093,16 +2144,16 @@ const renderStaffScheduleCell = (barber, hour) => {
                         <div className="unified-service-summary">
                           <span>{chosenService.name}</span>
                           <span>{money(chosenService.price_thb)}</span>
-                          <span>{chosenService.duration_minutes} {tr('นาที', 'min')}</span>
+                          <span>{chosenService.duration_minutes} {tr('เธเธฒเธ—เธต', 'min')}</span>
                         </div>
                       )}
                       {selectedService && selectedBarber && !isCustomerSlotAvailable(selectedBarber, Number(selectedTime.slice(0, 2))) && (
-                        <p className="schedule-error">{tr('ช่างคนนี้ไม่ว่างในช่วงเวลานี้ กรุณาเลือกช่างคนอื่นหรือ Any Barber', 'This barber is unavailable for this time. Choose another barber or Any Barber.')}</p>
+                        <p className="schedule-error">{tr('เธเนเธฒเธเธเธเธเธตเนเนเธกเนเธงเนเธฒเธเนเธเธเนเธงเธเน€เธงเธฅเธฒเธเธตเน เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเธเนเธฒเธเธเธเธญเธทเนเธเธซเธฃเธทเธญ Any Barber', 'This barber is unavailable for this time. Choose another barber or Any Barber.')}</p>
                       )}
                       <div className="booking-modal-actions">
-                        <button type="button" className="text-button" onClick={() => setShowBookingModal(false)}>{tr('กลับไปดูตาราง', 'Back to Schedule')}</button>
+                        <button type="button" className="text-button" onClick={() => setShowBookingModal(false)}>{tr('เธเธฅเธฑเธเนเธเธ”เธนเธ•เธฒเธฃเธฒเธ', 'Back to Schedule')}</button>
                         <button type="submit" disabled={loading || !selectedService || !selectedTime || !availableTimes.includes(selectedTime) || (selectedBarber && !isCustomerSlotAvailable(selectedBarber, Number(selectedTime.slice(0, 2))))}>
-                          {loading ? tr('กำลังจอง...', 'Booking...') : tr('ยืนยันการจอง', 'Confirm Booking')}
+                          {loading ? tr('เธเธณเธฅเธฑเธเธเธญเธ...', 'Booking...') : tr('เธขเธทเธเธขเธฑเธเธเธฒเธฃเธเธญเธ', 'Confirm Booking')}
                         </button>
                       </div>
                     </form>
@@ -2112,10 +2163,10 @@ const renderStaffScheduleCell = (barber, hour) => {
 
               {bookingResult && (
                 <div className="booking-success">
-                  <h3>{tr('จองคิวสำเร็จ!', 'Booking Successful!')}</h3>
-                  <p>{tr('รหัสจอง:', 'Booking ID:')} {bookingResult.booking_code || '-'}</p>
-                  <p>{tr('เวลา:', 'Time:')} {formatDateTime(bookingResult.starts_at, language)}</p>
-                  <p>{tr('ระบบจัดการคำขอจองเรียบร้อยแล้ว', 'Your booking has been processed successfully.')}</p>
+                  <h3>{tr('เธเธญเธเธเธดเธงเธชเธณเน€เธฃเนเธ!', 'Booking Successful!')}</h3>
+                  <p>{tr('เธฃเธซเธฑเธชเธเธญเธ:', 'Booking ID:')} {bookingResult.booking_code || '-'}</p>
+                  <p>{tr('เน€เธงเธฅเธฒ:', 'Time:')} {formatDateTime(bookingResult.starts_at, language)}</p>
+                  <p>{tr('เธฃเธฐเธเธเธเธฑเธ”เธเธฒเธฃเธเธณเธเธญเธเธญเธเน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธง', 'Your booking has been processed successfully.')}</p>
                 </div>
               )}
             </section>
@@ -2123,19 +2174,19 @@ const renderStaffScheduleCell = (barber, hour) => {
 
             <section className="auth-card booking-history customer-booking-history">
               <span className="gold-text">MY BOOKINGS</span>
-              <h2>{tr('ประวัติการจอง', 'Booking History')}</h2>
+              <h2>{tr('เธเธฃเธฐเธงเธฑเธ•เธดเธเธฒเธฃเธเธญเธ', 'Booking History')}</h2>
               <button
                 type="button"
                 className="refresh-button"
                 onClick={loadBookings}
                 disabled={loading}
               >
-                {tr('รีเฟรชรายการ', 'Refresh Bookings')}
+                {tr('เธฃเธตเน€เธเธฃเธเธฃเธฒเธขเธเธฒเธฃ', 'Refresh Bookings')}
               </button>
 
               {bookings.length === 0 && (
                <p className="booking-note">
-  {tr('ยังไม่มีประวัติการจอง', 'No booking history yet.')}
+  {tr('เธขเธฑเธเนเธกเนเธกเธตเธเธฃเธฐเธงเธฑเธ•เธดเธเธฒเธฃเธเธญเธ', 'No booking history yet.')}
 </p>
               )}
 
@@ -2144,12 +2195,12 @@ const renderStaffScheduleCell = (barber, hour) => {
     <table className="customer-history-table">
     <thead>
       <tr>
-       <th>{tr('วันที่', 'Date')}</th>
-<th>{tr('เวลา', 'Time')}</th>
-<th>{tr('บริการ', 'Service')}</th>
-<th>{tr('ช่าง', 'Barber')}</th>
-<th>{tr('ราคา', 'Price')}</th>
-<th>{tr('สถานะ', 'Status')}</th>
+       <th>{tr('เธงเธฑเธเธ—เธตเน', 'Date')}</th>
+<th>{tr('เน€เธงเธฅเธฒ', 'Time')}</th>
+<th>{tr('เธเธฃเธดเธเธฒเธฃ', 'Service')}</th>
+<th>{tr('เธเนเธฒเธ', 'Barber')}</th>
+<th>{tr('เธฃเธฒเธเธฒ', 'Price')}</th>
+<th>{tr('เธชเธ–เธฒเธเธฐ', 'Status')}</th>
       </tr>
     </thead>
 
@@ -2173,7 +2224,7 @@ const renderStaffScheduleCell = (barber, hour) => {
             })}
           </td>
 
-          <td>{booking.service_name_snapshot || tr('บริการ', 'Service')}</td>
+          <td>{booking.service_name_snapshot || tr('เธเธฃเธดเธเธฒเธฃ', 'Service')}</td>
           <td>{booking.barber?.full_name || '-'}</td>
           <td>{money(booking.price_thb_snapshot)}</td>
 
@@ -2191,7 +2242,7 @@ const renderStaffScheduleCell = (barber, hour) => {
                   onClick={() => handleCancelBooking(booking.id)}
                   disabled={loading}
                 >
-                  {tr('ยกเลิกการจอง', 'Cancel Booking')}
+                  {tr('เธขเธเน€เธฅเธดเธเธเธฒเธฃเธเธญเธ', 'Cancel Booking')}
                 </button>
               )}
           </td>
@@ -2207,22 +2258,41 @@ const renderStaffScheduleCell = (barber, hour) => {
 
         {user && !isOwner && route === '/account' && customer && (
           <>
-            <div className="customer-main-nav" aria-label={tr('เมนูหลัก', 'Main navigation')}>
-              <button onClick={() => navigate('/booking')}>{tr('จองคิว', 'Book Appointment')}</button>
-              <button onClick={() => navigate('/products')}>{tr('สินค้า', 'Products')}</button>
-              <button onClick={() => navigate('/cart')}>{tr('ตะกร้าสินค้า', 'Shopping Cart')}</button>
-              <button className="active" onClick={() => navigate('/account')}>{tr('จัดการบัญชี', 'Account Management')}</button>
-              <button className="customer-sidebar-logout" onClick={handleLogout}>{tr('ออกจากระบบ', 'Sign Out')}</button>
+            <div className="customer-main-nav" aria-label={tr('เน€เธกเธเธนเธซเธฅเธฑเธ', 'Main navigation')}>
+              <button onClick={() => navigate('/booking')}>{tr('เธเธญเธเธเธดเธง', 'Book Appointment')}</button>
+              <button onClick={() => navigate('/products')}>{tr('เธชเธดเธเธเนเธฒ', 'Products')}</button>
+              <button onClick={() => navigate('/cart')}>{tr('เธ•เธฐเธเธฃเนเธฒเธชเธดเธเธเนเธฒ', 'Shopping Cart')}</button>
+              <button className="active" onClick={() => navigate('/account')}>{tr('เธเธฑเธ”เธเธฒเธฃเธเธฑเธเธเธต', 'Account Management')}</button>
+              <button className="customer-sidebar-logout" onClick={handleLogout}>{tr('เธญเธญเธเธเธฒเธเธฃเธฐเธเธ', 'Sign Out')}</button>
             </div>
             <section className="hero customer-account-dashboard">
               <span className="gold-text">MICKEY MEMBERSHIP · ACCOUNT</span>
               <h2>{tr('จัดการบัญชี', 'Account Management')}</h2>
               <p>{tr('ยินดีต้อนรับ', 'Welcome')}, {customer.full_name}</p>
-              <div className="customer-account-details">
-                <p><b>{tr('ชื่อ-นามสกุล', 'Full Name')}:</b> {customer.full_name}</p>
-                <p><b>{tr('เบอร์โทรศัพท์', 'Phone')}:</b> {customer.phone}</p>
-                <p><b>{tr('อีเมล', 'Email')}:</b> {customer.email || user.email}</p>
-              </div>
+              {!accountEditing ? (
+                <>
+                  <div className="customer-account-details">
+                    <p><b>{tr('ชื่อ-นามสกุล', 'Full Name')}:</b> {customer.full_name || '-'}</p>
+                    <p><b>{tr('เบอร์โทรศัพท์', 'Phone')}:</b> {customer.phone || '-'}</p>
+                    <p><b>{tr('อีเมล', 'Email')}:</b> {customer.email || user.email}</p>
+                  </div>
+                  <button type="button" onClick={startAccountEdit}>{tr('แก้ไขข้อมูลส่วนตัว', 'Edit Personal Information')}</button>
+                </>
+              ) : (
+                <form className="customer-account-details" onSubmit={saveAccountDetails}>
+                  <label>{tr('ชื่อ-นามสกุล', 'Full Name')}
+                    <input value={accountEditName} onChange={(event) => setAccountEditName(event.target.value)} disabled={accountSaving} required />
+                  </label>
+                  <label>{tr('เบอร์โทรศัพท์', 'Phone Number')}
+                    <input type="tel" value={accountEditPhone} onChange={(event) => setAccountEditPhone(event.target.value)} disabled={accountSaving} required />
+                  </label>
+                  <p><b>{tr('อีเมล', 'Email')}:</b> {customer.email || user.email}</p>
+                  <div className="staff-modal-actions">
+                    <button type="submit" disabled={accountSaving}>{accountSaving ? tr('กำลังบันทึก...', 'Saving...') : tr('บันทึกการแก้ไข', 'Save Changes')}</button>
+                    <button type="button" className="secondary" onClick={() => setAccountEditing(false)} disabled={accountSaving}>{tr('ยกเลิก', 'Cancel')}</button>
+                  </div>
+                </form>
+              )}
               <p>{tr('เข้าสู่ระบบเรียบร้อยแล้ว', 'You are signed in.')}</p>
             </section>
           </>
@@ -2231,7 +2301,7 @@ const renderStaffScheduleCell = (barber, hour) => {
 
         {selectedStaffBooking && (
           <div className="staff-booking-overlay" onClick={(event) => { if (event.target === event.currentTarget) setSelectedStaffBooking(null) }}>
-            <section className="staff-booking-modal" role="dialog" aria-modal="true" aria-label={tr('จัดการคิว', 'Manage booking')}>
+            <section className="staff-booking-modal" role="dialog" aria-modal="true" aria-label={tr('เธเธฑเธ”เธเธฒเธฃเธเธดเธง', 'Manage booking')}>
               {selectedStaffBooking?.customer?.id && (
                 <div className="customer-edit-entry">
                   {String(editingCustomerId) === String(selectedStaffBooking.customer.id)
@@ -2241,23 +2311,23 @@ const renderStaffScheduleCell = (barber, hour) => {
                         type="button"
                         onClick={() => startCustomerEdit(selectedStaffBooking.customer)}
                       >
-                        {tr('แก้ไขข้อมูลลูกค้า', 'Edit customer details')}
+                        {tr('เนเธเนเนเธเธเนเธญเธกเธนเธฅเธฅเธนเธเธเนเธฒ', 'Edit customer details')}
                       </button>
                     )}
                 </div>
               )}
 
-              <button className="staff-modal-close" type="button" onClick={() => setSelectedStaffBooking(null)}>×</button>
+              <button className="staff-modal-close" type="button" onClick={() => setSelectedStaffBooking(null)}>ร—</button>
               <span className="gold-text">BOOKING DETAILS</span>
-              <h2>{selectedStaffBooking.customer?.full_name || tr('ลูกค้า', 'Customer')}</h2>
+              <h2>{selectedStaffBooking.customer?.full_name || tr('เธฅเธนเธเธเนเธฒ', 'Customer')}</h2>
               <div className="staff-booking-details">
-                <p><b>{tr('บริการ', 'Service')}:</b> {selectedStaffBooking.service_name_snapshot || '-'}</p>
-                <p><b>{tr('ช่าง', 'Barber')}:</b> {selectedStaffBooking.barber?.full_name || '-'}</p>
-                <p><b>{tr('เวลา', 'Time')}:</b> {formatDateTime(selectedStaffBooking.starts_at, language)}</p>
-                <p><b>{tr('สถานะ', 'Status')}:</b> {statusLabel(selectedStaffBooking.status, language)}</p>
-                {selectedStaffBooking.customer?.phone && <p><b>{tr('โทรศัพท์', 'Phone')}:</b> {selectedStaffBooking.customer.phone}</p>}
+                <p><b>{tr('เธเธฃเธดเธเธฒเธฃ', 'Service')}:</b> {selectedStaffBooking.service_name_snapshot || '-'}</p>
+                <p><b>{tr('เธเนเธฒเธ', 'Barber')}:</b> {selectedStaffBooking.barber?.full_name || '-'}</p>
+                <p><b>{tr('เน€เธงเธฅเธฒ', 'Time')}:</b> {formatDateTime(selectedStaffBooking.starts_at, language)}</p>
+                <p><b>{tr('เธชเธ–เธฒเธเธฐ', 'Status')}:</b> {statusLabel(selectedStaffBooking.status, language)}</p>
+                {selectedStaffBooking.customer?.phone && <p><b>{tr('เนเธ—เธฃเธจเธฑเธเธ—เน', 'Phone')}:</b> {selectedStaffBooking.customer.phone}</p>}
               </div>
-              <label>{tr('เปลี่ยนสถานะ', 'Change status')}
+              <label>{tr('เน€เธเธฅเธตเนเธขเธเธชเธ–เธฒเธเธฐ', 'Change status')}
                 <select value={selectedStaffBooking.status || 'Confirmed'} disabled={loading} onChange={async (event) => {
                   const nextStatus = event.target.value
                   await handleStaffBookingUpdate(selectedStaffBooking.id, { status: nextStatus })
@@ -2267,8 +2337,8 @@ const renderStaffScheduleCell = (barber, hour) => {
                 </select>
               </label>
               <div className="staff-modal-actions">
-                <button type="button" disabled={loading} onClick={() => handleMoveStaffBooking(selectedStaffBooking)}>{tr('ย้ายคิว', 'Move booking')}</button>
-                <button type="button" className="secondary" onClick={() => setSelectedStaffBooking(null)}>{tr('ปิด', 'Close')}</button>
+                <button type="button" disabled={loading} onClick={() => handleMoveStaffBooking(selectedStaffBooking)}>{tr('เธขเนเธฒเธขเธเธดเธง', 'Move booking')}</button>
+                <button type="button" className="secondary" onClick={() => setSelectedStaffBooking(null)}>{tr('เธเธดเธ”', 'Close')}</button>
               </div>
             </section>
           </div>
@@ -2278,11 +2348,11 @@ const renderStaffScheduleCell = (barber, hour) => {
             if (event.target === event.currentTarget) setShowLogoutConfirm(false)
           }}>
             <section className="staff-logout-dialog" role="alertdialog" aria-modal="true" aria-labelledby="staff-logout-title">
-              <h2 id="staff-logout-title">{tr('ยืนยันออกจากระบบ', 'Confirm Sign Out')}</h2>
-              <p>{tr('คุณต้องการออกจากระบบใช่หรือไม่?', 'Are you sure you want to sign out?')}</p>
+              <h2 id="staff-logout-title">{tr('เธขเธทเธเธขเธฑเธเธญเธญเธเธเธฒเธเธฃเธฐเธเธ', 'Confirm Sign Out')}</h2>
+              <p>{tr('เธเธธเธ“เธ•เนเธญเธเธเธฒเธฃเธญเธญเธเธเธฒเธเธฃเธฐเธเธเนเธเนเธซเธฃเธทเธญเนเธกเน?', 'Are you sure you want to sign out?')}</p>
               <div className="staff-logout-actions">
-                <button type="button" className="secondary" onClick={() => setShowLogoutConfirm(false)} disabled={loading}>{tr('ยกเลิก', 'Cancel')}</button>
-                <button type="button" onClick={handleLogout} disabled={loading}>{loading ? tr('กำลังดำเนินการ...', 'Please wait...') : tr('ยืนยันออกจากระบบ', 'Sign Out')}</button>
+                <button type="button" className="secondary" onClick={() => setShowLogoutConfirm(false)} disabled={loading}>{tr('เธขเธเน€เธฅเธดเธ', 'Cancel')}</button>
+                <button type="button" onClick={handleLogout} disabled={loading}>{loading ? tr('เธเธณเธฅเธฑเธเธ”เธณเน€เธเธดเธเธเธฒเธฃ...', 'Please wait...') : tr('เธขเธทเธเธขเธฑเธเธญเธญเธเธเธฒเธเธฃเธฐเธเธ', 'Sign Out')}</button>
               </div>
             </section>
           </div>
@@ -2290,7 +2360,7 @@ const renderStaffScheduleCell = (barber, hour) => {
         {message && <div className="auth-message" role="status">{message}</div>}
       </main>
 
-      <footer>MICKEY BARBERSHOP © 2026</footer>
+      <footer>MICKEY BARBERSHOP ยฉ 2026</footer>
     </div>
   )
 }
