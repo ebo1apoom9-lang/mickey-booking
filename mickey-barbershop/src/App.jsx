@@ -53,7 +53,9 @@ function App() {
 
  const [route, setRoute] = useState(window.location.pathname || '/login')
 
-const [activeStaffPage, setActiveStaffPage] = useState('overview')
+const [activeStaffPage, setActiveStaffPage] = useState('schedule')
+const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
 const [language, setLanguage] = useState(() => {
   return localStorage.getItem('mickey-language') || 'th'
@@ -1372,21 +1374,14 @@ const renderStaffScheduleCell = (barber, hour) => {
         )}
 
         {user && (isOwner || isBarber) && (route === '/owner' || route === '/barber') && (
-          <aside className="staff-sidebar">
+          <>
+          <button type="button" className="mobile-sidebar-toggle" aria-label="Open navigation menu" aria-expanded={mobileSidebarOpen} onClick={() => setMobileSidebarOpen(true)}>☰</button>
+          {mobileSidebarOpen && <button type="button" className="staff-sidebar-backdrop" aria-label="Close navigation menu" onClick={() => setMobileSidebarOpen(false)} />}
+          <aside className={"staff-sidebar " + (mobileSidebarOpen ? "is-open" : "")} onClick={() => setMobileSidebarOpen(false)}>
   <div className="sidebar-brand">
     MICKEY<span>BARBERSHOP</span>
   </div>
 
-  <a
-    href="#overview"
-    className={activeStaffPage === 'overview' ? 'active' : ''}
-    onClick={(e) => {
-      e.preventDefault()
-      setActiveStaffPage('overview')
-    }}
-  >
-    {tr('ภาพรวม', 'Overview')}
-  </a>
 
   <a
     href="#schedule"
@@ -1462,31 +1457,58 @@ const renderStaffScheduleCell = (barber, hour) => {
 
   <button
     type="button"
-    onClick={handleLogout}
+    onClick={() => setShowLogoutConfirm(true)}
     disabled={loading}
   >
     {tr('ออกจากระบบ', 'Sign Out')}
   </button>
 </aside>
+          </>
         )}
 
         {user && isOwner && route === '/owner' && (
           <>
-            {activeStaffPage === 'overview' && (
+            {activeStaffPage === 'schedule' && (
               <>
-            <section className="hero">
-              <span className="gold-text">MICKEY MANAGEMENT</span>
-              <h2>{tr('แดชบอร์ดเจ้าของร้าน', 'Owner Dashboard')}</h2>
-              <p>{staffProfile?.full_name || user.email}</p>
-              <p>{tr('บัญชีผู้ดูแลระบบร้าน MICKEY BARBERSHOP', 'MICKEY BARBERSHOP Administrator Account')}</p>
-              <button onClick={handleLogout} disabled={loading}>
-                {loading
-  ? tr('กำลังดำเนินการ...', 'Please wait...')
-  : tr('ออกจากระบบ', 'Sign Out')}
-              </button>
-            </section>
+            <section id="staff-schedule" className="auth-card staff-schedule-section">
+              <span className="gold-text">SHOP DAILY SCHEDULE</span>
+              <div className="staff-schedule-heading">
+                <div>
+                  <h2>{tr('ตารางงานช่างทุกคน', 'All Barbers Schedule')}</h2>
+                  <p>{tr('ภาพรวมคิวของร้าน แยกตามช่างและช่วงเวลา · ช่อง — คือไม่มีรายการจอง', 'Shop-wide bookings by barber and time. — means no booking is listed.')}</p>
+                </div>
+                <label>{tr('วันที่', 'Date')}
+                  <input type="date" value={scheduleDate} onChange={(event) => setScheduleDate(event.target.value)} />
+                </label>
+              </div>
+              <div className="customer-schedule-scroll">
+                <table className="staff-schedule-table">
+                  <thead><tr><th>{tr('ช่าง', 'Barber')}</th>{scheduleHours.map((hour) => <th key={hour}>{String(hour).padStart(2, '0')}:00</th>)}</tr></thead>
+                  <tbody>
+                    {barbers.map((barber) => (
+                      <tr key={barber.id}>
+                        <th>{barber.full_name}</th>
+                        {scheduleHours.map((hour) => (
+                          <td key={hour}>{renderStaffScheduleCell(barber, hour)}</td>
+                        ))}
+                      </tr>
+                    ))}
+                    {!barbers.length && <tr><td colSpan={11}>{tr('ไม่พบรายชื่อช่าง', 'No barbers found.')}</td></tr>}
+                  </tbody>
+                </table>
+              </div>
 
-          <section className="auth-card today-overview">
+
+            </section>
+              </>
+            )}
+
+            {activeStaffPage === 'reports' && (
+              <>
+            <section id="owner-reports" className="auth-card owner-reports-section">
+              <span className="gold-text">OWNER REPORTS</span>
+              <h2>{tr('รายงานยอดขายและบริการ', 'Sales & Service Reports')}</h2>
+<section className="auth-card today-overview">
   <span className="gold-text">TODAY OVERVIEW</span>
   <h2>{tr('ภาพรวมวันนี้', 'Today Overview')}</h2>
 
@@ -1528,50 +1550,6 @@ const renderStaffScheduleCell = (barber, hour) => {
     {tr('รีเฟรชข้อมูล', 'Refresh Data')}
   </button>
 </section>
-
-              </>
-            )}
-
-            {activeStaffPage === 'schedule' && (
-              <>
-            <section id="staff-schedule" className="auth-card staff-schedule-section">
-              <span className="gold-text">SHOP DAILY SCHEDULE</span>
-              <div className="staff-schedule-heading">
-                <div>
-                  <h2>{tr('ตารางงานช่างทุกคน', 'All Barbers Schedule')}</h2>
-                  <p>{tr('ภาพรวมคิวของร้าน แยกตามช่างและช่วงเวลา · ช่อง — คือไม่มีรายการจอง', 'Shop-wide bookings by barber and time. — means no booking is listed.')}</p>
-                </div>
-                <label>{tr('วันที่', 'Date')}
-                  <input type="date" value={scheduleDate} onChange={(event) => setScheduleDate(event.target.value)} />
-                </label>
-              </div>
-              <div className="customer-schedule-scroll">
-                <table className="staff-schedule-table">
-                  <thead><tr><th>{tr('ช่าง', 'Barber')}</th>{scheduleHours.map((hour) => <th key={hour}>{String(hour).padStart(2, '0')}:00</th>)}</tr></thead>
-                  <tbody>
-                    {barbers.map((barber) => (
-                      <tr key={barber.id}>
-                        <th>{barber.full_name}</th>
-                        {scheduleHours.map((hour) => (
-                          <td key={hour}>{renderStaffScheduleCell(barber, hour)}</td>
-                        ))}
-                      </tr>
-                    ))}
-                    {!barbers.length && <tr><td colSpan={11}>{tr('ไม่พบรายชื่อช่าง', 'No barbers found.')}</td></tr>}
-                  </tbody>
-                </table>
-              </div>
-
-
-            </section>
-              </>
-            )}
-
-            {activeStaffPage === 'reports' && (
-              <>
-            <section id="owner-reports" className="auth-card owner-reports-section">
-              <span className="gold-text">OWNER REPORTS</span>
-              <h2>{tr('รายงานยอดขายและบริการ', 'Sales & Service Reports')}</h2>
               <div className="booking-summary">
                 <div className="summary-row">
                   <span>{tr('รายได้เดือนนี้ (เฉพาะ Completed)', 'Monthly Revenue (Completed Only)')}</span>
@@ -1855,7 +1833,7 @@ const renderStaffScheduleCell = (barber, hour) => {
               <span className="gold-text">MICKEY BARBERSHOP · BARBER</span>
               <h2>{tr('ตารางงานช่าง', 'Barber Dashboard')}</h2>
               <p>{staffProfile?.full_name || user.email}</p>
-              <button onClick={handleLogout} disabled={loading}>{tr('ออกจากระบบ', 'Sign Out')}</button>
+
               </section>
             )}
 
@@ -2257,6 +2235,20 @@ const renderStaffScheduleCell = (barber, hour) => {
               <div className="staff-modal-actions">
                 <button type="button" disabled={loading} onClick={() => handleMoveStaffBooking(selectedStaffBooking)}>{tr('ย้ายคิว', 'Move booking')}</button>
                 <button type="button" className="secondary" onClick={() => setSelectedStaffBooking(null)}>{tr('ปิด', 'Close')}</button>
+              </div>
+            </section>
+          </div>
+        )}
+        {showLogoutConfirm && isStaffDashboard && (
+          <div className="staff-logout-overlay" role="presentation" onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setShowLogoutConfirm(false)
+          }}>
+            <section className="staff-logout-dialog" role="alertdialog" aria-modal="true" aria-labelledby="staff-logout-title">
+              <h2 id="staff-logout-title">{tr('ยืนยันออกจากระบบ', 'Confirm Sign Out')}</h2>
+              <p>{tr('คุณต้องการออกจากระบบใช่หรือไม่?', 'Are you sure you want to sign out?')}</p>
+              <div className="staff-logout-actions">
+                <button type="button" className="secondary" onClick={() => setShowLogoutConfirm(false)} disabled={loading}>{tr('ยกเลิก', 'Cancel')}</button>
+                <button type="button" onClick={handleLogout} disabled={loading}>{loading ? tr('กำลังดำเนินการ...', 'Please wait...') : tr('ยืนยันออกจากระบบ', 'Sign Out')}</button>
               </div>
             </section>
           </div>

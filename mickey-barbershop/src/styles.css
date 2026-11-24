@@ -1015,3 +1015,73 @@ footer {
   .staff-dayoff-heading select { width: 100%; }
   .staff-open-slot, .staff-blocked-slot, .staff-day-off-slot { min-height: 44px; }
 }
+
+/* Staff mobile drawer and logout confirmation */
+.mobile-sidebar-toggle,
+.staff-sidebar-backdrop { display: none; }
+
+.staff-logout-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, .78);
+  backdrop-filter: blur(3px);
+}
+.staff-logout-dialog {
+  width: min(420px, 100%);
+  padding: 28px;
+  border: 1px solid rgba(212, 175, 55, .55);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #191919, #0d0d0d);
+  color: #f5f0e6;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .6);
+}
+.staff-logout-dialog h2 { margin: 0 0 10px; color: #e8c77e; font-size: 1.25rem; }
+.staff-logout-dialog p { color: #c9c1ae; line-height: 1.6; }
+.staff-logout-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.staff-logout-actions button {
+  min-height: 44px; padding: 10px 16px; border: 1px solid #d4af37;
+  border-radius: 8px; background: linear-gradient(135deg, #f5d779, #b68b20);
+  color: #17130a; font: inherit; font-weight: 700; cursor: pointer;
+}
+.staff-logout-actions button.secondary { border-color: rgba(212,175,55,.4); background: transparent; color: #eee6d5; }
+.staff-logout-actions button:disabled { opacity: .55; cursor: wait; }
+
+@media (max-width: 900px) {
+  .mobile-sidebar-toggle {
+    position: fixed; top: 14px; left: 14px; z-index: 151;
+    display: inline-flex; width: 46px; height: 46px; align-items: center;
+    justify-content: center; border: 1px solid rgba(214,181,109,.55);
+    border-radius: 10px; background: #111; color: #e8c77e;
+    font-size: 24px; cursor: pointer; box-shadow: 0 8px 28px rgba(0,0,0,.35);
+  }
+  .staff-sidebar-backdrop {
+    position: fixed; inset: 0; z-index: 160; display: block;
+    width: 100%; height: 100%; border: 0; background: rgba(0,0,0,.68);
+  }
+  .staff-sidebar {
+    position: fixed !important; top: 0; bottom: 0; left: 0; z-index: 170;
+    width: min(300px, 84vw) !important; height: 100dvh; margin: 0 !important;
+    padding: 76px 18px 24px; overflow-y: auto;
+    display: flex !important; flex-direction: column !important;
+    flex-wrap: nowrap !important; align-items: stretch !important;
+    gap: 8px; border-radius: 0 16px 16px 0;
+    transform: translateX(-105%); transition: transform .24s ease;
+    box-shadow: 18px 0 48px rgba(0,0,0,.45);
+  }
+  .staff-sidebar.is-open { transform: translateX(0); }
+  .sidebar-brand { width: 100% !important; margin-bottom: 12px; }
+  .staff-sidebar a, .staff-sidebar button {
+    width: 100% !important; flex: 0 0 auto !important; text-align: left !important;
+  }
+  .app-shell:has(.staff-sidebar) .main { width: 100% !important; margin: 0 auto !important; }
+  .app-shell:has(.staff-sidebar) .main > .hero:first-child { padding-top: 68px; }
+}
+@media (max-width: 480px) {
+  .staff-logout-dialog { padding: 24px 18px; }
+  .staff-logout-actions { flex-direction: column-reverse; }
+  .staff-logout-actions button { width: 100%; }
+}
