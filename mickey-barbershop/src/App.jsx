@@ -1562,19 +1562,6 @@ const renderStaffScheduleCell = (barber, hour) => {
     {tr('ตารางคิวร้าน', 'Shop Schedule')}
   </a>
 
-  {!isOwner && (
-    <a
-      href="#my-schedule"
-      className={activeStaffPage === 'my-schedule' ? 'active' : ''}
-      onClick={(e) => {
-        e.preventDefault()
-        setActiveStaffPage('my-schedule')
-      }}
-    >
-      {tr('ตารางงานของฉัน', 'My Schedule')}
-    </a>
-  )}
-
   {isOwner && (
     <>
       <a
@@ -2134,24 +2121,14 @@ const renderStaffScheduleCell = (barber, hour) => {
               </section>
             )}
 
-           {(activeStaffPage === 'schedule' || activeStaffPage === 'my-schedule') && (
+           {activeStaffPage === 'schedule' && (
   <section id="staff-schedule" className="auth-card staff-schedule-section">
-    <span className="gold-text">
-      {activeStaffPage === 'my-schedule' ? 'MY DAILY SCHEDULE' : 'SHOP DAILY SCHEDULE'}
-    </span>
+    <span className="gold-text">SHOP & BARBER DAILY SCHEDULE</span>
 
     <div className="staff-schedule-heading">
       <div>
-        <h2>
-          {activeStaffPage === 'my-schedule'
-            ? tr('ตารางงานของฉัน', 'My Schedule')
-            : tr('ตารางงานช่างทุกคน', 'All Barbers Schedule')}
-        </h2>
-        <p>
-          {activeStaffPage === 'my-schedule'
-            ? tr('แสดงเฉพาะคิวของคุณ', 'Showing only your bookings.')
-            : tr('ภาพรวมคิวของร้าน แยกตามช่างและช่วงเวลา · ช่อง — คือไม่มีรายการจอง', 'Shop-wide bookings by barber and time. — means no booking is listed.')}
-        </p>
+        <h2>{tr('ตารางคิวช่างและคิวร้าน', 'Shop & Barber Schedule')}</h2>
+        <p>{tr('รวมคิวของร้านและตารางงานช่างทุกคนไว้หน้าเดียว แยกตามช่างและช่วงเวลา · ช่อง — คือไม่มีรายการจอง', 'All shop bookings and every barber’s schedule in one view, grouped by barber and time. — means no booking is listed.')}</p>
       </div>
 
       <label>
@@ -2176,12 +2153,7 @@ const renderStaffScheduleCell = (barber, hour) => {
         </thead>
 
         <tbody>
-          {(activeStaffPage === 'my-schedule'
-            ? barbers.filter(
-                (barber) => String(barber.id) === String(staffProfile?.id)
-              )
-            : barbers
-          ).map((barber) => (
+          {barbers.map((barber) => (
             <tr key={barber.id}>
               <th>{barber.full_name}</th>
 
@@ -2191,17 +2163,10 @@ const renderStaffScheduleCell = (barber, hour) => {
             </tr>
           ))}
 
-          {(activeStaffPage === 'my-schedule'
-            ? barbers.filter(
-                (barber) => String(barber.id) === String(staffProfile?.id)
-              ).length === 0
-            : barbers.length === 0
-          ) && (
+          {barbers.length === 0 && (
             <tr>
               <td colSpan={scheduleHours.length + 1}>
-                {activeStaffPage === 'my-schedule'
-                  ? tr('ไม่พบข้อมูลช่างของบัญชีนี้', 'Your barber profile was not found.')
-                  : tr('ไม่พบรายชื่อช่าง', 'No barbers found.')}
+                {tr('ไม่พบรายชื่อช่าง', 'No barbers found.')}
               </td>
             </tr>
           )}
