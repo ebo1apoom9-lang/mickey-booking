@@ -1980,9 +1980,6 @@ const renderStaffScheduleCell = (barber, hour) => {
               <p>เบอร์โทรศัพท์: {customer.phone}</p>
               <p>{customer.email || user.email}</p>
               <p>เข้าสู่ระบบเรียบร้อยแล้ว</p>
-              <button onClick={handleLogout} disabled={loading}>
-                {loading ? 'กำลังดำเนินการ...' : 'ออกจากระบบ'}
-              </button>
             </section>
             <section className="auth-card customer-schedule-card unified-booking-card">
               <span className="gold-text">MICKEY BARBERSHOP · LIVE BOOKING</span>
@@ -2215,7 +2212,7 @@ const renderStaffScheduleCell = (barber, hour) => {
           </>
         )}
 
-        {user && !isOwner && customer && ['/products', '/cart'].includes(route) && <CustomerShopPage tr={tr} navigate={navigate} route={route} />}
+        {user && !isOwner && customer && ['/products', '/cart'].includes(route) && <CustomerShopPage tr={tr} navigate={navigate} route={route} onLogout={handleLogout} />}
 
         {selectedStaffBooking && (
           <div className="staff-booking-overlay" onClick={(event) => { if (event.target === event.currentTarget) setSelectedStaffBooking(null) }}>

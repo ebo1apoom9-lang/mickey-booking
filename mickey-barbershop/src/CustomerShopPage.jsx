@@ -5,7 +5,7 @@ import './customer-shop.css'
 const CART_KEY = 'mickey-customer-cart-v1'
 const money = (value) => '฿' + new Intl.NumberFormat('th-TH').format(Number(value) || 0)
 
-export default function CustomerShopPage({ tr, navigate, route }) {
+export default function CustomerShopPage({ tr, navigate, route, onLogout }) {
   const [products, setProducts] = useState([])
   const [cart, setCart] = useState(() => {
     try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]') } catch { return [] }
@@ -78,9 +78,9 @@ export default function CustomerShopPage({ tr, navigate, route }) {
       <button className="shop-logo" onClick={() => navigate('/products')}><span>MICKEY</span><small>BARBERSHOP</small></button>
       <div className="shop-sidebar-caption">{tr('ร้านค้า', 'SHOP')}</div>
       <button className={route === '/products' ? 'shop-side-link active' : 'shop-side-link'} onClick={() => navigate('/products')}><span>▦</span>{tr('สินค้า', 'Products')}</button>
-      <button className={route === '/cart' ? 'shop-side-link active' : 'shop-side-link'} onClick={() => { navigate('/cart'); setCartOpen(true) }}><span>🛒</span>{tr('ตะกร้าสินค้า', 'Shopping Cart')}<b>{cartCount}</b></button>
       <div className="shop-sidebar-spacer"/>
       <button className="shop-side-link shop-back-link" onClick={() => navigate('/booking')}><span>←</span>{tr('กลับไปหน้าจองคิว', 'Back to Booking')}</button>
+      <button className="shop-side-link shop-logout-link" onClick={onLogout}><span>↪</span>{tr('ออกจากระบบ', 'Sign Out')}</button>
       <div className="shop-sidebar-foot">MICKEY BARBERSHOP EXPERIENCE</div>
     </aside>
 
