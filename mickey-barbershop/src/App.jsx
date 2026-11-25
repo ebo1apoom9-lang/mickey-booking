@@ -1707,25 +1707,30 @@ const renderStaffScheduleCell = (barber, hour) => {
               <div className="staff-schedule-heading">
                 <div>
                   <h2>{tr('ตารางงานช่างทุกคน', 'All Barbers Schedule')}</h2>
-                  <p>{tr('ภาพรวมคิวของร้าน แยกตามช่างและช่วงเวลา · ช่อง — คือไม่มีรายการจอง', 'Shop-wide bookings by barber and time. — means no booking is listed.')}</p>
+                  <p>{tr('แถวแสดงเวลา คอลัมน์แสดงช่างทุกคน · เลือกช่องเพื่อดูหรือจัดการคิว', 'Time is shown by row, with each barber in a separate column.')}</p>
                 </div>
                 <label>{tr('วันที่', 'Date')}
                   <input type="date" value={scheduleDate} onChange={(event) => setScheduleDate(event.target.value)} />
                 </label>
               </div>
               <div className="customer-schedule-scroll">
-                <table className="staff-schedule-table">
-                  <thead><tr><th>{tr('ช่าง', 'Barber')}</th>{scheduleHours.map((hour) => <th key={hour}>{String(hour).padStart(2, '0')}:00</th>)}</tr></thead>
+                <table className="staff-schedule-table schedule-time-grid">
+                  <thead>
+                    <tr>
+                      <th>{tr('เวลา', 'Time')}</th>
+                      {barbers.map((barber) => <th key={barber.id}>{barber.full_name}</th>)}
+                    </tr>
+                  </thead>
                   <tbody>
-                    {barbers.map((barber) => (
-                      <tr key={barber.id}>
-                        <th>{barber.full_name}</th>
-                        {scheduleHours.map((hour) => (
-                          <td key={hour}>{renderStaffScheduleCell(barber, hour)}</td>
+                    {scheduleHours.map((hour) => (
+                      <tr key={hour}>
+                        <th>{String(hour).padStart(2, '0')}:00</th>
+                        {barbers.map((barber) => (
+                          <td key={barber.id}>{renderStaffScheduleCell(barber, hour)}</td>
                         ))}
                       </tr>
                     ))}
-                    {!barbers.length && <tr><td colSpan={11}>{tr('ไม่พบรายชื่อช่าง', 'No barbers found.')}</td></tr>}
+                    {!barbers.length && <tr><td colSpan={1}>{tr('ไม่พบรายชื่อช่าง', 'No barbers found.')}</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -2170,7 +2175,7 @@ const renderStaffScheduleCell = (barber, hour) => {
     <div className="staff-schedule-heading">
       <div>
         <h2>{tr('ตารางคิวช่างและคิวร้าน', 'Shop & Barber Schedule')}</h2>
-        <p>{tr('รวมคิวของร้านและตารางงานช่างทุกคนไว้หน้าเดียว แยกตามช่างและช่วงเวลา · ช่อง — คือไม่มีรายการจอง', 'All shop bookings and every barber’s schedule in one view, grouped by barber and time. — means no booking is listed.')}</p>
+        <p>{tr('รวมคิวทุกคนไว้หน้าเดียว โดยแถวเป็นเวลาและคอลัมน์เป็นช่าง', 'All barbers in one view: time rows and barber columns.')}</p>
       </div>
 
       <label>
@@ -2184,36 +2189,25 @@ const renderStaffScheduleCell = (barber, hour) => {
     </div>
 
     <div className="customer-schedule-scroll">
-      <table className="staff-schedule-table">
-        <thead>
-          <tr>
-            <th>{tr('ช่าง', 'Barber')}</th>
-            {scheduleHours.map((hour) => (
-              <th key={hour}>{String(hour).padStart(2, '0')}:00</th>
-            ))}
-          </tr>
-        </thead>
-
-        <tbody>
-          {barbers.map((barber) => (
-            <tr key={barber.id}>
-              <th>{barber.full_name}</th>
-
-              {scheduleHours.map((hour) => (
-                <td key={hour} data-hour={String(hour).padStart(2, '0') + ':00'}>{renderStaffScheduleCell(barber, hour)}</td>
-              ))}
-            </tr>
-          ))}
-
-          {barbers.length === 0 && (
-            <tr>
-              <td colSpan={scheduleHours.length + 1}>
-                {tr('ไม่พบรายชื่อช่าง', 'No barbers found.')}
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+      <table className="staff-schedule-table schedule-time-grid">
+                  <thead>
+                    <tr>
+                      <th>{tr('เวลา', 'Time')}</th>
+                      {barbers.map((barber) => <th key={barber.id}>{barber.full_name}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {scheduleHours.map((hour) => (
+                      <tr key={hour}>
+                        <th>{String(hour).padStart(2, '0')}:00</th>
+                        {barbers.map((barber) => (
+                          <td key={barber.id}>{renderStaffScheduleCell(barber, hour)}</td>
+                        ))}
+                      </tr>
+                    ))}
+                    {!barbers.length && <tr><td colSpan={1}>{tr('ไม่พบรายชื่อช่าง', 'No barbers found.')}</td></tr>}
+                  </tbody>
+                </table>
     </div>
   </section>
 )}
@@ -2300,7 +2294,7 @@ const renderStaffScheduleCell = (barber, hour) => {
                 <div className="unified-schedule-heading">
                   <div>
                     <h3>{tr('ตารางเวลาของช่างทุกคน', 'All Barbers Schedule')}</h3>
-                    <p>{tr('เลือกวันที่ แล้วกด OPEN ในช่วงเวลาที่ต้องการ จากนั้นเลือกบริการและช่าง', 'Choose a date, tap OPEN, then select your service and preferred barber.')}</p>
+                    <p>{tr('เลือกวันที่ แล้วกด OPEN ในคอลัมน์ช่างและเวลาที่ต้องการ จากนั้นเลือกบริการ', 'Choose a date, then tap OPEN in the selected barber’s column and time to choose a service.')}</p>
                   </div>
                   <button type="button" className="schedule-refresh-button" onClick={loadPublicAvailability} disabled={availabilityLoading}>
                     {availabilityLoading ? tr('กำลังโหลด...', 'Loading...') : tr('รีเฟรช', 'Refresh')}
@@ -2314,44 +2308,45 @@ const renderStaffScheduleCell = (barber, hour) => {
                 {isSelectedDateShopClosed && <p className="schedule-error">{tr('ร้านปิดให้บริการในวันนี้ ไม่สามารถจองคิวได้', 'The shop is closed on this day. Bookings are unavailable.')}</p>}
                 {availabilityError && <p className="schedule-error">{availabilityError}</p>}
                 <div className="customer-schedule-scroll">
-                  <table className="customer-schedule-table">
+                  <table className="customer-schedule-table schedule-time-grid">
                     <thead>
                       <tr>
-                        <th>{tr('ช่าง', 'Barber')}</th>
-                        {scheduleHours.map((hour) => <th key={hour}>{String(hour).padStart(2, '0')}:00</th>)}
+                        <th>{tr('เวลา', 'Time')}</th>
+                        {barbers.map((barber) => <th key={barber.id}>{barber.full_name}</th>)}
                       </tr>
                     </thead>
                     <tbody>
-                      {barbers.map((barber) => (
-                        <tr key={barber.id}>
-                          <th>{barber.full_name}</th>
-                          {scheduleHours.map((hour) => {
-                            const time = `${String(hour).padStart(2, '0')}:00`
+                      {scheduleHours.map((hour) => (
+                        <tr key={hour}>
+                          <th>{String(hour).padStart(2, '0')}:00</th>
+                          {barbers.map((barber) => {
+                            const time = String(hour).padStart(2, '0') + ':00'
                             const open = isCustomerSlotAvailable(barber.id, hour)
-                            const isPast = new Date(`${selectedDate}T${time}:00+07:00`) <= new Date()
+                            const isPast = new Date(selectedDate + 'T' + time + ':00+07:00') <= new Date()
+                            const slotLabel = open && !isPast ? 'OPEN' : isSelectedDateShopClosed ? 'CLOSED' : 'UNAVAILABLE'
                             return (
-                              <td key={hour}>
+                              <td key={barber.id}>
                                 <button
                                   type="button"
-                                  className={`schedule-slot ${open ? 'is-open' : 'is-busy'}`}
+                                  className={"schedule-slot " + (open ? "is-open" : "is-busy")}
                                   disabled={!open || availabilityLoading || isPast}
                                   onClick={() => {
                                     setSelectedTime(time)
                                     setSelectedService('')
-                                    setSelectedBarber('')
+                                    setSelectedBarber(barber.id)
                                     setMessage('')
                                     setShowBookingModal(true)
                                   }}
-                                  aria-label={`${barber.full_name} ${time} ${open ? 'OPEN' : 'Unavailable'}`}
+                                  aria-label={barber.full_name + ' ' + time + ' ' + slotLabel}
                                 >
-                                  {open && !isPast ? 'OPEN' : '—'}
+                                  {slotLabel}
                                 </button>
                               </td>
                             )
                           })}
                         </tr>
                       ))}
-                      {!barbers.length && <tr><td colSpan={11}>{tr('ไม่พบรายชื่อช่างที่เปิดใช้งาน', 'No active barbers found.')}</td></tr>}
+                      {!barbers.length && <tr><td colSpan={1}>{tr('ไม่พบรายชื่อช่างที่เปิดใช้งาน', 'No active barbers found.')}</td></tr>}
                     </tbody>
                   </table>
                 </div>

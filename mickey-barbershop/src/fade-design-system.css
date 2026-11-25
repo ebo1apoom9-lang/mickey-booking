@@ -688,3 +688,85 @@ select:focus-visible, textarea:focus-visible {
   .app-shell .booking-customer-nav > button:not(.customer-mobile-menu-toggle), .customer-shop .shop-customer-nav > button:not(.customer-mobile-menu-toggle) { display:none !important; width:100%; box-sizing:border-box; }
   .app-shell .booking-customer-nav.is-open > button:not(.customer-mobile-menu-toggle), .customer-shop .shop-customer-nav.is-open > button:not(.customer-mobile-menu-toggle) { display:flex !important; }
 }
+
+/* Shared time-row / barber-column schedule layout */
+.app-shell .customer-schedule-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.app-shell .schedule-time-grid {
+  display: table !important;
+  width: max-content !important;
+  min-width: 100% !important;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.app-shell .schedule-time-grid thead,
+.app-shell .schedule-time-grid tbody {
+  display: table-row-group !important;
+}
+.app-shell .schedule-time-grid thead {
+  display: table-header-group !important;
+}
+.app-shell .schedule-time-grid tr {
+  display: table-row !important;
+}
+.app-shell .schedule-time-grid th,
+.app-shell .schedule-time-grid td {
+  display: table-cell !important;
+  min-width: 118px;
+  vertical-align: middle;
+  white-space: normal;
+}
+.app-shell .schedule-time-grid thead th {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  min-width: 118px;
+  text-align: center;
+}
+.app-shell .schedule-time-grid thead th:first-child,
+.app-shell .schedule-time-grid tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  min-width: 76px;
+  width: 76px;
+  text-align: center;
+  background: #171717;
+}
+.app-shell .schedule-time-grid tbody td::before {
+  display: none !important;
+  content: none !important;
+}
+.app-shell .schedule-time-grid .schedule-slot,
+.app-shell .schedule-time-grid .staff-booking-cell,
+.app-shell .schedule-time-grid .staff-blocked-slot,
+.app-shell .schedule-time-grid .staff-open-slot {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+}
+@media (max-width: 700px) {
+  .app-shell .schedule-time-grid th,
+  .app-shell .schedule-time-grid td {
+    min-width: 112px;
+    padding: 7px 5px !important;
+  }
+  .app-shell .schedule-time-grid thead th:first-child,
+  .app-shell .schedule-time-grid tbody th {
+    min-width: 68px;
+    width: 68px;
+    padding: 7px 4px !important;
+    font-size: 10px !important;
+  }
+  .app-shell .schedule-time-grid .schedule-slot {
+    min-height: 38px;
+    padding: 4px 2px;
+    font-size: 9px !important;
+  }
+}
