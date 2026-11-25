@@ -17,6 +17,7 @@ export default function CustomerShopPage({ tr, navigate, route, onLogout }) {
   const [detail, setDetail] = useState(null)
   const [detailQty, setDetailQty] = useState(1)
   const [cartOpen, setCartOpen] = useState(false)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   useEffect(() => { localStorage.setItem(CART_KEY, JSON.stringify(cart)) }, [cart])
 
@@ -74,7 +75,8 @@ export default function CustomerShopPage({ tr, navigate, route, onLogout }) {
   const openDetail = (product) => { setDetail(product); setDetailQty(1) }
 
   return <div className="customer-shop bbr-shop-layout">
-    <nav className="customer-main-nav shop-customer-nav" aria-label={tr('เมนูหลัก', 'Main navigation')}>
+    <nav className={`customer-main-nav shop-customer-nav ${mobileNavOpen ? 'is-open' : ''}`} aria-label={tr('เมนูหลัก', 'Main navigation')}>
+      <button type="button" className="customer-mobile-menu-toggle" aria-expanded={mobileNavOpen} onClick={() => setMobileNavOpen(open => !open)}><span className="customer-hamburger" aria-hidden="true"><i/><i/><i/></span><span>{tr('\u0e40\u0e21\u0e19\u0e39\u0e2b\u0e25\u0e31\u0e01', 'Menu')}</span></button>
       <button type="button" className={route === '/booking' ? 'active' : ''} onClick={() => navigate('/booking')}>{tr('จองคิว', 'Book Appointment')}</button>
       <button type="button" className={route === '/products' ? 'active' : ''} onClick={() => navigate('/products')}>{tr('สินค้า', 'Products')}</button>
       <button type="button" className={route === '/cart' ? 'active' : ''} onClick={() => navigate('/cart')}>

@@ -74,6 +74,7 @@ useEffect(() => {
 
 const [activeStaffPage, setActiveStaffPage] = useState('schedule')
 const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+const [mobileCustomerNavOpen, setMobileCustomerNavOpen] = useState(false)
 const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
 const [language, setLanguage] = useState(() => {
@@ -2263,7 +2264,8 @@ const renderStaffScheduleCell = (barber, hour) => {
 
         {user && !isOwner && route === '/booking' && customer && (
           <>
-            <div className="customer-main-nav booking-customer-nav" aria-label={tr('\u0e40\u0e21\u0e19\u0e39\u0e2b\u0e25\u0e31\u0e01', 'Main navigation')}>
+            <div className={`customer-main-nav booking-customer-nav ${mobileCustomerNavOpen ? 'is-open' : ''}`} aria-label={tr('\u0e40\u0e21\u0e19\u0e39\u0e2b\u0e25\u0e31\u0e01', 'Main navigation')}>
+              <button type="button" className="customer-mobile-menu-toggle" aria-expanded={mobileCustomerNavOpen} onClick={() => setMobileCustomerNavOpen(open => !open)}><span className="customer-hamburger" aria-hidden="true"><i/><i/><i/></span><span>{tr('\u0e40\u0e21\u0e19\u0e39\u0e2b\u0e25\u0e31\u0e01', 'Menu')}</span></button>
               <button className={route === '/booking' ? 'active' : ''} onClick={() => navigate('/booking')}>{tr('\u0e08\u0e2d\u0e07\u0e04\u0e34\u0e27', 'Book Appointment')}</button>
               <button className={route === '/products' ? 'active' : ''} onClick={() => navigate('/products')}>{tr('\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32', 'Products')}</button>
               <button className={route === '/cart' ? 'active' : ''} onClick={() => navigate('/cart')}>{tr('\u0e15\u0e30\u0e01\u0e23\u0e49\u0e32\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32', 'Shopping Cart')}</button>
@@ -2506,7 +2508,8 @@ const renderStaffScheduleCell = (barber, hour) => {
 
         {user && !isOwner && route === '/account' && customer && (
           <>
-            <div className="customer-main-nav booking-customer-nav" aria-label={tr('เมนูหลัก', 'Main navigation')}>
+            <div className={`customer-main-nav booking-customer-nav ${mobileCustomerNavOpen ? 'is-open' : ''}`} aria-label={tr('เมนูหลัก', 'Main navigation')}>
+              <button type="button" className="customer-mobile-menu-toggle" aria-expanded={mobileCustomerNavOpen} onClick={() => setMobileCustomerNavOpen(open => !open)}><span className="customer-hamburger" aria-hidden="true"><i/><i/><i/></span><span>{tr('\u0e40\u0e21\u0e19\u0e39\u0e2b\u0e25\u0e31\u0e01', 'Menu')}</span></button>
               <button onClick={() => navigate('/booking')}>{tr('จองคิว', 'Book Appointment')}</button>
               <button onClick={() => navigate('/products')}>{tr('สินค้า', 'Products')}</button>
               <button onClick={() => navigate('/cart')}>{tr('ตะกร้าสินค้า', 'Shopping Cart')}</button>

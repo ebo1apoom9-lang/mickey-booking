@@ -672,3 +672,19 @@ select:focus-visible, textarea:focus-visible {
 .shop-product-card:hover {
   border-color: var(--fade-line-strong);
 }
+
+/* Customer navigation: compact hamburger drawer on phones, full sidebar on desktop. */
+.customer-mobile-menu-toggle { display:none !important; }
+@media (max-width:700px) {
+  .app-shell .booking-customer-nav,
+  .customer-shop .shop-customer-nav { display:flex !important; flex-direction:column !important; align-items:stretch !important; gap:7px !important; width:100%; max-width:100%; box-sizing:border-box; }
+  .app-shell .booking-customer-nav .customer-mobile-menu-toggle,
+  .customer-shop .shop-customer-nav .customer-mobile-menu-toggle { display:flex !important; align-items:center; justify-content:flex-start; gap:12px; width:100%; min-height:46px; padding:10px 14px; border:1px solid var(--fade-gold); border-radius:10px; background:rgba(212,175,55,.08); color:var(--fade-champagne); font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+  .customer-hamburger { display:inline-flex; width:20px; height:16px; flex-direction:column; justify-content:space-between; }
+  .customer-hamburger i { display:block; width:20px; height:2px; border-radius:2px; background:var(--fade-gold); transition:transform .22s ease, opacity .18s ease; }
+  .customer-mobile-menu-toggle[aria-expanded="true"] .customer-hamburger i:first-child { transform:translateY(7px) rotate(45deg); }
+  .customer-mobile-menu-toggle[aria-expanded="true"] .customer-hamburger i:nth-child(2) { opacity:0; }
+  .customer-mobile-menu-toggle[aria-expanded="true"] .customer-hamburger i:last-child { transform:translateY(-7px) rotate(-45deg); }
+  .app-shell .booking-customer-nav > button:not(.customer-mobile-menu-toggle), .customer-shop .shop-customer-nav > button:not(.customer-mobile-menu-toggle) { display:none !important; width:100%; box-sizing:border-box; }
+  .app-shell .booking-customer-nav.is-open > button:not(.customer-mobile-menu-toggle), .customer-shop .shop-customer-nav.is-open > button:not(.customer-mobile-menu-toggle) { display:flex !important; }
+}
