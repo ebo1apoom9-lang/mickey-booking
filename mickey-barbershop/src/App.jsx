@@ -1574,7 +1574,6 @@ const renderStaffScheduleCell = (barber, hour) => {
             onClick={() => setMobileSidebarOpen((open) => !open)}
           >
             <span className="hamburger-lines" aria-hidden="true"><i /><i /><i /></span>
-            <span className="mobile-menu-label">{tr('เมนู', 'MENU')}</span>
           </button>
           {mobileSidebarOpen && <button type="button" className="staff-sidebar-backdrop" aria-label="Close navigation menu" onClick={() => setMobileSidebarOpen(false)} />}
           <aside id="staff-navigation" className={"staff-sidebar " + (mobileSidebarOpen ? "is-open" : "")} onClick={(event) => {
