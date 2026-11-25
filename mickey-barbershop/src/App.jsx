@@ -375,7 +375,6 @@ const loadBookings = useCallback(async () => {
     .from('bookings')
     .select(`
       id,
-      booking_code,
       created_at,
       service_name_snapshot,
       price_thb_snapshot,
@@ -2496,7 +2495,6 @@ const renderStaffScheduleCell = (barber, hour) => {
               {bookingResult && (
                 <div className="booking-success">
                   <h3>{tr('จองคิวสำเร็จ!', 'Booking Successful!')}</h3>
-                  <p>{tr('รหัสจอง:', 'Booking ID:')} {bookingResult.booking_code || '-'}</p>
                   <p>{tr('เวลา:', 'Time:')} {formatDateTime(bookingResult.starts_at, language)}</p>
                   <p>{tr('ระบบจัดการคำขอจองเรียบร้อยแล้ว', 'Your booking has been processed successfully.')}</p>
                 </div>
