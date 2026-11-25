@@ -1,0 +1,274 @@
+/* FADE BARBER STUDIO — shared Modern Premium design system
+   Central visual layer. Keep feature/layout rules in their existing stylesheets. */
+:root {
+  --fade-black: #0B0B0D;
+  --fade-charcoal: #1C1C1F;
+  --fade-gold: #D4AF37;
+  --fade-champagne: #E8D6A3;
+  --fade-ivory: #F4F0E7;
+  --fade-muted: #8A8780;
+  --fade-line: rgba(212,175,55,.22);
+  --fade-line-strong: rgba(212,175,55,.42);
+  --fade-surface-soft: rgba(255,255,255,.025);
+  --fade-radius-sm: 8px;
+  --fade-radius-md: 12px;
+  --fade-radius-lg: 16px;
+  --fade-shadow: 0 16px 42px rgba(0,0,0,.28);
+  color-scheme: dark;
+}
+.app-shell {
+  color: var(--fade-ivory);
+  background: var(--fade-black);
+}
+.app-shell .app-header,
+.app-shell .staff-sidebar,
+.app-shell .auth-card,
+.app-shell .unified-booking-card,
+.app-shell .staff-booking-modal,
+.app-shell .staff-logout-dialog {
+  border-color: var(--fade-line);
+}
+.app-shell .app-header > p,
+.app-shell .sidebar-brand,
+.app-shell .auth-card h1,
+.app-shell .auth-card h2,
+.app-shell .auth-card h3,
+.app-shell .unified-booking-card h1,
+.app-shell .unified-booking-card h2,
+.app-shell .unified-booking-card h3,
+.app-shell .staff-booking-modal h2,
+.app-shell .owner-reports-section h3 {
+  color: var(--fade-champagne);
+}
+.app-shell .gold-text,
+.app-shell .staff-sidebar a.active,
+.app-shell .staff-sidebar a:hover,
+.app-shell .staff-sidebar button:hover {
+  color: var(--fade-gold);
+}
+.app-shell .staff-sidebar,
+.app-shell .auth-card,
+.app-shell .staff-booking-modal,
+.app-shell .staff-logout-dialog {
+  background: linear-gradient(155deg, #1C1C1F 0%, #0B0B0D 100%);
+  box-shadow: var(--fade-shadow);
+}
+.app-shell button,
+.app-shell input,
+.app-shell select,
+.app-shell textarea {
+  font-family: inherit;
+}
+.app-shell button:not(.customer-main-nav button):not(.staff-sidebar a) {
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+.app-shell input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.app-shell select,
+.app-shell textarea {
+  border-color: var(--fade-line-strong);
+  border-radius: var(--fade-radius-sm);
+  background-color: #111114;
+  color: var(--fade-ivory);
+}
+.app-shell input:focus,
+.app-shell select:focus,
+.app-shell textarea:focus {
+  outline: 2px solid rgba(212,175,55,.22);
+  outline-offset: 1px;
+  border-color: var(--fade-gold);
+}
+.app-shell input::placeholder,
+.app-shell textarea::placeholder {
+  color: #8A8780;
+}
+.app-shell .staff-sidebar {
+  border-radius: var(--fade-radius-lg);
+}
+.app-shell .staff-sidebar a,
+.app-shell .staff-sidebar button {
+  border-radius: var(--fade-radius-sm);
+}
+.app-shell .staff-sidebar a.active {
+  border-color: var(--fade-line-strong);
+  background: linear-gradient(100deg, rgba(212,175,55,.15), rgba(212,175,55,.035));
+  box-shadow: inset 3px 0 0 var(--fade-gold);
+}
+.app-shell .staff-sidebar .sidebar-brand {
+  letter-spacing: .18em;
+}
+.app-shell .staff-schedule-table,
+.app-shell .customer-schedule-table {
+  border-color: var(--fade-line);
+}
+.app-shell .staff-schedule-table thead th,
+.app-shell .customer-schedule-table thead th {
+  background: #1C1C1F;
+  color: var(--fade-champagne);
+  border-color: var(--fade-line);
+}
+.app-shell .staff-schedule-table tbody th,
+.app-shell .customer-schedule-table tbody th {
+  background: #151518;
+  color: var(--fade-ivory);
+}
+.app-shell .staff-schedule-table td,
+.app-shell .staff-schedule-table th,
+.app-shell .customer-schedule-table td,
+.app-shell .customer-schedule-table th {
+  border-color: var(--fade-line);
+}
+.app-shell .staff-booking-cell,
+.app-shell .staff-open-slot {
+  border-color: var(--fade-line-strong);
+  color: var(--fade-champagne);
+  background: rgba(212,175,55,.075);
+}
+.app-shell .staff-booking-cell:hover,
+.app-shell .staff-open-slot:hover:not(:disabled) {
+  border-color: var(--fade-gold);
+  color: var(--fade-ivory);
+  background: rgba(212,175,55,.16);
+}
+.app-shell .staff-day-off-slot {
+  border-color: rgba(138,135,128,.3);
+  color: var(--fade-muted);
+  background: #111114;
+}
+.app-shell .staff-actions button,
+.app-shell .staff-actions select,
+.app-shell .staff-dayoff-manager,
+.app-shell .staff-booking-details {
+  border-color: var(--fade-line);
+}
+.app-shell .staff-logout-actions button,
+.app-shell .mobile-sidebar-toggle {
+  border-color: var(--fade-gold);
+  background: linear-gradient(135deg, var(--fade-champagne), var(--fade-gold));
+  color: var(--fade-black);
+}
+.app-shell .staff-logout-actions button.secondary {
+  background: transparent;
+  color: var(--fade-ivory);
+  border-color: var(--fade-line-strong);
+}
+/* Customer pages share one navigation, card, form and button language. */
+.app-shell:not(:has(.staff-sidebar)) .main {
+  color: var(--fade-ivory);
+}
+.app-shell:not(:has(.staff-sidebar)) .auth-card,
+.app-shell:not(:has(.staff-sidebar)) .customer-schedule-card,
+.app-shell:not(:has(.staff-sidebar)) .unified-booking-card {
+  border-color: var(--fade-line);
+  border-radius: var(--fade-radius-lg);
+  background: linear-gradient(155deg, #1C1C1F 0%, #0B0B0D 100%);
+  box-shadow: var(--fade-shadow);
+}
+.app-shell:not(:has(.staff-sidebar)) .customer-main-nav {
+  border: 1px solid var(--fade-line);
+  border-radius: var(--fade-radius-lg);
+  background: rgba(11,11,13,.97);
+  box-shadow: 0 12px 34px rgba(0,0,0,.25);
+}
+.app-shell:not(:has(.staff-sidebar)) .customer-main-nav button,
+.customer-shop .shop-customer-nav button {
+  min-height: 42px;
+  border: 1px solid var(--fade-line);
+  border-radius: var(--fade-radius-sm);
+  background: #151518;
+  color: var(--fade-champagne);
+  font-weight: 600;
+}
+.app-shell:not(:has(.staff-sidebar)) .customer-main-nav button.active,
+.app-shell:not(:has(.staff-sidebar)) .customer-main-nav button:hover,
+.customer-shop .shop-customer-nav button.active,
+.customer-shop .shop-customer-nav button:hover {
+  border-color: var(--fade-gold);
+  background: var(--fade-gold);
+  color: var(--fade-black);
+}
+.app-shell:not(:has(.staff-sidebar)) .customer-main-nav .customer-sidebar-logout {
+  border-color: var(--fade-line-strong);
+  background: transparent;
+  color: var(--fade-champagne);
+}
+.app-shell:not(:has(.staff-sidebar)) .customer-main-nav .customer-sidebar-logout:hover {
+  background: rgba(212,175,55,.12);
+  color: var(--fade-champagne);
+}
+.app-shell:not(:has(.staff-sidebar)) .auth-card button,
+.app-shell:not(:has(.staff-sidebar)) .unified-booking-card button,
+.customer-shop button:not(.shop-icon-button) {
+  border-radius: var(--fade-radius-sm);
+}
+.app-shell:not(:has(.staff-sidebar)) .auth-card button[type="submit"],
+.app-shell:not(:has(.staff-sidebar)) .unified-booking-card button.primary,
+.customer-shop .shop-primary-button,
+.customer-shop .shop-checkout-button {
+  border-color: var(--fade-gold);
+  background: linear-gradient(135deg, var(--fade-champagne), var(--fade-gold));
+  color: var(--fade-black);
+  font-weight: 700;
+}
+.customer-shop {
+  color: var(--fade-ivory);
+}
+.customer-shop .shop-product-card,
+.customer-shop .shop-full-cart-items,
+.customer-shop .shop-order-summary,
+.customer-shop .shop-cart-item,
+.customer-shop .shop-page-heading,
+.customer-shop .shop-products-panel {
+  border-color: var(--fade-line);
+}
+.customer-shop .shop-product-card,
+.customer-shop .shop-full-cart-items,
+.customer-shop .shop-order-summary,
+.customer-shop .shop-cart-item {
+  border-radius: var(--fade-radius-md);
+  background: linear-gradient(155deg, #1C1C1F, #101012);
+}
+.customer-shop .shop-product-card h2,
+.customer-shop .shop-product-card h3,
+.customer-shop .shop-order-summary h2,
+.customer-shop .shop-page-heading h1,
+.customer-shop .shop-products-panel-head h2 {
+  color: var(--fade-champagne);
+}
+.customer-shop input,
+.customer-shop select,
+.customer-shop textarea {
+  border-color: var(--fade-line-strong);
+  border-radius: var(--fade-radius-sm);
+  background: #111114;
+  color: var(--fade-ivory);
+}
+.customer-shop input:focus,
+.customer-shop select:focus,
+.customer-shop textarea:focus {
+  outline: 2px solid rgba(212,175,55,.22);
+  border-color: var(--fade-gold);
+}
+@media (max-width: 900px) {
+  .app-shell:has(.staff-sidebar) .staff-sidebar {
+    border-radius: 0 var(--fade-radius-lg) var(--fade-radius-lg) 0;
+  }
+}
+@media (max-width: 760px) {
+  .app-shell:not(:has(.staff-sidebar)) .customer-main-nav {
+    border-radius: var(--fade-radius-md);
+  }
+  .app-shell:not(:has(.staff-sidebar)) .customer-main-nav button,
+  .customer-shop .shop-customer-nav button {
+    min-height: 40px;
+    padding: 9px 11px;
+    font-size: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell *,
+  .customer-shop * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}

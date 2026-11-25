@@ -10,6 +10,7 @@ import CustomerShopPage from './CustomerShopPage'
 import StaffPageSkeleton from './StaffPageSkeleton'
 import AnimatedNumber from './AnimatedNumber'
 import './motion.css'
+import './fade-design-system.css'
 const money = (value) =>
   new Intl.NumberFormat('th-TH').format(Number(value) || 0) + ' บาท'
 
@@ -1568,7 +1569,7 @@ const renderStaffScheduleCell = (barber, hour) => {
           {mobileSidebarOpen && <button type="button" className="staff-sidebar-backdrop" aria-label="Close navigation menu" onClick={() => setMobileSidebarOpen(false)} />}
           <aside className={"staff-sidebar " + (mobileSidebarOpen ? "is-open" : "")} onClick={() => setMobileSidebarOpen(false)}>
   <div className="sidebar-brand">
-    MICKEY<span>BARBERSHOP</span>
+    FADE<span>BARBER STUDIO</span>
   </div>
 
 
