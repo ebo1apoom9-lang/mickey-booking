@@ -85,7 +85,7 @@ useEffect(() => {
 }, [language])
 
   const tr = (thai, english) => {
-  return isStaffDashboard && language !== 'en' ? thai : english
+  return language === 'th' ? thai : english
 }
   const [mode, setMode] = useState('login')
   const [loading, setLoading] = useState(false)
@@ -1397,7 +1397,7 @@ const renderStaffScheduleCell = (barber, hour) => {
 <header className="app-header">
   <p>FADE BARBER STUDIO</p>
 
-  {isStaffDashboard && (['/', '/login', '/reset-password', '/booking', '/products', '/cart', '/account', '/owner', '/barber'].includes(route)) && (
+  {(['/', '/login', '/reset-password', '/booking', '/products', '/cart', '/account', '/owner', '/barber'].includes(route)) && (
     <div className="language-switch">
       <button
         type="button"
