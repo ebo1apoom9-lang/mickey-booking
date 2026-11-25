@@ -109,3 +109,10 @@
 @media (prefers-reduced-motion:reduce) {
   .app-shell:has(.booking-customer-nav) .booking-customer-nav { transition:none !important; }
 }
+
+/* Mobile header: keep the hamburger control only; hide the FADE wordmark and tagline. */
+@media (max-width: 760px) {
+  .app-shell .app-header > p { display: none !important; }
+  .app-shell .app-header > p::before,
+  .app-shell .app-header > p::after { content: none !important; display: none !important; }
+}
