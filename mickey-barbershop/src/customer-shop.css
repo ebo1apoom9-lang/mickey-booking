@@ -2,7 +2,7 @@
 .customer-shop.bbr-shop-layout {
   --shop-bg:#0b0b0b; --shop-card:#141414; --shop-card-2:#191919;
   --shop-text:#f2eee5; --shop-muted:#9b9488; --shop-line:#393021;
-  --shop-gold:#d0ad63; --shop-gold-bright:#edcf86;
+  --shop-gold:#D4AF37; --shop-gold-bright:#E8D6A3;
   min-height:100vh; padding:0; margin:0; display:flex;
   background:var(--shop-bg); color:var(--shop-text);
   font-family:inherit; box-sizing:border-box;
@@ -31,7 +31,7 @@ body.shop-overlay-open { overflow:hidden; }
 .shop-side-link>span { width:22px; text-align:center; font-size:16px; }
 .shop-side-link b { margin-left:auto; min-width:22px; height:22px; display:grid; place-items:center; border-radius:50%; background:#292318; color:var(--shop-gold-bright); font-size:11px; }
 .shop-side-link:hover { background:#211d16; color:#f4e4bd; }
-.shop-side-link.active { background:linear-gradient(110deg,#c9a45a,#a9843e); color:#111; font-weight:700; box-shadow:0 4px 15px #0005; }
+.shop-side-link.active { background:linear-gradient(110deg,#D4AF37,#A98522); color:#111; font-weight:700; box-shadow:0 4px 15px #0005; }
 .shop-side-link.active b { background:#17130d; color:#efd28d; }
 .shop-sidebar-spacer { flex:1; }
 .shop-back-link { border-top:1px solid #30291d; border-radius:0; padding-top:18px; }
@@ -53,14 +53,14 @@ body.shop-overlay-open { overflow:hidden; }
   position:relative; width:43px; height:42px; border:1px solid #57472b; border-radius:8px;
   background:#171510; color:#e6c87f; cursor:pointer; font-size:17px;
 }
-.shop-toolbar-cart i { position:absolute; top:-7px; right:-7px; min-width:19px; height:19px; padding:0 4px; display:grid; place-items:center; border-radius:20px; background:#d0ad63; color:#17120a; font-size:10px; font-style:normal; font-weight:800; }
+.shop-toolbar-cart i { position:absolute; top:-7px; right:-7px; min-width:19px; height:19px; padding:0 4px; display:grid; place-items:center; border-radius:20px; background:#D4AF37; color:#17120a; font-size:10px; font-style:normal; font-weight:800; }
 .shop-catalog,.shop-full-cart { max-width:1480px; margin:0 auto; }
 .shop-page-heading { display:flex; justify-content:space-between; align-items:flex-end; gap:20px; margin:16px 0 23px; }
-.shop-page-heading small { color:#b99a5b; font-size:10px; letter-spacing:2.4px; }
+.shop-page-heading small { color:#D4AF37; font-size:10px; letter-spacing:2.4px; }
 .shop-page-heading h1 { margin:7px 0 6px; color:#f4ead5; font-family:Georgia,serif; font-size:30px; font-weight:500; letter-spacing:.3px; }
 .shop-page-heading p { margin:0; color:#918a7e; font-size:13px; }
 .shop-product-count { color:#8e8575; font-size:10px; letter-spacing:1.5px; white-space:nowrap; }
-.shop-product-count b { margin-left:8px; color:#e2c27b; font-size:18px; }
+.shop-product-count b { margin-left:8px; color:#E8D6A3; font-size:18px; }
 .shop-products-panel { padding:20px; background:#121212; border:1px solid #332b1e; border-radius:11px; box-shadow:0 8px 28px #0003; }
 .shop-products-panel-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
 .shop-products-panel-head>div { display:flex; align-items:baseline; gap:10px; }
@@ -83,18 +83,18 @@ body.shop-overlay-open { overflow:hidden; }
 .shop-product-card-bottom { display:flex; justify-content:space-between; align-items:center; gap:10px; }
 .shop-product-card-bottom strong { color:#e4c77f; font-size:16px; }
 .shop-product-card-bottom button { width:34px; height:32px; border:1px solid #796039; border-radius:6px; background:#211c13; color:#e8c978; font-size:20px; cursor:pointer; transition:.15s; }
-.shop-product-card-bottom button:hover { background:#d0ad63; color:#111; }
+.shop-product-card-bottom button:hover { background:#D4AF37; color:#111; }
 .shop-empty-state { min-height:260px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:#938a7b; text-align:center; }
 .shop-empty-state>span:not(.shop-loader) { color:#a88b50; font-size:32px; }
 .shop-empty-state h2 { margin:5px 0 0; color:#e8dfcf; font-size:17px; }
 .shop-empty-state p { margin:0; font-size:13px; }
-.shop-loader { width:25px; height:25px; border:2px solid #4b402a; border-top-color:#d0ad63; border-radius:50%; animation:shopSpin .7s linear infinite; }
+.shop-loader { width:25px; height:25px; border:2px solid #4b402a; border-top-color:#D4AF37; border-radius:50%; animation:shopSpin .7s linear infinite; }
 @keyframes shopSpin { to { transform:rotate(360deg); } }
 .shop-error { padding:15px; color:#ff9e8f; }
 .shop-footer { max-width:1480px; margin:45px auto 0; padding:19px 0 5px; border-top:1px solid #30291e; color:#71654d; font-size:9px; letter-spacing:2px; text-align:center; }
 .shop-footer span { color:#c2a15d; padding:0 7px; }
 .shop-full-cart { padding-top:8px; }
-.shop-page-heading>button { padding:10px 14px; border:1px solid #7a6236; border-radius:6px; background:#1b1812; color:#e2c27b; cursor:pointer; }
+.shop-page-heading>button { padding:10px 14px; border:1px solid #7a6236; border-radius:6px; background:#1b1812; color:#E8D6A3; cursor:pointer; }
 .shop-full-cart-grid { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(260px,.8fr); gap:20px; }
 .shop-full-cart-items,.shop-order-summary { padding:18px; border:1px solid #332b1e; border-radius:9px; background:#141414; }
 .shop-full-cart-item { display:flex; align-items:center; gap:15px; padding:14px 0; border-bottom:1px solid #30291e; }
@@ -111,13 +111,13 @@ body.shop-overlay-open { overflow:hidden; }
 .shop-order-summary h2 { margin:2px 0 18px; font-size:17px; }
 .shop-order-summary>div { display:flex; justify-content:space-between; padding:11px 0; color:#aaa092; font-size:13px; }
 .shop-order-total { margin-top:6px; border-top:1px solid #55452b; color:#eee5d5!important; font-size:16px!important; }
-.shop-order-total strong { color:#e2c27b; font-size:20px; }
+.shop-order-total strong { color:#E8D6A3; font-size:20px; }
 .shop-order-summary>button,.shop-drawer-bottom>button:not(.shop-view-cart) { width:100%; padding:12px; margin-top:12px; border:1px solid #51432c; border-radius:5px; background:#302a20; color:#8d8475; cursor:not-allowed; }
 .shop-order-summary p,.shop-drawer-bottom p { color:#827a6d; font-size:11px; line-height:1.6; }
 .shop-drawer-backdrop { position:fixed; inset:0; z-index:1500; display:flex; justify-content:flex-end; background:rgba(0,0,0,.68); animation:shopBackdropIn .22s ease both; }
 .shop-cart-drawer { width:min(410px,100%); height:100%; display:flex; flex-direction:column; overflow:hidden; padding:24px 21px; padding-top:calc(24px + env(safe-area-inset-top,0px)); padding-bottom:calc(20px + env(safe-area-inset-bottom,0px)); background:#141414; color:#f2eee5; border-left:1px solid #80683e; box-shadow:-22px 0 60px #0008; animation:shopDrawerIn .3s cubic-bezier(.22,.8,.25,1) both; }
 .shop-drawer-header { display:flex; justify-content:space-between; align-items:center; padding-bottom:17px; border-bottom:1px solid #403522; }
-.shop-drawer-header small { color:#b99a5b; font-size:9px; letter-spacing:2px; }
+.shop-drawer-header small { color:#D4AF37; font-size:9px; letter-spacing:2px; }
 .shop-drawer-header h2 { margin:6px 0 0; font-family:Georgia,serif; font-size:22px; font-weight:500; }
 .shop-drawer-header h2 span { color:#c5a25d; font:12px Arial,sans-serif; }
 .shop-drawer-header>button { width:36px; height:36px; border:1px solid #59482b; border-radius:50%; background:#1b1914; color:#e4c77f; font-size:24px; cursor:pointer; }
@@ -137,14 +137,14 @@ body.shop-overlay-open { overflow:hidden; }
 .shop-drawer-empty>span { font-size:40px; }
 .shop-drawer-empty h3 { margin:12px 0 4px; }
 .shop-drawer-empty p { color:#928a7e; font-size:13px; }
-.shop-drawer-empty button { margin-top:12px; padding:11px 18px; border:1px solid #9a7a42; border-radius:5px; background:#d0ad63; color:#17130c; cursor:pointer; }
+.shop-drawer-empty button { margin-top:12px; padding:11px 18px; border:1px solid #9a7a42; border-radius:5px; background:#D4AF37; color:#17130c; cursor:pointer; }
 .shop-detail-overlay { position:fixed; inset:0; z-index:1400; display:grid; place-items:center; padding:18px; background:#000b; animation:shopBackdropIn .2s ease both; }
 .shop-detail-modal { position:relative; width:min(760px,100%); max-height:92vh; display:grid; grid-template-columns:1fr 1fr; gap:25px; overflow:auto; padding:26px; border:1px solid #6b5733; border-radius:10px; background:#151515; box-shadow:0 20px 70px #0009; }
 .shop-detail-close { position:absolute; top:10px; right:12px; z-index:1; width:34px; height:34px; border:1px solid #51432c; border-radius:50%; background:#1c1a16; color:#e4c77f; font-size:23px; cursor:pointer; }
 .shop-detail-image { min-height:300px; display:grid; place-items:center; overflow:hidden; background:#211d16; color:#b89a5c; font-family:Georgia,serif; letter-spacing:4px; text-align:center; }
 .shop-detail-image img { width:100%; height:100%; max-height:400px; object-fit:contain; }
 .shop-detail-copy { align-self:center; padding:12px 0; }
-.shop-detail-copy>small { color:#b99a5b; font-size:10px; letter-spacing:1.5px; }
+.shop-detail-copy>small { color:#D4AF37; font-size:10px; letter-spacing:1.5px; }
 .shop-detail-copy h2 { margin:10px 0; font-size:23px; }
 .shop-detail-copy>strong { color:#e4c77f; font-size:23px; }
 .shop-detail-copy p { color:#aaa194; font-size:13px; line-height:1.8; white-space:pre-line; }
@@ -317,7 +317,7 @@ body.shop-overlay-open { overflow:hidden; }
 }
 .customer-shop .shop-customer-nav button.active {
   border-color:#c4a15c;
-  background:linear-gradient(110deg,#c9a45a,#a9843e);
+  background:linear-gradient(110deg,#D4AF37,#A98522);
   color:#111;
   font-weight:700;
 }
@@ -421,18 +421,18 @@ body.shop-overlay-open { overflow:hidden; }
 
 /* Keep Products and Shopping Cart navigation visually identical to Booking/Account. */
 .customer-shop .shop-customer-nav::before {
-  content: "MICKEY BARBERSHOP";
+  content: "FADE";
   display: block;
   padding: 10px 12px 2px;
-  color: #e0c98f;
+  color: #E8D6A3;
   font: 600 18px/1.2 Georgia,serif;
   letter-spacing: 4px;
 }
 .customer-shop .shop-customer-nav::after {
-  content: "BARBERSHOP EXPERIENCE";
+  content: "BARBER STUDIO";
   display: block;
   padding: 0 12px 13px;
-  color: #82765d;
+  color: #8A8780;
   font-size: 8px;
   letter-spacing: 2.1px;
 }

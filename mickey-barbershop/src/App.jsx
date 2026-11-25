@@ -84,7 +84,7 @@ useEffect(() => {
 }, [language])
 
   const tr = (thai, english) => {
-  return language === 'en' ? english : thai
+  return isStaffDashboard && language !== 'en' ? thai : english
 }
   const [mode, setMode] = useState('login')
   const [loading, setLoading] = useState(false)
@@ -1380,13 +1380,13 @@ const renderStaffScheduleCell = (barber, hour) => {
   if (!authInitialized || (user && profileLoading)) {
     return (
       <div className="app-shell">
-        <header><p>MICKEY BARBERSHOP EXPERIENCE</p></header>
+        <header><p>FADE BARBER STUDIO</p></header>
         <main className="main">
           <StaffPageSkeleton />
           <p className="sr-only" role="status">กำลังตรวจสอบบัญชีของคุณ...</p>
         </main>
-        {showBrandSplash && <div className="mickey-splash" aria-hidden="true"><strong>MICKEY BARBERSHOP</strong></div>}
-        <footer>MICKEY BARBERSHOP © 2026</footer>
+        {showBrandSplash && <div className="mickey-splash" aria-hidden="true"><strong>FADE</strong></div>}
+        <footer>FADE BARBER STUDIO © 2026</footer>
       </div>
     )
   }
@@ -1394,9 +1394,9 @@ const renderStaffScheduleCell = (barber, hour) => {
   return (
     <div className="app-shell">
 <header className="app-header">
-  <p>MICKEY BARBERSHOP EXPERIENCE</p>
+  <p>FADE BARBER STUDIO</p>
 
-  {(['/', '/login', '/reset-password', '/booking', '/products', '/cart', '/account', '/owner', '/barber'].includes(route)) && (
+  {isStaffDashboard && (['/', '/login', '/reset-password', '/booking', '/products', '/cart', '/account', '/owner', '/barber'].includes(route)) && (
     <div className="language-switch">
       <button
         type="button"
@@ -1419,7 +1419,7 @@ const renderStaffScheduleCell = (barber, hour) => {
       <main key={`${route}-${isStaffDashboard ? activeStaffPage : 'customer'}`} className="main">
         {route === '/reset-password' && recoveryReady && (
           <section className="auth-card">
-            <span className="gold-text">MICKEY MEMBERSHIP</span>
+            <span className="gold-text">FADE MEMBER</span>
             <h2>{tr('ตั้งรหัสผ่านใหม่', 'Reset Password')}</h2>
 <p className="auth-description">
   {tr('กรุณากรอกรหัสผ่านใหม่ของคุณ', 'Please enter your new password.')}
@@ -1464,7 +1464,7 @@ const renderStaffScheduleCell = (barber, hour) => {
 
         {!user && route === '/login' && (
           <section className="auth-card">
-            <span className="gold-text">MICKEY MEMBERSHIP</span>
+            <span className="gold-text">FADE MEMBER</span>
            <h2>
   {mode === 'login'
     ? tr('เข้าสู่ระบบ', 'Sign In')
@@ -2216,10 +2216,10 @@ const renderStaffScheduleCell = (barber, hour) => {
 
         {user && !isOwner && route === '/booking' && !customer && (
           <section className="auth-card">
-            <span className="gold-text">MICKEY MEMBERSHIP</span>
-            <h2>กรอกข้อมูลสมาชิก</h2>
+            <span className="gold-text">FADE MEMBER</span>
+            <h2>Complete Your Membership Profile</h2>
             <p className="auth-description">
-              กรุณากรอกชื่อและเบอร์โทรศัพท์ก่อนเริ่มใช้งาน
+              Please provide your name and phone number to continue.
             </p>
 
             <form onSubmit={handleCompleteProfile}>
@@ -2229,22 +2229,22 @@ const renderStaffScheduleCell = (barber, hour) => {
                 onChange={(event) => setFullName(event.target.value)}
                 required
               />
-              <label>เบอร์โทรศัพท์</label>
+              <label>Phone Number</label>
               <input
                 type="tel"
                 value={phone}
                 onChange={(event) => setPhone(event.target.value)}
                 required
               />
-              <label>อีเมล</label>
+              <label>Email Address</label>
               <input value={user.email || ''} disabled />
               <button type="submit" disabled={loading}>
-                {loading ? 'กำลังบันทึก...' : 'บันทึกข้อมูลสมาชิก'}
+                {loading ? 'Saving...' : 'Save Profile'}
               </button>
             </form>
 
             <button className="text-button" onClick={handleLogout}>
-              ออกจากระบบ
+              Sign Out
             </button>
           </section>
         )}
@@ -2258,7 +2258,7 @@ const renderStaffScheduleCell = (barber, hour) => {
               <button className={route === '/account' ? 'active' : ''} onClick={() => navigate('/account')}>{tr('จัดการบัญชี', 'Account Management')}</button>
               <button className="customer-sidebar-logout" onClick={() => setShowLogoutConfirm(true)}>{tr('\u0e2d\u0e2d\u0e01\u0e08\u0e32\u0e01\u0e23\u0e30\u0e1a\u0e1a', 'Sign Out')}</button>
             </div><section className="auth-card customer-schedule-card unified-booking-card">
-              <span className="gold-text">MICKEY BARBERSHOP · LIVE BOOKING</span>
+              <span className="gold-text">FADE BARBER STUDIO · BOOKING</span>
               <h2>{tr('เลือกบริการและจองคิว', 'Choose Service & Book')}</h2>
               <p className="auth-description">
                 {tr(
@@ -2502,7 +2502,7 @@ const renderStaffScheduleCell = (barber, hour) => {
               <button className="customer-sidebar-logout" onClick={() => setShowLogoutConfirm(true)}>{tr('ออกจากระบบ', 'Sign Out')}</button>
             </div>
             <section className="hero customer-account-dashboard">
-              <span className="gold-text">MICKEY MEMBERSHIP · ACCOUNT</span>
+              <span className="gold-text">FADE MEMBER · ACCOUNT</span>
               <h2>{tr("จัดการบัญชี", 'Account Management')}</h2>
               <p>{tr("ยินดีต้อนรับ", 'Welcome')}, {customer.full_name}</p>
               {!accountEditing ? (
@@ -2606,8 +2606,8 @@ const renderStaffScheduleCell = (barber, hour) => {
         {message && <div className="auth-message" role="status">{message}</div>}
       </main>
 
-      {showBrandSplash && <div className="mickey-splash" aria-hidden="true"><strong>MICKEY BARBERSHOP</strong></div>}
-      <footer>MICKEY BARBERSHOP © 2026</footer>
+      {showBrandSplash && <div className="mickey-splash" aria-hidden="true"><strong>FADE</strong></div>}
+      <footer>FADE BARBER STUDIO © 2026</footer>
     </div>
   )
 }

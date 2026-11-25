@@ -91,15 +91,15 @@ export default function CustomerShopPage({ tr, navigate, route, onLogout }) {
       </header>
 
       {route === '/cart' ? <section className="shop-full-cart">
-        <div className="shop-page-heading"><div><small>MICKEY BARBERSHOP · SHOPPING</small><h1>{tr('ตะกร้าสินค้า', 'Shopping Cart')}</h1><p>{tr('ตรวจสอบรายการสินค้าของคุณ', 'Review the items you selected.')}</p></div><button onClick={() => navigate('/products')}>＋ {tr('เลือกซื้อสินค้าต่อ', 'Continue Shopping')}</button></div>
+        <div className="shop-page-heading"><div><small>FADE BARBER STUDIO · SHOPPING</small><h1>{tr('ตะกร้าสินค้า', 'Shopping Cart')}</h1><p>{tr('ตรวจสอบรายการสินค้าของคุณ', 'Review the items you selected.')}</p></div><button onClick={() => navigate('/products')}>＋ {tr('เลือกซื้อสินค้าต่อ', 'Continue Shopping')}</button></div>
         {!cart.length ? <div className="shop-empty-state"><span>🛒</span><h2>{tr('ตะกร้าว่างเปล่า', 'Your cart is empty')}</h2><p>{tr('เลือกสินค้าที่คุณสนใจแล้วเพิ่มลงในตะกร้า', 'Browse products and add your favorites to the cart.')}</p></div> :
           <div className="shop-full-cart-grid"><div className="shop-full-cart-items">{cart.map(item => <article className="shop-full-cart-item" key={item.id}>
-            {item.image_path ? <img src={imageUrl(item.image_path)} alt={item.name}/> : <div className="shop-image-placeholder">M</div>}
+            {item.image_path ? <img src={imageUrl(item.image_path)} alt={item.name}/> : <div className="shop-image-placeholder">F</div>}
             <div className="shop-full-item-copy"><small>{tr('ผลิตภัณฑ์ดูแลเส้นผม', 'GROOMING')}</small><h3>{item.name}</h3><strong>{money(item.price)}</strong><div className="shop-qty"><button onClick={() => updateQuantity(item.id, item.quantity - 1)}>−</button><span>{item.quantity}</span><button onClick={() => updateQuantity(item.id, item.quantity + 1)} disabled={item.quantity >= item.stock}>＋</button></div></div>
             <button className="shop-delete-item" onClick={() => removeItem(item.id)}>{tr('ลบ', 'Remove')}</button>
           </article>)}</div><aside className="shop-order-summary"><h2>{tr('สรุปคำสั่งซื้อ', 'Order Summary')}</h2><div><span>{tr('จำนวนสินค้า', 'Items')}</span><b>{cartCount}</b></div><div className="shop-order-total"><span>{tr('ยอดรวมทั้งหมด', 'Total')}</span><strong>{money(total)}</strong></div><button disabled>{tr('ดำเนินการสั่งซื้อ — เร็ว ๆ นี้', 'Checkout — Coming Soon')}</button><p>{tr('ยังไม่เปิดระบบสั่งซื้อและชำระเงินออนไลน์ กรุณาชำระเงินที่ร้าน', 'Online checkout is not available yet. Payment is at the shop.')}</p></aside></div>}
       </section> : <section className="shop-catalog bbr-catalog">
-        <div className="shop-page-heading"><div><small>MICKEY BARBERSHOP · GROOMING STORE</small><h1>{tr('สินค้า', 'Products')}</h1><p>{tr('เลือกผลิตภัณฑ์ดูแลเส้นผมและจัดแต่งทรงที่คัดสรรมาเพื่อคุณ', 'Professional grooming products, selected for you.')}</p></div><div className="shop-product-count">{tr('สินค้าทั้งหมด', 'PRODUCTS')} <b>{visibleProducts.length}</b></div></div>
+        <div className="shop-page-heading"><div><small>FADE BARBER STUDIO · GROOMING STORE</small><h1>{tr('สินค้า', 'Products')}</h1><p>{tr('เลือกผลิตภัณฑ์ดูแลเส้นผมและจัดแต่งทรงที่คัดสรรมาเพื่อคุณ', 'Professional grooming products, selected for you.')}</p></div><div className="shop-product-count">{tr('สินค้าทั้งหมด', 'PRODUCTS')} <b>{visibleProducts.length}</b></div></div>
         <section className="shop-products-panel">
           <div className="shop-products-panel-head"><div><h2>{tr('รายการสินค้า', 'Product Collection')}</h2><span>{visibleProducts.length} {tr('รายการ', 'items')}</span></div><select value={category} onChange={e => setCategory(e.target.value)}><option value="">{tr('ทุกหมวดหมู่', 'All Categories')}</option>{categories.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
           {error && <div className="shop-error">{tr('โหลดสินค้าไม่สำเร็จ: ', 'Unable to load products: ')}{error}</div>}
@@ -107,23 +107,23 @@ export default function CustomerShopPage({ tr, navigate, route, onLogout }) {
             !visibleProducts.length ? <div className="shop-empty-state"><span>▦</span><h2>{tr('ไม่พบสินค้า', 'No products found')}</h2><p>{tr('ลองเปลี่ยนคำค้นหาหรือหมวดหมู่', 'Try another search or category.')}</p></div> :
             <div className="shop-product-grid">{visibleProducts.map(product => <article className="shop-product-card" key={product.id}>
               <button className="shop-product-image" onClick={() => openDetail(product)} aria-label={tr('ดูรายละเอียด ', 'View details ')+product.name}>
-                {product.image_path ? <img src={imageUrl(product.image_path)} alt={product.name}/> : <span className="shop-product-placeholder">MICKEY<br/>BARBERSHOP</span>}
+                {product.image_path ? <img src={imageUrl(product.image_path)} alt={product.name}/> : <span className="shop-product-placeholder">FADE<br/>BARBER STUDIO</span>}
                 {product.category && <i>{product.category}</i>}
                 <span className="shop-quick-view">{tr('ดูรายละเอียด', 'Quick View')}</span>
               </button>
-              <div className="shop-product-copy"><small>{product.brand || product.category || 'MICKEY BARBERSHOP'}</small><h3>{product.name}</h3><div className="shop-product-card-bottom"><strong>{money(product.price)}</strong><button onClick={() => addToCart(product)} aria-label={tr('เพิ่มลงตะกร้า ', 'Add to cart ')+product.name}>＋</button></div></div>
+              <div className="shop-product-copy"><small>{product.brand || product.category || 'FADE BARBER STUDIO'}</small><h3>{product.name}</h3><div className="shop-product-card-bottom"><strong>{money(product.price)}</strong><button onClick={() => addToCart(product)} aria-label={tr('เพิ่มลงตะกร้า ', 'Add to cart ')+product.name}>＋</button></div></div>
             </article>)}</div>}
         </section>
       </section>}
-      <footer className="shop-footer">MICKEY BARBERSHOP EXPERIENCE <span>·</span> {tr('ชำระเงินที่ร้าน', 'PAY AT SHOP')}</footer>
+      <footer className="shop-footer">FADE BARBER STUDIO <span>·</span> {tr('ชำระเงินที่ร้าน', 'PAY AT SHOP')}</footer>
     </section>
 
     {cartOpen && <div className="shop-drawer-backdrop" onMouseDown={e => { if (e.target === e.currentTarget) setCartOpen(false) }}>
       <aside className="shop-cart-drawer" role="dialog" aria-modal="true" aria-label={tr('ตะกร้าสินค้า', 'Shopping Cart')}>
-        <div className="shop-drawer-header"><div><small>MICKEY BARBERSHOP</small><h2>{tr('ตะกร้าสินค้า', 'Shopping Cart')} <span>({cartCount})</span></h2></div><button onClick={() => setCartOpen(false)} aria-label={tr('ปิด', 'Close')}>×</button></div>
+        <div className="shop-drawer-header"><div><small>FADE BARBER STUDIO</small><h2>{tr('ตะกร้าสินค้า', 'Shopping Cart')} <span>({cartCount})</span></h2></div><button onClick={() => setCartOpen(false)} aria-label={tr('ปิด', 'Close')}>×</button></div>
         {!cart.length ? <div className="shop-drawer-empty"><span>🛒</span><h3>{tr('ตะกร้าว่างเปล่า', 'Your cart is empty')}</h3><p>{tr('ยังไม่มีสินค้าในตะกร้า', 'No items have been added yet.')}</p><button onClick={() => { setCartOpen(false); navigate('/products') }}>{tr('เลือกซื้อสินค้า', 'Browse Products')}</button></div> :
           <><div className="shop-drawer-items">{cart.map(item => <article className="shop-drawer-item" key={item.id}>
-            {item.image_path ? <img src={imageUrl(item.image_path)} alt={item.name}/> : <div className="shop-image-placeholder">M</div>}
+            {item.image_path ? <img src={imageUrl(item.image_path)} alt={item.name}/> : <div className="shop-image-placeholder">F</div>}
             <div className="shop-drawer-item-info"><small>{tr('สินค้า', 'PRODUCT')}</small><h3>{item.name}</h3><strong>{money(item.price)}</strong><div className="shop-qty"><button onClick={() => updateQuantity(item.id, item.quantity - 1)}>−</button><span>{item.quantity}</span><button onClick={() => updateQuantity(item.id, item.quantity + 1)} disabled={item.quantity >= item.stock}>＋</button></div></div>
             <button className="shop-delete-item" onClick={() => removeItem(item.id)} aria-label={tr('ลบสินค้า', 'Remove item')}>×</button>
           </article>)}</div><div className="shop-drawer-bottom"><div className="shop-drawer-total"><span>{tr('รวมทั้งหมด', 'Total')}</span><strong>{money(total)}</strong></div><p>{tr('ชำระเงินที่ร้าน · ยังไม่เปิดชำระเงินออนไลน์', 'Pay at shop · Online checkout coming soon')}</p><button disabled>{tr('ดำเนินการสั่งซื้อ — เร็ว ๆ นี้', 'Checkout — Coming Soon')}</button><button className="shop-view-cart" onClick={() => { setCartOpen(false); navigate('/cart') }}>{tr('ดูตะกร้าสินค้าทั้งหมด', 'View Shopping Cart')}</button></div></>}
@@ -132,8 +132,8 @@ export default function CustomerShopPage({ tr, navigate, route, onLogout }) {
 
     {detail && <div className="shop-detail-overlay" onMouseDown={e => { if (e.target === e.currentTarget) setDetail(null) }}><section className="shop-detail-modal" role="dialog" aria-modal="true">
       <button className="shop-detail-close" onClick={() => setDetail(null)}>×</button>
-      <div className="shop-detail-image">{detail.image_path ? <img src={imageUrl(detail.image_path)} alt={detail.name}/> : <span>MICKEY<br/>BARBERSHOP</span>}</div>
-      <div className="shop-detail-copy"><small>{detail.category || 'MICKEY BARBERSHOP'}{detail.brand ? ' · '+detail.brand : ''}</small><h2>{detail.name}</h2><strong>{money(detail.price)}</strong><p>{detail.description || tr('ไม่มีรายละเอียดสินค้าเพิ่มเติม', 'No additional product details.')}</p><div className="shop-detail-stock">{tr('คงเหลือ', 'In stock')} {detail.stock} {tr('ชิ้น', 'items')}</div><div className="shop-qty shop-detail-qty"><button onClick={() => setDetailQty(q => Math.max(1,q-1))}>−</button><span>{detailQty}</span><button onClick={() => setDetailQty(q => Math.min(Number(detail.stock),q+1))} disabled={detailQty >= detail.stock}>＋</button></div><button className="shop-detail-add" onClick={() => { addToCart(detail,detailQty); setDetail(null) }}>{tr('เพิ่มลงตะกร้า', 'Add to Cart')}</button></div>
+      <div className="shop-detail-image">{detail.image_path ? <img src={imageUrl(detail.image_path)} alt={detail.name}/> : <span>FADE<br/>BARBER STUDIO</span>}</div>
+      <div className="shop-detail-copy"><small>{detail.category || 'FADE BARBER STUDIO'}{detail.brand ? ' · '+detail.brand : ''}</small><h2>{detail.name}</h2><strong>{money(detail.price)}</strong><p>{detail.description || tr('ไม่มีรายละเอียดสินค้าเพิ่มเติม', 'No additional product details.')}</p><div className="shop-detail-stock">{tr('คงเหลือ', 'In stock')} {detail.stock} {tr('ชิ้น', 'items')}</div><div className="shop-qty shop-detail-qty"><button onClick={() => setDetailQty(q => Math.max(1,q-1))}>−</button><span>{detailQty}</span><button onClick={() => setDetailQty(q => Math.min(Number(detail.stock),q+1))} disabled={detailQty >= detail.stock}>＋</button></div><button className="shop-detail-add" onClick={() => { addToCart(detail,detailQty); setDetail(null) }}>{tr('เพิ่มลงตะกร้า', 'Add to Cart')}</button></div>
     </section></div>}
   </div>
 }

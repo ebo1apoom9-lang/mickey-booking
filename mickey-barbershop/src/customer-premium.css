@@ -1,10 +1,10 @@
-/* MICKEY BARBERSHOP — Customer Experience / Quiet Luxury refresh */
+/* FADE BARBER STUDIO — Customer Experience / Modern Premium */
 :root {
-  --cx-gold: #c9a86a;
-  --cx-gold-soft: #e8d5a8;
+  --cx-gold: #D4AF37;
+  --cx-gold-soft: #E8D6A3;
   --cx-ink: #090a09;
   --cx-panel: rgba(21, 21, 19, .92);
-  --cx-line: rgba(201, 168, 106, .22);
+  --cx-line: rgba(212, 175, 55, .22);
   --cx-muted: #a69c88;
 }
 .app-shell:has(.booking-customer-nav) .main {
@@ -18,7 +18,7 @@
   box-shadow: 0 22px 60px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.055);
 }
 .app-shell .booking-customer-nav::before {
-  content: "MICKEY";
+  content: "FADE";
   display: block;
   padding: 10px 12px 2px;
   color: var(--cx-gold-soft);
@@ -26,7 +26,7 @@
   letter-spacing: 4px;
 }
 .app-shell .booking-customer-nav::after {
-  content: "BARBERSHOP EXPERIENCE";
+  content: "BARBER STUDIO";
   display: block;
   padding: 0 12px 13px;
   color: #82765d;
@@ -41,8 +41,8 @@
   transition: background .2s ease, border-color .2s ease, transform .2s ease;
 }
 .app-shell .booking-customer-nav button:hover {
-  background: rgba(201,168,106,.08);
-  border-color: rgba(201,168,106,.18);
+  background: rgba(212,175,55,.08);
+  border-color: rgba(212,175,55,.18);
   transform: translateX(2px);
 }
 .app-shell .booking-customer-nav button.active {
@@ -53,8 +53,8 @@
 }
 .app-shell .booking-customer-nav .customer-sidebar-logout {
   margin-top: 12px;
-  border: 1px solid rgba(201,168,106,.25);
-  background: rgba(201,168,106,.045);
+  border: 1px solid rgba(212,175,55,.25);
+  background: rgba(212,175,55,.045);
   color: #d0b77e;
 }
 .unified-booking-card,
@@ -65,7 +65,7 @@
   border: 1px solid var(--cx-line) !important;
   border-radius: 24px !important;
   background:
-    radial-gradient(ellipse at 92% 0%, rgba(201,168,106,.12), transparent 32rem),
+    radial-gradient(ellipse at 92% 0%, rgba(212,175,55,.12), transparent 32rem),
     linear-gradient(145deg, rgba(29,28,24,.97), rgba(12,13,12,.97)) !important;
   box-shadow: 0 28px 80px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06) !important;
 }
@@ -107,7 +107,7 @@
 .customer-date-first {
   margin-top: 30px;
   padding: clamp(16px, 2.4vw, 26px);
-  border: 1px solid rgba(201,168,106,.2);
+  border: 1px solid rgba(212,175,55,.2);
   border-radius: 18px;
   background: linear-gradient(145deg, rgba(255,255,255,.035), rgba(255,255,255,.012));
 }
@@ -123,7 +123,7 @@
 .customer-date-first > label input {
   min-height: 48px;
   padding: 0 14px;
-  border: 1px solid rgba(201,168,106,.32);
+  border: 1px solid rgba(212,175,55,.32);
   border-radius: 11px;
   background: rgba(7,8,7,.82);
   color: #f3ead7;
@@ -144,9 +144,9 @@
   line-height: 1.7;
 }
 .schedule-refresh-button {
-  border: 1px solid rgba(201,168,106,.35) !important;
+  border: 1px solid rgba(212,175,55,.35) !important;
   border-radius: 10px !important;
-  background: rgba(201,168,106,.08) !important;
+  background: rgba(212,175,55,.08) !important;
   color: #e4cd9b !important;
 }
 .schedule-legend {
@@ -168,7 +168,7 @@
 }
 .customer-schedule-scroll {
   margin-top: 15px;
-  border: 1px solid rgba(201,168,106,.18) !important;
+  border: 1px solid rgba(212,175,55,.18) !important;
   border-radius: 14px;
   background: rgba(5,6,5,.56) !important;
 }
@@ -206,14 +206,14 @@
   padding: clamp(22px, 3vw, 34px) !important;
 }
 .customer-booking-history .refresh-button {
-  border: 1px solid rgba(201,168,106,.32);
+  border: 1px solid rgba(212,175,55,.32);
   border-radius: 10px;
-  background: rgba(201,168,106,.08);
+  background: rgba(212,175,55,.08);
   color: #e4cd9b;
 }
 .customer-history-wrap {
   margin-top: 18px;
-  border: 1px solid rgba(201,168,106,.2) !important;
+  border: 1px solid rgba(212,175,55,.2) !important;
   border-radius: 14px;
   overflow-x: auto;
 }
@@ -228,19 +228,19 @@
   border-color: rgba(255,255,255,.055) !important;
   font-size: 12px;
 }
-.customer-history-table tbody tr:hover { background: rgba(201,168,106,.055) !important; }
+.customer-history-table tbody tr:hover { background: rgba(212,175,55,.055) !important; }
 .customer-status {
   display: inline-flex;
   padding: 5px 9px;
-  border: 1px solid rgba(201,168,106,.25);
+  border: 1px solid rgba(212,175,55,.25);
   border-radius: 30px;
-  background: rgba(201,168,106,.08);
+  background: rgba(212,175,55,.08);
   color: #e2cc9d;
   font-size: 10px;
   white-space: nowrap;
 }
 .booking-modal {
-  border: 1px solid rgba(201,168,106,.4) !important;
+  border: 1px solid rgba(212,175,55,.4) !important;
   border-radius: 22px !important;
   background: linear-gradient(145deg,#242219,#10110f) !important;
   box-shadow: 0 30px 100px rgba(0,0,0,.65) !important;
@@ -252,14 +252,14 @@
 .booking-modal label { color: #d9c9a8; }
 .booking-modal select {
   min-height: 48px;
-  border: 1px solid rgba(201,168,106,.3);
+  border: 1px solid rgba(212,175,55,.3);
   border-radius: 10px;
   background: #11120f;
 }
 .unified-service-summary {
-  border: 1px solid rgba(201,168,106,.22) !important;
+  border: 1px solid rgba(212,175,55,.22) !important;
   border-radius: 12px;
-  background: rgba(201,168,106,.07) !important;
+  background: rgba(212,175,55,.07) !important;
 }
 .booking-modal-actions button[type="submit"],
 .booking-modal-actions button:last-child {
@@ -277,7 +277,7 @@
   max-width: 760px;
   margin: 24px 0;
   padding: 8px 22px;
-  border: 1px solid rgba(201,168,106,.2);
+  border: 1px solid rgba(212,175,55,.2);
   border-radius: 16px;
   background: rgba(0,0,0,.2);
 }
@@ -298,16 +298,16 @@
   --shop-card-2:#1d1b16;
   --shop-text:#f2ecdf;
   --shop-muted:#a69c88;
-  --shop-line:rgba(201,168,106,.22);
-  --shop-gold:#c9a86a;
-  --shop-gold-bright:#ead5a5;
+  --shop-line:rgba(212,175,55,.22);
+  --shop-gold:#D4AF37;
+  --shop-gold-bright:#E8D6A3;
   background:
-    radial-gradient(ellipse at 85% 0%,rgba(201,168,106,.11),transparent 34rem),
+    radial-gradient(ellipse at 85% 0%,rgba(212,175,55,.11),transparent 34rem),
     linear-gradient(145deg,#090a09,#11120f 55%,#090a09);
 }
 .customer-shop .shop-customer-nav {
   background: linear-gradient(165deg,rgba(27,25,21,.98),rgba(10,11,10,.98));
-  border: 1px solid rgba(201,168,106,.24);
+  border: 1px solid rgba(212,175,55,.24);
   border-radius: 18px;
   box-shadow: 0 20px 55px rgba(0,0,0,.38);
 }
@@ -321,11 +321,11 @@
   color: #17130c;
 }
 .customer-shop .shop-toolbar {
-  border-color: rgba(201,168,106,.16);
+  border-color: rgba(212,175,55,.16);
 }
 .customer-shop .shop-search,
 .customer-shop .shop-toolbar-cart {
-  border-color: rgba(201,168,106,.25);
+  border-color: rgba(212,175,55,.25);
   border-radius: 12px;
   background: rgba(19,19,16,.88);
 }
@@ -336,14 +336,14 @@
 .customer-shop .shop-products-panel,
 .customer-shop .shop-full-cart-items,
 .customer-shop .shop-order-summary {
-  border: 1px solid rgba(201,168,106,.2);
+  border: 1px solid rgba(212,175,55,.2);
   border-radius: 18px;
   background: linear-gradient(145deg,rgba(29,28,24,.94),rgba(12,13,12,.94));
   box-shadow: 0 20px 55px rgba(0,0,0,.28);
 }
 .customer-shop .shop-product-card {
   overflow: hidden;
-  border: 1px solid rgba(201,168,106,.16);
+  border: 1px solid rgba(212,175,55,.16);
   border-radius: 15px;
   background: linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.012));
 }
@@ -361,7 +361,7 @@
 }
 .customer-shop .shop-cart-drawer,
 .customer-shop .shop-detail-modal {
-  border: 1px solid rgba(201,168,106,.32);
+  border: 1px solid rgba(212,175,55,.32);
   border-radius: 20px;
   background: linear-gradient(145deg,#242219,#10110f);
 }
@@ -391,12 +391,12 @@
   position: relative;
   margin-top: 18px;
   overflow: auto;
-  border: 1px solid rgba(201,168,106,.24) !important;
+  border: 1px solid rgba(212,175,55,.24) !important;
   border-radius: 18px;
   background: #0b0c0a !important;
   box-shadow: 0 18px 48px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.035);
   scrollbar-width: thin;
-  scrollbar-color: rgba(201,168,106,.42) rgba(255,255,255,.04);
+  scrollbar-color: rgba(212,175,55,.42) rgba(255,255,255,.04);
 }
 .customer-schedule-table {
   width: 100%;
@@ -409,7 +409,7 @@
   height: 54px;
   padding: 0 8px !important;
   border: 0 !important;
-  border-bottom: 1px solid rgba(201,168,106,.2) !important;
+  border-bottom: 1px solid rgba(212,175,55,.2) !important;
   background: linear-gradient(180deg,#28251d,#1b1a15) !important;
   color: #cdb783 !important;
   font: 600 10px/1.2 Arial,sans-serif !important;
@@ -435,7 +435,7 @@
   background: rgba(255,255,255,.022);
 }
 .customer-schedule-table tbody tr:hover {
-  background: rgba(201,168,106,.035);
+  background: rgba(212,175,55,.035);
 }
 .customer-schedule-table tbody th {
   position: sticky;
@@ -445,7 +445,7 @@
   padding: 12px 16px !important;
   border: 0 !important;
   border-bottom: 1px solid rgba(255,255,255,.055) !important;
-  border-right: 1px solid rgba(201,168,106,.12) !important;
+  border-right: 1px solid rgba(212,175,55,.12) !important;
   background: #171713 !important;
   color: #eee5d4 !important;
   font: 500 13px/1.4 Georgia,serif !important;
@@ -473,9 +473,9 @@
   transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
 }
 .customer-schedule-table .schedule-slot.is-open {
-  border: 1px solid rgba(201,168,106,.62) !important;
-  background: linear-gradient(145deg,rgba(201,168,106,.19),rgba(201,168,106,.075)) !important;
-  color: #ead6a8 !important;
+  border: 1px solid rgba(212,175,55,.62) !important;
+  background: linear-gradient(145deg,rgba(212,175,55,.19),rgba(212,175,55,.075)) !important;
+  color: #E8D6A3 !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 3px 12px rgba(0,0,0,.16) !important;
 }
 .customer-schedule-table .schedule-slot.is-open:hover:not(:disabled) {
@@ -483,7 +483,7 @@
   border-color: #e3c98f !important;
   background: linear-gradient(145deg,rgba(218,190,129,.32),rgba(166,129,66,.18)) !important;
   color: #fff0cb !important;
-  box-shadow: 0 7px 18px rgba(0,0,0,.25), 0 0 0 2px rgba(201,168,106,.07) !important;
+  box-shadow: 0 7px 18px rgba(0,0,0,.25), 0 0 0 2px rgba(212,175,55,.07) !important;
 }
 .customer-schedule-table .schedule-slot.is-busy,
 .customer-schedule-table .schedule-slot:disabled {
@@ -498,7 +498,7 @@
   align-items: center;
   gap: 12px 22px;
   padding: 14px 17px;
-  border-color: rgba(201,168,106,.12);
+  border-color: rgba(212,175,55,.12);
   background: rgba(255,255,255,.018);
 }
 .schedule-legend span {
@@ -516,8 +516,8 @@
   box-shadow: none;
 }
 .schedule-legend .legend-open {
-  background: #c9a86a;
-  box-shadow: 0 0 10px rgba(201,168,106,.35);
+  background: #D4AF37;
+  box-shadow: 0 0 10px rgba(212,175,55,.35);
 }
 .schedule-legend .legend-busy { background: #77736a; }
 .schedule-legend .legend-closed { background: #393a35; border: 1px solid #777064; }
@@ -544,3 +544,18 @@
   .customer-schedule-table tbody tr,
   .customer-schedule-table .schedule-slot { transition: none !important; }
 }
+
+/* FADE customer identity — aligned with the approved Modern Premium system */
+.app-shell:has(.booking-customer-nav) { --cx-gold:#D4AF37; --cx-gold-soft:#E8D6A3; --cx-line:rgba(212,175,55,.22); }
+.app-shell:has(.booking-customer-nav) .app-header > p { color:#E8D6A3; font-family:Georgia,"Times New Roman",serif; font-size:clamp(18px,2vw,22px); font-weight:600; letter-spacing:.28em; }
+.app-shell:has(.booking-customer-nav) .app-header > p::after { content:"BARBER STUDIO"; display:block; margin-top:4px; color:#8A8780; font:600 9px/1.4 Arial,sans-serif; letter-spacing:.3em; }
+.app-shell:has(.booking-customer-nav) .booking-customer-nav::before { content:"FADE"; color:#E8D6A3; font-family:Georgia,"Times New Roman",serif; font-size:22px; letter-spacing:.28em; }
+.app-shell:has(.booking-customer-nav) .booking-customer-nav::after { content:"BARBER STUDIO"; color:#8A8780; letter-spacing:2.5px; }
+.customer-shop .shop-customer-nav::before { content:"FADE"; display:block; padding:10px 12px 2px; color:#E8D6A3; font:600 22px/1.2 Georgia,serif; letter-spacing:4px; }
+.customer-shop .shop-customer-nav::after { content:"BARBER STUDIO"; display:block; padding:0 12px 13px; color:#8A8780; font-size:8px; letter-spacing:2.5px; }
+.customer-shop .shop-page-heading h1,.customer-shop .shop-products-panel-head h2,.customer-shop .shop-order-summary h2 { color:#E8D6A3; }
+.customer-shop .shop-product-card,.customer-shop .shop-full-cart-items,.customer-shop .shop-order-summary { border-color:rgba(212,175,55,.22); }
+@media (max-width:760px) { .app-shell:has(.booking-customer-nav) .app-header > p { font-size:17px; letter-spacing:.2em; } .app-shell:has(.booking-customer-nav) .booking-customer-nav { border-radius:14px; padding:10px; } }
+
+.app-shell:not(:has(.staff-sidebar)) .app-header > p { color:#E8D6A3; font-family:Georgia,"Times New Roman",serif; font-size:clamp(18px,2vw,22px); font-weight:600; letter-spacing:.28em; }
+.app-shell:not(:has(.staff-sidebar)) .app-header > p::after { content:"BARBER STUDIO"; display:block; margin-top:4px; color:#8A8780; font:600 9px/1.4 Arial,sans-serif; letter-spacing:.3em; }
