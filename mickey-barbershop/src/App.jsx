@@ -357,6 +357,7 @@ const loadBookings = useCallback(async () => {
     .select(`
       id,
       booking_code,
+      created_at,
       service_name_snapshot,
       price_thb_snapshot,
       duration_minutes_snapshot,
@@ -2448,9 +2449,12 @@ const renderStaffScheduleCell = (barber, hour) => {
               {statusLabel(booking.status, language)}
             </span>
 
-            {booking.status === 'Confirmed' &&
-              new Date(booking.starts_at).getTime() >
-                Date.now() + 2 * 60 * 60 * 1000 && (
+            {['Pending', 'Confirmed'].includes(booking.status) &&
+              new Date(booking.starts_at).getTime() > Date.now() &&
+              (
+                new Date(booking.starts_at).getTime() >= Date.now() + 2 * 60 * 60 * 1000 ||
+                (booking.created_at && new Date(booking.created_at).getTime() >= Date.now() - 10 * 60 * 1000)
+              ) && (
                 <button
                   type="button"
                   className="cancel-button"
