@@ -381,3 +381,294 @@
     animation: none !important;
   }
 }
+
+
+/* -------------------------------------------------------------------------
+   FADE SYSTEM-WIDE FINISH
+   Preserve the MICKEY BARBERSHOP component templates and motion; normalize
+   legacy theme aliases and role-specific surfaces to the approved FADE palette.
+   ------------------------------------------------------------------------- */
+:root {
+  /* Compatibility aliases used by the original MICKEY stylesheets. */
+  --gold: var(--fade-gold);
+  --gold-light: var(--fade-champagne);
+  --card: var(--fade-charcoal);
+  --staff-line: var(--fade-line);
+  --cx-gold: var(--fade-gold);
+  --cx-gold-soft: var(--fade-champagne);
+  --cx-ink: var(--fade-black);
+  --cx-panel: rgba(28, 28, 31, .94);
+  --cx-line: var(--fade-line);
+  --lux-bg: var(--fade-black);
+  --lux-panel: var(--fade-charcoal);
+  --lux-panel-soft: #151518;
+  --lux-line: var(--fade-line);
+  --lux-gold: var(--fade-gold);
+  --lux-gold-light: var(--fade-champagne);
+  --lux-muted: var(--fade-muted);
+  --lux-text: var(--fade-ivory);
+  --motion-gold: var(--fade-gold);
+}
+html { background: var(--fade-black); }
+body {
+  background: radial-gradient(ellipse at 50% -20%, rgba(212,175,55,.075) 0, var(--fade-black) 48rem), var(--fade-black);
+  color: var(--fade-ivory);
+}
+::selection { color: var(--fade-black); background: var(--fade-champagne); }
+a { text-underline-offset: 3px; }
+button:focus-visible, a:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--fade-champagne);
+  outline-offset: 3px;
+}
+
+/* Shared role shell and page surfaces. */
+.app-shell {
+  min-height: 100vh;
+  color: var(--fade-ivory);
+  background: transparent;
+}
+.app-shell .app-header,
+.app-shell .header {
+  color: var(--fade-ivory);
+  background: rgba(11,11,13,.96);
+  border-color: var(--fade-line);
+  backdrop-filter: blur(14px);
+}
+.app-shell .main {
+  color: var(--fade-ivory);
+}
+.app-shell .main h1,
+.app-shell .main h2,
+.app-shell .main h3,
+.app-shell .main h4,
+.app-shell .header h1,
+.app-shell .app-header h1 {
+  color: var(--fade-champagne);
+}
+.app-shell .main p,
+.app-shell .main label,
+.app-shell .main small {
+  color: inherit;
+}
+.app-shell .main p:not([class]),
+.app-shell .main .muted,
+.app-shell .main .subtitle {
+  color: var(--fade-muted);
+}
+.app-shell .auth-card,
+.app-shell .hero,
+.app-shell .today-overview,
+.app-shell .customer-management,
+.app-shell .staff-schedule-section,
+.app-shell .owner-reports-section,
+.app-shell .customer-schedule-card,
+.app-shell .booking-card,
+.app-shell .staff-panel,
+.app-shell .staff-content-card,
+.app-shell .customer-details-panel,
+.app-shell .customer-profile-card,
+.app-shell .customer-history-card {
+  border-color: var(--fade-line);
+  background-color: var(--fade-charcoal);
+  color: var(--fade-ivory);
+}
+.app-shell .app-header h1,
+.app-shell .header h1,
+.app-shell .sidebar-brand,
+.app-shell .booking-customer-nav::before {
+  color: var(--fade-champagne);
+}
+
+/* Owner and Barber: preserve the original sidebar geometry and transitions. */
+.app-shell .staff-sidebar {
+  color: var(--fade-ivory);
+  border-color: var(--fade-line);
+  background: linear-gradient(155deg, #1C1C1F 0%, #0B0B0D 100%);
+}
+.app-shell .staff-sidebar a,
+.app-shell .staff-sidebar button {
+  color: var(--fade-ivory);
+}
+.app-shell .staff-sidebar a:hover,
+.app-shell .staff-sidebar button:hover,
+.app-shell .staff-sidebar a.active {
+  color: var(--fade-gold);
+  border-color: var(--fade-line-strong);
+  background: linear-gradient(100deg, rgba(212,175,55,.15), rgba(212,175,55,.035));
+}
+.app-shell .staff-sidebar a.active {
+  box-shadow: inset 3px 0 0 var(--fade-gold);
+}
+.app-shell .sidebar-brand {
+  border-color: var(--fade-line);
+}
+.app-shell .sidebar-brand span { color: var(--fade-ivory); }
+
+/* Customer booking navigation, membership and account panels. */
+.app-shell .booking-customer-nav,
+.app-shell .customer-main-nav {
+  color: var(--fade-ivory);
+  border-color: var(--fade-line);
+  background: linear-gradient(155deg, rgba(28,28,31,.98), rgba(11,11,13,.98));
+}
+.app-shell .booking-customer-nav::after { color: var(--fade-muted); }
+.app-shell .booking-customer-nav a,
+.app-shell .booking-customer-nav button,
+.app-shell .customer-main-nav a,
+.app-shell .customer-main-nav button {
+  color: var(--fade-champagne);
+  border-color: var(--fade-line);
+}
+.app-shell .booking-customer-nav a.active,
+.app-shell .booking-customer-nav button.active,
+.app-shell .customer-main-nav a.active,
+.app-shell .customer-main-nav button.active {
+  color: var(--fade-black);
+  border-color: var(--fade-gold);
+  background: linear-gradient(135deg, var(--fade-champagne), var(--fade-gold));
+}
+.app-shell .booking-customer-nav a:hover,
+.app-shell .booking-customer-nav button:hover,
+.app-shell .customer-main-nav a:hover,
+.app-shell .customer-main-nav button:hover {
+  border-color: var(--fade-gold);
+}
+
+/* Shop is a separate customer surface but uses the same palette tokens. */
+.customer-shop.bbr-shop-layout {
+  --shop-bg: var(--fade-black);
+  --shop-card: var(--fade-charcoal);
+  --shop-card-2: #151518;
+  --shop-text: var(--fade-ivory);
+  --shop-muted: var(--fade-muted);
+  --shop-line: var(--fade-line);
+  --shop-gold: var(--fade-gold);
+  --shop-gold-bright: var(--fade-champagne);
+  background: var(--fade-black);
+  color: var(--fade-ivory);
+}
+.customer-shop .shop-sidebar,
+.customer-shop .shop-header,
+.customer-shop .shop-cart-drawer,
+.customer-shop .shop-detail-modal {
+  color: var(--fade-ivory);
+  background: linear-gradient(155deg, #1C1C1F 0%, #0B0B0D 100%);
+  border-color: var(--fade-line);
+}
+.customer-shop .shop-logo,
+.customer-shop .shop-page-heading h1,
+.customer-shop .shop-products-panel-head h2 { color: var(--fade-champagne); }
+.customer-shop .shop-side-link { color: var(--fade-ivory); }
+.customer-shop .shop-side-link:hover {
+  color: var(--fade-champagne);
+  border-color: var(--fade-line);
+  background: rgba(212,175,55,.09);
+}
+.customer-shop .shop-side-link.active {
+  color: var(--fade-black);
+  background: linear-gradient(135deg, var(--fade-champagne), var(--fade-gold));
+}
+.customer-shop .shop-side-link.active b {
+  color: var(--fade-champagne);
+  background: var(--fade-black);
+}
+
+/* Shared controls, status-neutral surfaces and data tables. */
+.app-shell .main input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.app-shell .main select,
+.app-shell .main textarea,
+.customer-shop input,
+.customer-shop select,
+.customer-shop textarea {
+  color: var(--fade-ivory);
+  border-color: var(--fade-line-strong);
+  background-color: #111114;
+}
+.app-shell .main input::placeholder,
+.app-shell .main textarea::placeholder,
+.customer-shop input::placeholder,
+.customer-shop textarea::placeholder { color: var(--fade-muted); }
+.app-shell .main button.primary,
+.app-shell .main button[type="submit"],
+.app-shell .main .refresh-button,
+.app-shell .main .schedule-refresh-button,
+.customer-shop .shop-primary-button,
+.customer-shop .shop-checkout-button {
+  color: var(--fade-black);
+  border-color: var(--fade-gold);
+  background: linear-gradient(135deg, var(--fade-champagne), var(--fade-gold));
+}
+.app-shell .staff-schedule-table thead th,
+.app-shell .customer-schedule-table thead th {
+  color: var(--fade-champagne);
+  background: #1C1C1F;
+  border-color: var(--fade-line);
+}
+.app-shell .staff-schedule-table td,
+.app-shell .staff-schedule-table th,
+.app-shell .customer-schedule-table td,
+.app-shell .customer-schedule-table th { border-color: var(--fade-line); }
+.app-shell .staff-booking-cell,
+.app-shell .staff-open-slot {
+  color: var(--fade-champagne);
+  border-color: var(--fade-line-strong);
+  background: rgba(212,175,55,.075);
+}
+.app-shell .staff-booking-cell:hover,
+.app-shell .staff-open-slot:hover:not(:disabled) {
+  color: var(--fade-ivory);
+  border-color: var(--fade-gold);
+  background: rgba(212,175,55,.16);
+}
+
+/* Consistent responsive behavior while retaining each role's existing template. */
+@media (max-width: 900px) {
+  .app-shell:has(.staff-sidebar) .main {
+    width: 100%;
+    max-width: none;
+    margin: 0 auto;
+    padding: 24px 18px 44px;
+  }
+}
+@media (max-width: 760px) {
+  .app-shell .app-header,
+  .app-shell .header {
+    gap: 10px;
+  }
+  .app-shell:has(.staff-sidebar) .main {
+    padding: 18px 14px 36px;
+  }
+  .app-shell:not(:has(.staff-sidebar)) .main {
+    width: 100%;
+    padding: 18px 14px 36px;
+  }
+  .app-shell .auth-card,
+  .app-shell .today-overview,
+  .app-shell .customer-schedule-card,
+  .app-shell .unified-booking-card,
+  .app-shell .staff-content-card {
+    border-radius: var(--fade-radius-md);
+  }
+  .customer-shop .shop-sidebar {
+    background: linear-gradient(155deg, #1C1C1F 0%, #0B0B0D 100%);
+  }
+}
+@media (max-width: 420px) {
+  .app-shell .main { padding-left: 12px; padding-right: 12px; }
+  .app-shell .language-switch { margin-left: 0; }
+  .app-shell .unified-booking-card { padding: 18px 13px; }
+  .app-shell .customer-schedule-card { padding: 18px 12px; }
+}
+
+/* Keep the MICKEY interaction language; only normalize its highlight color. */
+.motion-count-up,
+.motion-bar-chart,
+.motion-line-chart,
+.motion-donut,
+.motion-fade-up { --motion-gold: var(--fade-gold); }
+.owner-kpi-card:hover,
+.summary-row:hover,
+.shop-product-card:hover {
+  border-color: var(--fade-line-strong);
+}
