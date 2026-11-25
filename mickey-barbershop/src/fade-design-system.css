@@ -272,3 +272,111 @@
     animation-duration: .01ms !important;
   }
 }
+
+
+/* FADE staff navigation: same Owner/Barber sidebar on desktop, hamburger drawer on phones. */
+.app-shell .mobile-sidebar-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 48px;
+  min-height: 46px;
+  padding: 10px 14px;
+  border: 1px solid var(--fade-line-strong);
+  border-radius: 10px;
+  background: linear-gradient(145deg, #1C1C1F, #0B0B0D);
+  color: var(--fade-champagne);
+  box-shadow: 0 8px 22px rgba(0,0,0,.28);
+  cursor: pointer;
+}
+.app-shell .hamburger-lines {
+  display: flex;
+  width: 22px;
+  flex: 0 0 22px;
+  flex-direction: column;
+  gap: 5px;
+}
+.app-shell .hamburger-lines i {
+  display: block;
+  width: 22px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--fade-gold);
+  transition: transform .22s ease, opacity .18s ease;
+}
+.app-shell .mobile-sidebar-toggle[aria-expanded="true"] .hamburger-lines i:first-child {
+  transform: translateY(7px) rotate(45deg);
+}
+.app-shell .mobile-sidebar-toggle[aria-expanded="true"] .hamburger-lines i:nth-child(2) {
+  opacity: 0;
+}
+.app-shell .mobile-sidebar-toggle[aria-expanded="true"] .hamburger-lines i:last-child {
+  transform: translateY(-7px) rotate(-45deg);
+}
+.app-shell .mobile-menu-label {
+  color: var(--fade-champagne);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .16em;
+}
+.app-shell .staff-sidebar-backdrop {
+  padding: 0;
+  background: rgba(0,0,0,.72);
+  backdrop-filter: blur(3px);
+}
+@media (max-width: 700px) {
+  .app-shell:has(.staff-sidebar) .mobile-sidebar-toggle {
+    display: inline-flex !important;
+    position: relative;
+    z-index: 1280;
+    margin: 0 0 14px;
+  }
+  .app-shell:has(.staff-sidebar) .staff-sidebar {
+    display: none !important;
+  }
+  .app-shell:has(.staff-sidebar) .staff-sidebar.is-open {
+    display: flex !important;
+    position: fixed;
+    inset: 12px;
+    z-index: 1300;
+    width: auto;
+    max-width: 360px;
+    height: auto;
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 22px 18px;
+    border: 1px solid var(--fade-line-strong);
+    border-radius: 16px;
+    background: linear-gradient(155deg, #1C1C1F 0%, #0B0B0D 100%);
+    box-shadow: 0 24px 70px rgba(0,0,0,.62);
+    animation: fadeSidebarIn .28s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .app-shell .staff-sidebar.is-open .sidebar-brand {
+    width: auto;
+    margin-bottom: 18px;
+  }
+  .app-shell .staff-sidebar.is-open a,
+  .app-shell .staff-sidebar.is-open button {
+    display: flex;
+    width: 100%;
+    min-height: 46px;
+    flex: 0 0 auto;
+    align-items: center;
+    text-align: left;
+  }
+}
+@keyframes fadeSidebarIn {
+  from { opacity: 0; transform: translateX(-14px) scale(.985); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell .hamburger-lines i,
+  .app-shell .staff-sidebar.is-open {
+    transition: none !important;
+    animation: none !important;
+  }
+}

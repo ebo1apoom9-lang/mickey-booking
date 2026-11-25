@@ -1565,9 +1565,21 @@ const renderStaffScheduleCell = (barber, hour) => {
 
         {user && (isOwner || isBarber) && (route === '/owner' || route === '/barber') && (
           <>
-          <button type="button" className="mobile-sidebar-toggle" aria-label="Open navigation menu" aria-expanded={mobileSidebarOpen} onClick={() => setMobileSidebarOpen(true)}>☰</button>
+          <button
+            type="button"
+            className="mobile-sidebar-toggle"
+            aria-label="Open navigation menu"
+            aria-controls="staff-navigation"
+            aria-expanded={mobileSidebarOpen}
+            onClick={() => setMobileSidebarOpen((open) => !open)}
+          >
+            <span className="hamburger-lines" aria-hidden="true"><i /><i /><i /></span>
+            <span className="mobile-menu-label">{tr('เมนู', 'MENU')}</span>
+          </button>
           {mobileSidebarOpen && <button type="button" className="staff-sidebar-backdrop" aria-label="Close navigation menu" onClick={() => setMobileSidebarOpen(false)} />}
-          <aside className={"staff-sidebar " + (mobileSidebarOpen ? "is-open" : "")} onClick={() => setMobileSidebarOpen(false)}>
+          <aside id="staff-navigation" className={"staff-sidebar " + (mobileSidebarOpen ? "is-open" : "")} onClick={(event) => {
+            if (event.target.closest('a')) setMobileSidebarOpen(false)
+          }}>
   <div className="sidebar-brand">
     FADE<span>BARBER STUDIO</span>
   </div>
@@ -1666,7 +1678,7 @@ const renderStaffScheduleCell = (barber, hour) => {
 </aside>
           <section className="staff-workspace-heading">
             <div>
-              <span className="gold-text">MICKEY BARBERSHOP · {isOwner ? 'OWNER CONSOLE' : 'BARBER WORKSPACE'}</span>
+              <span className="gold-text">FADE BARBER STUDIO · {isOwner ? 'OWNER CONSOLE' : 'BARBER WORKSPACE'}</span>
               <h1>{isOwner ? tr('ระบบจัดการร้าน', 'Management Dashboard') : tr('พื้นที่ทำงานช่าง', 'Barber Workspace')}</h1>
               <p>{tr('ยินดีต้อนรับ', 'Welcome')}, {staffProfile?.full_name || user.email}</p>
             </div>
