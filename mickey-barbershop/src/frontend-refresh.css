@@ -296,6 +296,18 @@ footer { border-color: var(--lux-line); }
 .booking-note { color:#a99f8e; }
 .customer-status { display:inline-flex; padding:5px 9px; border:1px solid var(--lux-line); border-radius:999px; color:var(--lux-gold-light); font-size:11px; white-space:nowrap; }
 .cancel-button { display:block; margin-top:8px; padding:7px 10px; border:1px solid #75463d; border-radius:7px; background:#2a1715; color:#e5a99b; font-size:11px; }
+.customer-cancel-actions { margin-top:22px; padding:18px; border:1px solid var(--lux-line); border-radius:12px; background:rgba(20,18,14,.72); }
+.customer-cancel-actions h3 { margin:0 0 12px; color:var(--lux-gold-light); font-size:15px; }
+.customer-cancel-row { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 0; border-top:1px solid var(--lux-line); }
+.customer-cancel-row > div { display:grid; gap:5px; }
+.customer-cancel-row strong { color:#f3eee4; font-size:13px; }
+.customer-cancel-row span { color:#a99f8e; font-size:12px; }
+.customer-cancel-row .cancel-button { flex:0 0 auto; margin:0; padding:9px 14px; cursor:pointer; }
+.customer-cancel-row .cancel-button:disabled { opacity:.55; cursor:wait; }
+@media(max-width:520px) {
+  .customer-cancel-row { align-items:flex-start; flex-direction:column; }
+  .customer-cancel-row .cancel-button { width:100%; }
+}
 @media(max-width:900px) {
   .app-shell:not(:has(.staff-sidebar)) .main { width:min(100% - 28px,1180px); }
   .staff-workspace-heading { padding:20px; }

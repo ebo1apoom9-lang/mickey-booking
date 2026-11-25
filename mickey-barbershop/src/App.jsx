@@ -2466,21 +2466,7 @@ const renderStaffScheduleCell = (barber, hour) => {
               {statusLabel(booking.status, language)}
             </span>
 
-            {['Pending', 'Confirmed'].includes(booking.status) &&
-              new Date(booking.starts_at).getTime() > Date.now() &&
-              (
-                new Date(booking.starts_at).getTime() >= Date.now() + 2 * 60 * 60 * 1000 ||
-                (booking.created_at && new Date(booking.created_at).getTime() >= Date.now() - 10 * 60 * 1000)
-              ) && (
-                <button
-                  type="button"
-                  className="cancel-button"
-                  onClick={() => handleCancelBooking(booking.id)}
-                  disabled={loading}
-                >
-                  {tr('ยกเลิกการจอง', 'Cancel Booking')}
-                </button>
-              )}
+
           </td>
         </tr>
       ))}
@@ -2488,6 +2474,44 @@ const renderStaffScheduleCell = (barber, hour) => {
   </table>
 </div>
 )}
+
+<div className="customer-cancel-actions">
+  <h3>{tr('ยกเลิกคิวของฉัน', 'Cancel My Booking')}</h3>
+  {bookings.filter((booking) =>
+    ['Pending', 'Confirmed'].includes(booking.status) &&
+    new Date(booking.starts_at).getTime() > Date.now() &&
+    (
+      new Date(booking.starts_at).getTime() >= Date.now() + 2 * 60 * 60 * 1000 ||
+      (booking.created_at && new Date(booking.created_at).getTime() >= Date.now() - 10 * 60 * 1000)
+    )
+  ).length === 0 ? (
+    <p className="booking-note">{tr('ไม่มีคิวที่สามารถยกเลิกได้ในขณะนี้', 'There are no cancellable bookings at this time.')}</p>
+  ) : (
+    bookings.filter((booking) =>
+      ['Pending', 'Confirmed'].includes(booking.status) &&
+      new Date(booking.starts_at).getTime() > Date.now() &&
+      (
+        new Date(booking.starts_at).getTime() >= Date.now() + 2 * 60 * 60 * 1000 ||
+        (booking.created_at && new Date(booking.created_at).getTime() >= Date.now() - 10 * 60 * 1000)
+      )
+    ).map((booking) => (
+      <div className="customer-cancel-row" key={booking.id}>
+        <div>
+          <strong>{booking.service_name_snapshot || tr('บริการ', 'Service')}</strong>
+          <span>{formatDateTime(booking.starts_at, language)}</span>
+        </div>
+        <button
+          type="button"
+          className="cancel-button"
+          onClick={() => handleCancelBooking(booking.id)}
+          disabled={loading}
+        >
+          {loading ? tr('กำลังดำเนินการ...', 'Processing...') : tr('ยกเลิกคิวนี้', 'Cancel This Booking')}
+        </button>
+      </div>
+    ))
+  )}
+</div>
           </section>
           </>
         )}
