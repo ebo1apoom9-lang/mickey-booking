@@ -11,6 +11,7 @@ import StaffPageSkeleton from './StaffPageSkeleton'
 import AnimatedNumber from './AnimatedNumber'
 import './motion.css'
 import './fade-design-system.css'
+import './customer-owner-parity.css'
 const money = (value) =>
   new Intl.NumberFormat('th-TH').format(Number(value) || 0) + ' บาท'
 
@@ -780,7 +781,6 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
       setLoading(false)
     }
   }
-
 
   async function handleCustomerRoleChange(customer, nextRole) {
     if (!isOwner || !customer?.id || !customer.auth_user_id) return
@@ -1584,7 +1584,6 @@ const renderStaffScheduleCell = (barber, hour) => {
     FADE<span>BARBER STUDIO</span>
   </div>
 
-
   <a
     href="#schedule"
     className={activeStaffPage === 'schedule' ? 'active' : ''}
@@ -1731,7 +1730,6 @@ const renderStaffScheduleCell = (barber, hour) => {
                 </table>
               </div>
 
-
             </section>
               </>
             )}
@@ -1842,8 +1840,6 @@ const renderStaffScheduleCell = (barber, hour) => {
 
 <div className="owner-table-wrap">
   <table className="owner-booking-table">
-
-
 
 <thead>
   <tr>
@@ -2156,7 +2152,6 @@ const renderStaffScheduleCell = (barber, hour) => {
             </>
           )}
 
-
         {user && isBarber && route === '/barber' && (
           <>
             {activeStaffPage === 'overview' && (
@@ -2264,14 +2259,17 @@ const renderStaffScheduleCell = (barber, hour) => {
 
         {user && !isOwner && route === '/booking' && customer && (
           <>
-            <div className={`customer-main-nav booking-customer-nav ${mobileCustomerNavOpen ? 'is-open' : ''}`} aria-label={tr('\u0e40\u0e21\u0e19\u0e39\u0e2b\u0e25\u0e31\u0e01', 'Main navigation')}>
-              <button type="button" className="customer-mobile-menu-toggle" aria-expanded={mobileCustomerNavOpen} onClick={() => setMobileCustomerNavOpen(open => !open)}><span className="customer-hamburger" aria-hidden="true"><i/><i/><i/></span><span>{tr('\u0e40\u0e21\u0e19\u0e39\u0e2b\u0e25\u0e31\u0e01', 'Menu')}</span></button>
+            <button type="button" className="mobile-sidebar-toggle customer-mobile-sidebar-toggle" aria-label="Open navigation menu" aria-controls="customer-navigation" aria-expanded={mobileCustomerNavOpen} onClick={() => setMobileCustomerNavOpen(open => !open)}>
+              <span className="hamburger-lines" aria-hidden="true"><i /><i /><i /></span>
+            </button>
+            {mobileCustomerNavOpen && <button type="button" className="staff-sidebar-backdrop customer-sidebar-backdrop" aria-label="Close navigation menu" onClick={() => setMobileCustomerNavOpen(false)} />}
+            <aside id="customer-navigation" className={`customer-main-nav booking-customer-nav ${mobileCustomerNavOpen ? 'is-open' : ''}`} aria-label={tr('\u0e40\u0e21\u0e19\u0e39\u0e2b\u0e25\u0e31\u0e01', 'Main navigation')} onClick={(event) => { if (event.target.closest('button')) setMobileCustomerNavOpen(false) }}>
               <button className={route === '/booking' ? 'active' : ''} onClick={() => navigate('/booking')}>{tr('\u0e08\u0e2d\u0e07\u0e04\u0e34\u0e27', 'Book Appointment')}</button>
               <button className={route === '/products' ? 'active' : ''} onClick={() => navigate('/products')}>{tr('\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32', 'Products')}</button>
               <button className={route === '/cart' ? 'active' : ''} onClick={() => navigate('/cart')}>{tr('\u0e15\u0e30\u0e01\u0e23\u0e49\u0e32\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32', 'Shopping Cart')}</button>
               <button className={route === '/account' ? 'active' : ''} onClick={() => navigate('/account')}>{tr('จัดการบัญชี', 'Account Management')}</button>
               <button className="customer-sidebar-logout" onClick={() => setShowLogoutConfirm(true)}>{tr('\u0e2d\u0e2d\u0e01\u0e08\u0e32\u0e01\u0e23\u0e30\u0e1a\u0e1a', 'Sign Out')}</button>
-            </div><section className="auth-card customer-schedule-card unified-booking-card">
+            </aside><section className="auth-card customer-schedule-card unified-booking-card">
               <span className="gold-text">FADE BARBER STUDIO · BOOKING</span>
               <h2>{tr('เลือกบริการและจองคิว', 'Choose Service & Book')}</h2>
               <p className="auth-description">
@@ -2418,7 +2416,6 @@ const renderStaffScheduleCell = (barber, hour) => {
               )}
             </section>
 
-
             <section className="auth-card booking-history customer-booking-history">
               <span className="gold-text">MY BOOKINGS</span>
               <h2>{tr('ประวัติการจอง', 'Booking History')}</h2>
@@ -2508,14 +2505,18 @@ const renderStaffScheduleCell = (barber, hour) => {
 
         {user && !isOwner && route === '/account' && customer && (
           <>
-            <div className={`customer-main-nav booking-customer-nav ${mobileCustomerNavOpen ? 'is-open' : ''}`} aria-label={tr('เมนูหลัก', 'Main navigation')}>
-              <button type="button" className="customer-mobile-menu-toggle" aria-expanded={mobileCustomerNavOpen} onClick={() => setMobileCustomerNavOpen(open => !open)}><span className="customer-hamburger" aria-hidden="true"><i/><i/><i/></span><span>{tr('\u0e40\u0e21\u0e19\u0e39\u0e2b\u0e25\u0e31\u0e01', 'Menu')}</span></button>
+            <button type="button" className="mobile-sidebar-toggle customer-mobile-sidebar-toggle" aria-label="Open navigation menu" aria-controls="customer-navigation" aria-expanded={mobileCustomerNavOpen} onClick={() => setMobileCustomerNavOpen(open => !open)}>
+              <span className="hamburger-lines" aria-hidden="true"><i /><i /><i /></span>
+            </button>
+            {mobileCustomerNavOpen && <button type="button" className="staff-sidebar-backdrop customer-sidebar-backdrop" aria-label="Close navigation menu" onClick={() => setMobileCustomerNavOpen(false)} />}
+            <aside id="customer-navigation" className={`customer-main-nav booking-customer-nav ${mobileCustomerNavOpen ? 'is-open' : ''}`} aria-label={tr('\u0e40\u0e21\u0e19\u0e39\u0e2b\u0e25\u0e31\u0e01', 'Main navigation')} onClick={(event) => { if (event.target.closest('button')) setMobileCustomerNavOpen(false) }}>
               <button onClick={() => navigate('/booking')}>{tr('จองคิว', 'Book Appointment')}</button>
               <button onClick={() => navigate('/products')}>{tr('สินค้า', 'Products')}</button>
               <button onClick={() => navigate('/cart')}>{tr('ตะกร้าสินค้า', 'Shopping Cart')}</button>
               <button className="active" onClick={() => navigate('/account')}>{tr('จัดการบัญชี', 'Account Management')}</button>
               <button className="customer-sidebar-logout" onClick={() => setShowLogoutConfirm(true)}>{tr('ออกจากระบบ', 'Sign Out')}</button>
-            </div>
+
+            </aside>
             <section className="hero customer-account-dashboard">
               <span className="gold-text">FADE MEMBER · ACCOUNT</span>
               <h2>{tr("จัดการบัญชี", 'Account Management')}</h2>
