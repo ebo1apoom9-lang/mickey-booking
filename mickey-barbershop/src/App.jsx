@@ -400,7 +400,6 @@ const loadBookings = useCallback(async () => {
       .from('bookings')
             .select(`
         id,
-        booking_code,
         service_name_snapshot,
         price_thb_snapshot,
         duration_minutes_snapshot,
@@ -1932,7 +1931,6 @@ const renderStaffScheduleCell = (barber, hour) => {
     <th>{tr('การบริการ', 'Service')}</th>
     <th>{tr('ชื่อช่าง', 'Barber')}</th>
     <th>{tr('วันเวลา', 'Date & Time')}</th>
-    <th>{tr('รหัสจอง', 'Booking ID')}</th>
     <th>{tr('สถานะ', 'Status')}</th>
     <th>{tr('การชำระเงิน', 'Payment')}</th>
     <th>{tr('ราคา', 'Price')}</th>
@@ -1945,7 +1943,6 @@ const renderStaffScheduleCell = (barber, hour) => {
       <td>{booking.service_name_snapshot || '-'}</td>
       <td>{booking.barber?.full_name || '-'}</td>
       <td>{formatDateTime(booking.starts_at, language)}</td>
-      <td>{booking.booking_code || '-'}</td>
       <td>{statusLabel(booking.status, language)}</td>
       <td>{booking.payment_status || '-'}</td>
       <td>{money(booking.price_thb_snapshot)}</td>
