@@ -92,6 +92,13 @@ useEffect(() => {
   const [mode, setMode] = useState('login')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [, setClockTick] = useState(0)
+
+  // Re-render schedule availability as time passes, without requiring a page refresh.
+  useEffect(() => {
+    const timer = window.setInterval(() => setClockTick((tick) => tick + 1), 15000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
@@ -129,6 +136,7 @@ const [accountSaving, setAccountSaving] = useState(false)
   const [scheduleDate, setScheduleDate] = useState(bangkokDate())
   const [selectedTime, setSelectedTime] = useState('')
   const [showBookingModal, setShowBookingModal] = useState(false)
+  const [dismissedBookingDurationNotice, setDismissedBookingDurationNotice] = useState(false)
   const [selectedStaffBooking, setSelectedStaffBooking] = useState(null)
   const [bookingResult, setBookingResult] = useState(null)
   const [publicAvailability, setPublicAvailability] = useState([])
@@ -223,6 +231,14 @@ return () => {
       }
 
       setStaffProfile(profile)
+
+      // An inactive account must not enter any role workspace.
+      if (profile?.is_active === false) {
+        setMessage(tr('บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อเจ้าของร้าน', 'This account is inactive. Please contact the shop owner.'))
+        setProfileLoading(false)
+        await supabase.auth.signOut()
+        return
+      }
 
      // Owner and barber accounts do not need a customer record.
 if (profile?.role === 'owner' || ['barber', 'baber'].includes(profile?.role)) {
@@ -926,12 +942,20 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     setLoading(true)
     setMessage('')
     try {
-      const { error } = await supabase.from('bookings').update(updates).eq('id', bookingId)
+      const { data, error } = await supabase
+        .from('bookings')
+        .update(updates)
+        .eq('id', bookingId)
+        .select('id')
+        .maybeSingle()
       if (error) throw error
+      if (!data?.id) throw new Error(tr('ไม่พบคิวหรือไม่มีสิทธิ์แก้ไข', 'Booking not found or you do not have permission to update it.'))
       setMessage(tr('อัปเดตคิวเรียบร้อยแล้ว', 'Booking updated.'))
       await loadOwnerBookings()
+      return true
     } catch (error) {
       setMessage(error.message || tr('ไม่สามารถอัปเดตคิวได้', 'Could not update booking.'))
+      return false
     } finally {
       setLoading(false)
     }
@@ -943,8 +967,28 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     if (!window.confirm('Cancel ' + customerName + "'s booking? This will release the time slot.")) return
     setLoading(true)
     try {
-      const { error } = await supabase.from('bookings').update({ status: 'Cancelled' }).eq('id', booking.id)
-      if (error) throw error
+      if (isOwner) {
+        const { error } = await supabase.rpc('owner_cancel_booking', {
+          p_booking_id: booking.id,
+          p_reason: 'Cancelled by shop owner',
+        })
+        if (error) throw error
+      } else {
+        const { data, error } = await supabase
+          .from('bookings')
+          .update({
+            status: 'Cancelled',
+            cancelled_at: new Date().toISOString(),
+            cancelled_by: user.id,
+            cancellation_reason: 'Cancelled by barber',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', booking.id)
+          .select('id')
+          .maybeSingle()
+        if (error) throw error
+        if (!data?.id) throw new Error(tr('ไม่พบคิวหรือไม่มีสิทธิ์ยกเลิก', 'Booking not found or you do not have permission to cancel it.'))
+      }
       setSelectedStaffBooking(prev => prev && String(prev.id) === String(booking.id) ? { ...prev, status: 'Cancelled' } : prev)
       setMessage(tr('\u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e04\u0e34\u0e27\u0e40\u0e23\u0e35\u0e22\u0e1a\u0e23\u0e49\u0e2d\u0e22\u0e41\u0e25\u0e49\u0e27', 'Booking cancelled successfully.'))
       await loadOwnerBookings()
@@ -1065,6 +1109,20 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     const opening = new Date(`${nextDate}T10:00:00+07:00`)
     if (starts < opening || starts <= new Date() || ends > closing) {
       setMessage(tr('เวลาใหม่ต้องอยู่ในเวลาทำการ 10:00–20:00 และเป็นเวลาในอนาคต', 'New time must be in the future and within business hours (10:00–20:00).'))
+      return
+    }
+    const weekday = new Date(nextDate + 'T12:00:00+07:00').getUTCDay()
+    if (shopClosedDays.includes(weekday)) {
+      setMessage(tr('วันที่เลือกเป็นวันปิดร้าน', 'The shop is closed on the selected date.'))
+      return
+    }
+    if (weeklyDaysOff.some((day) => String(day.barber_id) === String(booking.barber_id) && Number(day.weekday) === weekday)) {
+      setMessage(tr('ช่างคนนี้หยุดในวันที่เลือก', 'This barber is off on the selected date.'))
+      return
+    }
+    const blocked = staffTimeBlocks.some((block) => String(block.barber_id) === String(booking.barber_id) && starts < new Date(block.ends_at) && ends > new Date(block.starts_at))
+    if (blocked) {
+      setMessage(tr('ช่างถูก Block ในช่วงเวลานี้ กรุณาเลือกเวลาใหม่', 'This barber has blocked the selected time. Choose another time.'))
       return
     }
     const conflict = ownerBookings.some((other) => {
@@ -1218,6 +1276,23 @@ const scheduleHours = Array.from(
 const selectedWeekday = new Date(`${selectedDate}T12:00:00+07:00`).getUTCDay()
 const isSelectedDateShopClosed = shopClosedDays.includes(selectedWeekday)
 
+const isSelectedDurationWindowUnavailable = (() => {
+  const duration = Number(chosenService?.duration_minutes || 0)
+  if (duration <= 60 || !selectedTime || isSelectedDateShopClosed) return false
+  const start = new Date(selectedDate + 'T' + selectedTime + ':00+07:00')
+  if (start <= new Date()) return false
+  const end = new Date(start.getTime() + duration * 60000)
+  const closing = new Date(selectedDate + 'T20:00:00+07:00')
+  if (end > closing) return true
+  const eligibleBarbers = selectedBarber
+    ? barbers.filter((barber) => barber.id === selectedBarber)
+    : barbers
+  if (!eligibleBarbers.length) return false
+  return !eligibleBarbers.some((barber) => !publicAvailability.some((item) => {
+    if (item.barber_id !== barber.id) return false
+    return start < new Date(item.ends_at) && end > new Date(item.starts_at)
+  }))
+})()
 const isCustomerSlotAvailable = (barberId, hour) => {
   if (isSelectedDateShopClosed || availabilityLoading || availabilityError) return false
   const duration = Number(chosenService?.duration_minutes || 60)
@@ -1304,6 +1379,11 @@ const renderStaffScheduleCell = (barber, hour) => {
     )
   }
 
+  const scheduleSlotStart = new Date(`${scheduleDate}T${String(hour).padStart(2, '0')}:00:00+07:00`)
+  if (scheduleSlotStart <= new Date()) {
+    return <span className="staff-day-off-slot">CLOSED</span>
+  }
+
   return (
     <button
       type="button"
@@ -1334,14 +1414,14 @@ const renderStaffScheduleCell = (barber, hour) => {
   const todayCompletedBookings = todayOwnerBookings.filter((booking) => booking.status === 'Completed')
   const todayCancelledBookings = todayOwnerBookings.filter((booking) => booking.status === 'Cancelled')
   const todayNoShowBookings = todayOwnerBookings.filter((booking) => booking.status === 'No Show')
-  const todayRevenue = todayCompletedBookings.reduce(
+  const todayRevenue = todayCompletedBookings.filter((booking) => booking.payment_status === 'Paid').reduce(
     (total, booking) => total + Number(booking.price_thb_snapshot || 0),
     0
   )
   const monthCompletedBookings = completedOwnerBookings.filter((booking) =>
     bangkokDate(new Date(booking.starts_at)).startsWith(today.slice(0, 7))
   )
-  const monthRevenue = monthCompletedBookings.reduce(
+  const monthRevenue = monthCompletedBookings.filter((booking) => booking.payment_status === 'Paid').reduce(
     (total, booking) => total + Number(booking.price_thb_snapshot || 0),
     0
   )
@@ -1355,7 +1435,7 @@ const renderStaffScheduleCell = (barber, hour) => {
         revenue: 0,
       }
       groups[key].count += 1
-      groups[key].revenue += Number(booking.price_thb_snapshot || 0)
+      if (booking.payment_status === 'Paid') groups[key].revenue += Number(booking.price_thb_snapshot || 0)
       return groups
     }, {})
   ).sort((a, b) => b.count - a.count)
@@ -1364,7 +1444,7 @@ const renderStaffScheduleCell = (barber, hour) => {
     ? ownerBookings.filter((booking) => String(booking.customer?.id) === String(selectedCustomer.id))
     : []
   const selectedCustomerCompleted = selectedCustomerBookings.filter((booking) => booking.status === 'Completed')
-  const selectedCustomerSpend = selectedCustomerCompleted.reduce((sum, booking) => sum + Number(booking.price_thb_snapshot || 0), 0)
+  const selectedCustomerSpend = selectedCustomerCompleted.filter((booking) => booking.payment_status === 'Paid').reduce((sum, booking) => sum + Number(booking.price_thb_snapshot || 0), 0)
   const selectedCustomerLastVisit = selectedCustomerCompleted
     .slice().sort((a, b) => new Date(b.starts_at) - new Date(a.starts_at))[0]
   const selectedCustomerServices = Object.values(selectedCustomerCompleted.reduce((groups, booking) => {
@@ -1985,7 +2065,7 @@ const renderStaffScheduleCell = (barber, hour) => {
                         </div>
                         <div className="customer-profile-stats">
                           <div><span>{tr('ใช้บริการแล้ว', 'TOTAL VISITS')}</span><strong>{selectedCustomerCompleted.length}</strong><small>{tr('ครั้ง', 'visits')}</small></div>
-                          <div><span>{tr('ยอดใช้จ่ายสะสม', 'TOTAL SPENT')}</span><strong>{money(selectedCustomerSpend)}</strong><small>{tr('เฉพาะบริการที่เสร็จสิ้น', 'Completed services only')}</small></div>
+                          <div><span>{tr('ยอดใช้จ่ายสะสม', 'TOTAL SPENT')}</span><strong>{money(selectedCustomerSpend)}</strong><small>{tr('เฉพาะบริการที่ชำระเงินแล้ว', 'Paid completed services only')}</small></div>
                           <div><span>{tr('ใช้บริการล่าสุด', 'LAST VISIT')}</span><strong>{selectedCustomerLastVisit ? formatDateTime(selectedCustomerLastVisit.starts_at, language) : '-'}</strong><small>{tr('วันที่มาใช้บริการ', 'Most recent completed visit')}</small></div>
                         </div>
                         <div className="customer-profile-section">
@@ -2286,6 +2366,7 @@ const renderStaffScheduleCell = (barber, hour) => {
                       setPublicAvailability([])
                       setSelectedDate(event.target.value)
                       setSelectedTime('')
+                      setDismissedBookingDurationNotice(false)
                       setShowBookingModal(false)
                     }}
                     required
@@ -2322,8 +2403,11 @@ const renderStaffScheduleCell = (barber, hour) => {
                           {barbers.map((barber) => {
                             const time = String(hour).padStart(2, '0') + ':00'
                             const open = isCustomerSlotAvailable(barber.id, hour)
-                            const isPast = new Date(selectedDate + 'T' + time + ':00+07:00') <= new Date()
-                            const slotLabel = open && !isPast ? 'OPEN' : isSelectedDateShopClosed ? 'CLOSED' : 'UNAVAILABLE'
+                            const slotStart = new Date(selectedDate + 'T' + time + ':00+07:00')
+                            const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000)
+                            const isPast = slotStart <= new Date()
+                            const hasBooking = publicAvailability.some((item) => item.barber_id === barber.id && slotStart < new Date(item.ends_at) && slotEnd > new Date(item.starts_at))
+                            const slotLabel = isSelectedDateShopClosed || (isPast && !hasBooking) ? 'CLOSED' : open && !isPast ? 'OPEN' : 'UNAVAILABLE'
                             return (
                               <td key={barber.id}>
                                 <button
@@ -2334,6 +2418,7 @@ const renderStaffScheduleCell = (barber, hour) => {
                                     setSelectedTime(time)
                                     setSelectedService('')
                                     setSelectedBarber(barber.id)
+                                    setDismissedBookingDurationNotice(false)
                                     setMessage('')
                                     setShowBookingModal(true)
                                   }}
@@ -2364,7 +2449,7 @@ const renderStaffScheduleCell = (barber, hour) => {
                     <form onSubmit={handleBooking}>
                       <label>
                         {tr('เลือกบริการ', 'Choose Service')}
-                        <select value={selectedService} onChange={(event) => setSelectedService(event.target.value)} required>
+                        <select value={selectedService} onChange={(event) => { setSelectedService(event.target.value); setDismissedBookingDurationNotice(false) }} required>
                           <option value="">{tr('-- เลือกบริการ --', '-- Select Service --')}</option>
                           {services.map((service) => (
                             <option key={service.id} value={service.id}>
@@ -2375,7 +2460,7 @@ const renderStaffScheduleCell = (barber, hour) => {
                       </label>
                       <label>
                         {tr('เลือกช่าง', 'Choose Barber')}
-                        <select value={selectedBarber} onChange={(event) => setSelectedBarber(event.target.value)}>
+                        <select value={selectedBarber} onChange={(event) => { setSelectedBarber(event.target.value); setDismissedBookingDurationNotice(false) }}>
                           <option value="">{tr('ช่างคนไหนก็ได้ · ให้ระบบจัดสรร', 'Any Barber · Auto-assign')}</option>
                           {barbers.map((barber) => <option key={barber.id} value={barber.id}>{barber.full_name}</option>)}
                         </select>
@@ -2387,7 +2472,17 @@ const renderStaffScheduleCell = (barber, hour) => {
                           <span>{chosenService.duration_minutes} {tr('นาที', 'min')}</span>
                         </div>
                       )}
-                      {selectedService && selectedBarber && !isCustomerSlotAvailable(selectedBarber, Number(selectedTime.slice(0, 2))) && (
+                      {isSelectedDurationWindowUnavailable && !availabilityLoading && !availabilityError && !dismissedBookingDurationNotice && (
+                        <div className="booking-duration-notice" role="alert">
+                          <strong>{tr('ช่วงเวลานี้ไม่เพียงพอสำหรับบริการ Full Service', 'Not enough time for Full Service')}</strong>
+                          <p>{tr('บริการนี้ต้องใช้เวลา 2 ชั่วโมงต่อเนื่อง แต่ช่วงเวลาที่เลือกไม่มีเวลาว่างต่อเนื่องครบ 2 ชั่วโมงก่อนคิวถัดไปหรือเวลาปิดร้าน 20:00 น. กรุณาเลือกเวลาเริ่มต้นที่เร็วกว่านี้', 'This service requires two consecutive hours, but there is not a continuous two-hour opening before the next booking or the 20:00 shop closing time. Please choose an earlier time.')}</p>
+                          <div className="booking-duration-notice-actions">
+                            <button type="button" className="booking-duration-dismiss" onClick={() => setDismissedBookingDurationNotice(true)}>{tr('ปิดข้อความ', 'Close message')}</button>
+                            <button type="button" className="booking-duration-rebook" onClick={() => { setSelectedTime(''); setSelectedService(''); setDismissedBookingDurationNotice(false); setShowBookingModal(false); setMessage('') }}>{tr('จองใหม่อีกครั้ง', 'Book another time')}</button>
+                          </div>
+                        </div>
+                      )}
+                      {selectedService && selectedBarber && !isSelectedDurationWindowUnavailable && !isCustomerSlotAvailable(selectedBarber, Number(selectedTime.slice(0, 2))) && (
                         <p className="schedule-error">{tr('ช่างคนนี้ไม่ว่างในช่วงเวลานี้ กรุณาเลือกช่างคนอื่นหรือ Any Barber', 'This barber is unavailable for this time. Choose another barber or Any Barber.')}</p>
                       )}
                       <div className="booking-modal-actions">
@@ -2587,10 +2682,23 @@ const renderStaffScheduleCell = (barber, hour) => {
               <label>{tr('เปลี่ยนสถานะ', 'Change status')}
                 <select value={selectedStaffBooking.status || 'Confirmed'} disabled={loading} onChange={async (event) => {
                   const nextStatus = event.target.value
-                  await handleStaffBookingUpdate(selectedStaffBooking.id, { status: nextStatus })
-                  setSelectedStaffBooking({ ...selectedStaffBooking, status: nextStatus })
+                  if (nextStatus === 'Cancelled') {
+                    await handleStaffCancelBooking(selectedStaffBooking)
+                    return
+                  }
+                  const saved = await handleStaffBookingUpdate(selectedStaffBooking.id, { status: nextStatus })
+                  if (saved) setSelectedStaffBooking((previous) => previous ? { ...previous, status: nextStatus } : previous)
                 }}>
                   {['Confirmed', 'Checked In', 'In Progress', 'Completed', 'Cancelled', 'No Show'].map((status) => <option key={status} value={status}>{statusLabel(status, language)}</option>)}
+                </select>
+              </label>
+              <label>{tr('การชำระเงิน', 'Payment status')}
+                <select value={selectedStaffBooking.payment_status || 'Unpaid'} disabled={loading || ['Cancelled', 'No Show'].includes(selectedStaffBooking.status)} onChange={async (event) => {
+                  const nextPaymentStatus = event.target.value
+                  const saved = await handleStaffBookingUpdate(selectedStaffBooking.id, { payment_status: nextPaymentStatus })
+                  if (saved) setSelectedStaffBooking((previous) => previous ? { ...previous, payment_status: nextPaymentStatus } : previous)
+                }}>
+                  {['Unpaid', 'Paid', 'Refunded'].map((status) => <option key={status} value={status}>{status}</option>)}
                 </select>
               </label>
               <div className="staff-modal-actions">

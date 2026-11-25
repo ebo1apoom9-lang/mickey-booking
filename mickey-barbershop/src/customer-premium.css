@@ -1,4 +1,4 @@
-/* FADE BARBER STUDIO — Customer Experience / Modern Premium */
+/* FADE BARBER STUDIO โ€” Customer Experience / Modern Premium */
 :root {
   --cx-gold: #D4AF37;
   --cx-gold-soft: #E8D6A3;
@@ -256,6 +256,23 @@
   border-radius: 10px;
   background: #11120f;
 }
+.booking-duration-notice {
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid rgba(212,175,55,.42);
+  border-left: 3px solid var(--fade-gold, #D4AF37);
+  border-radius: 13px;
+  background: linear-gradient(135deg, rgba(212,175,55,.12), rgba(28,28,31,.92));
+  color: var(--fade-ivory, #F4F0E7);
+}
+.booking-duration-notice strong { display:block; color:var(--fade-champagne, #E8D6A3); font-size:14px; }
+.booking-duration-notice p { margin:8px 0 14px; color:#d0c7b7; font-size:13px; line-height:1.65; }
+.booking-duration-notice-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; }
+.booking-duration-notice-actions button { min-height:42px; padding:10px 16px; border-radius:10px; font-weight:700; cursor:pointer; }
+.booking-duration-dismiss { border:1px solid rgba(232,214,163,.38); background:rgba(255,255,255,.035); color:var(--fade-champagne, #E8D6A3); }
+.booking-duration-rebook { border:1px solid var(--fade-champagne, #E8D6A3); background:linear-gradient(135deg, var(--fade-champagne, #E8D6A3), var(--fade-gold, #D4AF37)); color:#0B0B0D; box-shadow:0 5px 18px rgba(212,175,55,.22); }
+.booking-duration-rebook:hover { filter:brightness(1.08); transform:translateY(-1px); }
+@media(max-width:520px) { .booking-duration-notice-actions { flex-direction:column-reverse; } .booking-duration-notice-actions button { width:100%; } }
 .unified-service-summary {
   border: 1px solid rgba(212,175,55,.22) !important;
   border-radius: 12px;
@@ -386,7 +403,7 @@
 }
 
 
-/* Customer booking timetable — refined editorial luxury */
+/* Customer booking timetable โ€” refined editorial luxury */
 .customer-schedule-scroll {
   position: relative;
   margin-top: 18px;
@@ -545,7 +562,7 @@
   .customer-schedule-table .schedule-slot { transition: none !important; }
 }
 
-/* FADE customer identity — aligned with the approved Modern Premium system */
+/* FADE customer identity โ€” aligned with the approved Modern Premium system */
 .app-shell:has(.booking-customer-nav) { --cx-gold:#D4AF37; --cx-gold-soft:#E8D6A3; --cx-line:rgba(212,175,55,.22); }
 .app-shell:has(.booking-customer-nav) .app-header > p { color:#E8D6A3; font-family:Georgia,"Times New Roman",serif; font-size:clamp(18px,2vw,22px); font-weight:600; letter-spacing:.28em; }
 .app-shell:has(.booking-customer-nav) .app-header > p::after { content:"BARBER STUDIO"; display:block; margin-top:4px; color:#8A8780; font:600 9px/1.4 Arial,sans-serif; letter-spacing:.3em; }
