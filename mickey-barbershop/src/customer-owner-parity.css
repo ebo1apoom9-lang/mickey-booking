@@ -116,3 +116,56 @@
   .app-shell .app-header > p::before,
   .app-shell .app-header > p::after { content: none !important; display: none !important; }
 }
+
+/* Unified mobile controls for Owner, Barber and Customer */
+@media (max-width: 760px) {
+  .app-shell .app-header {
+    position: static !important;
+    min-height: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .app-shell .app-header > p {
+    display: none !important;
+  }
+
+  .app-shell .app-header .language-switch {
+    position: fixed !important;
+    top: 14px !important;
+    right: 14px !important;
+    z-index: 152 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 46px !important;
+    margin: 0 !important;
+    padding: 4px !important;
+  }
+
+  .app-shell .mobile-sidebar-toggle,
+  .app-shell .customer-mobile-sidebar-toggle {
+    position: fixed !important;
+    top: 14px !important;
+    left: 14px !important;
+    right: auto !important;
+    z-index: 151 !important;
+    display: inline-flex !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+  }
+
+  .app-shell > .main {
+    padding-top: 78px !important;
+  }
+}
