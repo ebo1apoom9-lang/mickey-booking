@@ -935,6 +935,23 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
     }
   }
 
+  async function handleStaffCancelBooking(booking) {
+    if (!isStaffDashboard || !booking?.id || ['Cancelled', 'Completed', 'No Show'].includes(booking.status)) return
+    const customerName = booking.customer?.full_name || tr('\u0e25\u0e39\u0e01\u0e04\u0e49\u0e32', 'this customer')
+    if (!window.confirm('Cancel ' + customerName + "'s booking? This will release the time slot.")) return
+    setLoading(true)
+    try {
+      const { error } = await supabase.from('bookings').update({ status: 'Cancelled' }).eq('id', booking.id)
+      if (error) throw error
+      setSelectedStaffBooking(prev => prev && String(prev.id) === String(booking.id) ? { ...prev, status: 'Cancelled' } : prev)
+      setMessage(tr('\u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e04\u0e34\u0e27\u0e40\u0e23\u0e35\u0e22\u0e1a\u0e23\u0e49\u0e2d\u0e22\u0e41\u0e25\u0e49\u0e27', 'Booking cancelled successfully.'))
+      await loadOwnerBookings()
+    } catch (error) {
+      setMessage(error.message || tr('\u0e44\u0e21\u0e48\u0e2a\u0e32\u0e21\u0e32\u0e23\u0e16\u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e04\u0e34\u0e27\u0e44\u0e14\u0e49', 'Could not cancel booking.'))
+    } finally {
+      setLoading(false)
+    }
+  }
   async function handleToggleScheduleBlock(barberId, hour) {
     const existingBlock = getScheduleBlock(barberId, hour)
 
@@ -2546,6 +2563,16 @@ const renderStaffScheduleCell = (barber, hour) => {
                 <p><b>{tr('สถานะ', 'Status')}:</b> {statusLabel(selectedStaffBooking.status, language)}</p>
                 {selectedStaffBooking.customer?.phone && <p><b>{tr('โทรศัพท์', 'Phone')}:</b> {selectedStaffBooking.customer.phone}</p>}
               </div>
+              {!['Cancelled', 'Completed', 'No Show'].includes(selectedStaffBooking.status) && (
+                <button
+                  type="button"
+                  className="customer-profile-cancel"
+                  onClick={() => handleStaffCancelBooking(selectedStaffBooking)}
+                  disabled={loading}
+                >
+                  {tr('\u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e04\u0e34\u0e27\u0e19\u0e35\u0e49', 'Cancel this booking')}
+                </button>
+              )}
               <label>{tr('เปลี่ยนสถานะ', 'Change status')}
                 <select value={selectedStaffBooking.status || 'Confirmed'} disabled={loading} onChange={async (event) => {
                   const nextStatus = event.target.value
