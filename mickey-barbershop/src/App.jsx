@@ -1899,15 +1899,18 @@ const renderStaffScheduleCell = (barber, hour) => {
               )}
             </section>
             <section id="staff-schedule" className="auth-card staff-schedule-section">
-              <span className="gold-text">SHOP DAILY SCHEDULE</span>
+              <span className="gold-text">SHOP & BARBER DAILY SCHEDULE</span>
               <div className="staff-schedule-heading">
                 <div>
-                  <h2>{tr('ตารางงานช่างทุกคน', 'All Barbers Schedule')}</h2>
-                  <p>{tr('แถวแสดงเวลา คอลัมน์แสดงช่างทุกคน · เลือกช่องเพื่อดูหรือจัดการคิว', 'Time is shown by row, with each barber in a separate column.')}</p>
+                  <h2>{tr('ตารางคิวช่างและคิวร้าน', 'Shop & Barber Schedule')}</h2>
+                  <p>{tr('รวมคิวทุกคนไว้หน้าเดียว โดยแถวเป็นเวลาและคอลัมน์เป็นช่าง · คลิกคิวเพื่อจัดการ หรือกด + เพื่อ Block เวลา', 'All barbers in one view: time rows and barber columns. Select a booking to manage it, or press + to block a time.')}</p>
                 </div>
                 <label>{tr('วันที่', 'Date')}
                   <input type="date" value={scheduleDate} onChange={(event) => setScheduleDate(event.target.value)} />
                 </label>
+                <button type="button" className="refresh-button" onClick={() => { loadOwnerBookings(); loadStaffAvailability() }} disabled={loading}>
+                  {tr('รีเฟรชตาราง', 'Refresh Schedule')}
+                </button>
               </div>
               <div className="customer-schedule-scroll">
                 <table className="staff-schedule-table schedule-time-grid">
@@ -2025,53 +2028,6 @@ const renderStaffScheduleCell = (barber, hour) => {
 
               </>
             )}
-
-            {activeStaffPage === 'schedule' && (
-            <section className="auth-card booking-history">
-              <span className="gold-text">ALL BOOKINGS</span>
-              <h2>{tr('รายการจองของร้าน', 'All Shop Bookings')}</h2>
-              {ownerBookings.length === 0 && (
-               <p className="booking-note">
-  {tr(
-    'ยังไม่พบรายการจอง หรือบัญชีไม่มีสิทธิ์อ่านข้อมูล',
-    'No bookings found, or this account does not have permission to view them.'
-  )}
-</p>
-              )}
-
-<div className="owner-table-wrap">
-  <table className="owner-booking-table">
-
-<thead>
-  <tr>
-    <th>{tr('ชื่อลูกค้า', 'Customer')}</th>
-    <th>{tr('การบริการ', 'Service')}</th>
-    <th>{tr('ชื่อช่าง', 'Barber')}</th>
-    <th>{tr('วันเวลา', 'Date & Time')}</th>
-    <th>{tr('สถานะ', 'Status')}</th>
-    <th>{tr('การชำระเงิน', 'Payment')}</th>
-    <th>{tr('ราคา', 'Price')}</th>
-  </tr>
-</thead>
-<tbody>
-  {ownerBookings.map((booking) => (
-    <tr key={booking.id}>
-      <td>{booking.customer?.full_name || '-'}</td>
-      <td>{booking.service_name_snapshot || '-'}</td>
-      <td>{booking.barber?.full_name || '-'}</td>
-      <td>{formatDateTime(booking.starts_at, language)}</td>
-      <td>{statusLabel(booking.status, language)}</td>
-      <td>{booking.payment_status || '-'}</td>
-      <td>{money(booking.price_thb_snapshot)}</td>
-    </tr>
-  ))}
-</tbody>
- </table>
-</div>
-
-            </section>
-
-                        )}
 
             {activeStaffPage === 'customers' && (
               <section className="auth-card customer-management">
