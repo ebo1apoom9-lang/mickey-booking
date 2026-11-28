@@ -138,6 +138,14 @@ const [accountSaving, setAccountSaving] = useState(false)
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [dismissedBookingDurationNotice, setDismissedBookingDurationNotice] = useState(false)
   const [selectedStaffBooking, setSelectedStaffBooking] = useState(null)
+  const [showOwnerAddBooking, setShowOwnerAddBooking] = useState(false)
+  const [ownerWalkInName, setOwnerWalkInName] = useState('')
+  const [ownerWalkInPhone, setOwnerWalkInPhone] = useState('')
+  const [ownerWalkInEmail, setOwnerWalkInEmail] = useState('')
+  const [ownerWalkInService, setOwnerWalkInService] = useState('')
+  const [ownerWalkInBarber, setOwnerWalkInBarber] = useState('')
+  const [ownerWalkInTime, setOwnerWalkInTime] = useState('')
+  const [ownerWalkInSaving, setOwnerWalkInSaving] = useState(false)
   const [bookingResult, setBookingResult] = useState(null)
   const [publicAvailability, setPublicAvailability] = useState([])
   const [availabilityLoading, setAvailabilityLoading] = useState(false)
@@ -956,6 +964,54 @@ setMessage(tr('บันทึกข้อมูลสมาชิกเรี�
       return false
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleOwnerAddWalkInBooking(event) {
+    event.preventDefault()
+    if (!isOwner || ownerWalkInSaving) return
+    const service = services.find(item => String(item.id) === String(ownerWalkInService))
+    if (!service || !ownerWalkInBarber || !ownerWalkInTime) {
+      setMessage(tr('กรุณาเลือกบริการ ช่าง และเวลาให้ครบถ้วน', 'Please select a service, barber and time.'))
+      return
+    }
+    const today = bangkokDate()
+    const startsAt = new Date(today + 'T' + ownerWalkInTime + ':00+07:00')
+    const endsAt = new Date(startsAt.getTime() + Number(service.duration_minutes || 60) * 60000)
+    const shopClose = new Date(today + 'T20:00:00+07:00')
+    if (endsAt > shopClose) {
+      setMessage(tr('บริการนี้สิ้นสุดเกินเวลาปิดร้าน 20:00 น.', 'This service would finish after the 20:00 closing time.'))
+      return
+    }
+    setOwnerWalkInSaving(true)
+    setMessage('')
+    try {
+      const { data, error } = await supabase.rpc('create_owner_walkin_booking', {
+        p_customer_name: ownerWalkInName.trim(),
+        p_customer_phone: ownerWalkInPhone.trim(),
+        p_customer_email: ownerWalkInEmail.trim(),
+        p_service_id: ownerWalkInService,
+        p_starts_at: startsAt.toISOString(),
+        p_barber_id: ownerWalkInBarber,
+      })
+      if (error) throw error
+      const created = Array.isArray(data) ? data[0] : data
+      if (!created?.booking_id) {
+        throw new Error(tr('ระบบไม่ได้ส่งข้อมูลยืนยันการเพิ่มคิวกลับมา', 'The booking system did not return confirmation details.'))
+      }
+      setMessage(tr('เพิ่มคิวหน้าร้านเรียบร้อยแล้ว', 'Walk-in booking added successfully.') + (created.queue_number ? ' · ' + tr('คิวที่', 'Queue') + ' ' + created.queue_number : ''))
+      setOwnerWalkInName('')
+      setOwnerWalkInPhone('')
+      setOwnerWalkInEmail('')
+      setOwnerWalkInService('')
+      setOwnerWalkInBarber('')
+      setOwnerWalkInTime('')
+      setShowOwnerAddBooking(false)
+      await Promise.all([loadOwnerBookings(), loadStaffAvailability()])
+    } catch (error) {
+      setMessage(error?.message || tr('ไม่สามารถเพิ่มคิวได้ กรุณาลองอีกครั้ง', 'Could not add the booking. Please try again.'))
+    } finally {
+      setOwnerWalkInSaving(false)
     }
   }
 
@@ -1779,6 +1835,68 @@ const renderStaffScheduleCell = (barber, hour) => {
               <article className="owner-kpi-card"><span>{tr('ยกเลิก', 'CANCELLED')}</span><strong><AnimatedNumber value={todayCancelledBookings.length} /></strong><small>{tr('รายการ', 'appointments')}</small></article>
               <article className="owner-kpi-card"><span>{tr('ไม่มาตามนัด', 'NO SHOW')}</span><strong><AnimatedNumber value={todayNoShowBookings.length} /></strong><small>{tr('รายการ', 'appointments')}</small></article>
               <article className="owner-kpi-card owner-kpi-revenue"><span>{tr('รายได้วันนี้', "TODAY'S REVENUE")}</span><strong>{money(todayRevenue)}</strong><small>{tr('เฉพาะบริการที่เสร็จสิ้น', 'completed services only')}</small></article>
+            </section>
+            <section className="auth-card owner-add-booking-section">
+              <div className="staff-schedule-heading">
+                <div>
+                  <span className="gold-text">OWNER · WALK-IN BOOKING</span>
+                  <h2>{tr('เพิ่มคิวหน้าร้าน', 'Add Walk-in Booking')}</h2>
+                  <p>{tr('สำหรับเจ้าของร้านเพิ่มคิวลูกค้าที่หน้าร้านในวันนี้', 'Add an in-store customer booking for today.')}</p>
+                </div>
+                <button type="button" onClick={() => { setShowOwnerAddBooking(value => !value); setMessage('') }} disabled={ownerWalkInSaving}>
+                  {showOwnerAddBooking ? tr('ปิดฟอร์ม', 'Close Form') : tr('+ เพิ่มคิว', '+ Add Booking')}
+                </button>
+              </div>
+              {showOwnerAddBooking && (
+                <form className="customer-edit-form owner-add-booking-form" onSubmit={handleOwnerAddWalkInBooking}>
+                  <label>{tr('ชื่อลูกค้า', 'Customer name')}
+                    <input value={ownerWalkInName} onChange={event => setOwnerWalkInName(event.target.value)} placeholder={tr('กรอกชื่อลูกค้า', 'Enter customer name')} required maxLength={120} disabled={ownerWalkInSaving} />
+                  </label>
+                  <label>{tr('เบอร์โทรศัพท์', 'Phone number')}
+                    <input type="tel" value={ownerWalkInPhone} onChange={event => setOwnerWalkInPhone(event.target.value)} placeholder="08XXXXXXXX" required minLength={9} maxLength={20} disabled={ownerWalkInSaving} />
+                  </label>
+                  <label>{tr('อีเมล (ไม่บังคับ)', 'Email (optional)')}
+                    <input type="email" value={ownerWalkInEmail} onChange={event => setOwnerWalkInEmail(event.target.value)} placeholder="customer@email.com" disabled={ownerWalkInSaving} />
+                  </label>
+                  <label>{tr('บริการ', 'Service')}
+                    <select value={ownerWalkInService} onChange={event => { setOwnerWalkInService(event.target.value); setOwnerWalkInTime('') }} required disabled={ownerWalkInSaving}>
+                      <option value="">{tr('เลือกบริการ', 'Select service')}</option>
+                      {services.map(service => <option key={service.id} value={service.id}>{service.name} · {money(service.price_thb)} · {service.duration_minutes} {tr('นาที', 'min')}</option>)}
+                    </select>
+                  </label>
+                  <label>{tr('ช่างตัดผม', 'Barber')}
+                    <select value={ownerWalkInBarber} onChange={event => setOwnerWalkInBarber(event.target.value)} required disabled={ownerWalkInSaving}>
+                      <option value="">{tr('เลือกช่าง', 'Select barber')}</option>
+                      {barbers.map(barber => <option key={barber.id} value={barber.id}>{barber.full_name}</option>)}
+                    </select>
+                  </label>
+                  <label>{tr('เวลาเริ่มคิววันนี้', "Today's start time")}
+                    <select value={ownerWalkInTime} onChange={event => setOwnerWalkInTime(event.target.value)} required disabled={ownerWalkInSaving || !ownerWalkInService}>
+                      <option value="">{tr('เลือกเวลา', 'Select time')}</option>
+                      {Array.from({ length: 20 }, (_, index) => {
+                        const minutes = 10 * 60 + index * 30
+                        const hour = Math.floor(minutes / 60)
+                        const minute = minutes % 60
+                        const time = ('0' + hour).slice(-2) + ':' + ('0' + minute).slice(-2)
+                        const service = services.find(item => String(item.id) === String(ownerWalkInService))
+                        const finish = minutes + Number(service?.duration_minutes || 60)
+                        const startDate = new Date(bangkokDate() + 'T' + time + ':00+07:00')
+                        const allowed = finish <= 20 * 60 && startDate.getTime() >= Date.now() - 30 * 60 * 1000
+                        return allowed ? <option key={time} value={time}>{time}</option> : null
+                      })}
+                    </select>
+                  </label>
+                  <div className="staff-modal-actions">
+                    <button type="submit" disabled={ownerWalkInSaving || !services.length || !barbers.length}>
+                      {ownerWalkInSaving ? tr('กำลังเพิ่มคิว...', 'Adding booking...') : tr('ยืนยันเพิ่มคิว', 'Add Booking')}
+                    </button>
+                    <button type="button" className="secondary" onClick={() => setShowOwnerAddBooking(false)} disabled={ownerWalkInSaving}>{tr('ยกเลิก', 'Cancel')}</button>
+                  </div>
+                  {!services.length && <p className="booking-note">{tr('ยังไม่มีบริการที่เปิดใช้งาน', 'No active services are available.')}</p>}
+                  {!barbers.length && <p className="booking-note">{tr('ยังไม่มีรายชื่อช่างที่เปิดใช้งาน', 'No active barbers are available.')}</p>}
+                  <p className="booking-note">{tr('ระบบจะตรวจสอบวันหยุด เวลาทำงาน และคิวซ้ำก่อนบันทึก · รับคิววันนี้เท่านั้น', 'The system checks shop hours, days off and schedule conflicts before saving. Today only.')}</p>
+                </form>
+              )}
             </section>
             <section id="staff-schedule" className="auth-card staff-schedule-section">
               <span className="gold-text">SHOP DAILY SCHEDULE</span>
