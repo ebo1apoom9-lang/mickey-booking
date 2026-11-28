@@ -138,6 +138,7 @@ const [accountSaving, setAccountSaving] = useState(false)
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [dismissedBookingDurationNotice, setDismissedBookingDurationNotice] = useState(false)
   const [selectedStaffBooking, setSelectedStaffBooking] = useState(null)
+  const [selectedScheduleAction, setSelectedScheduleAction] = useState(null)
   const [showOwnerAddBooking, setShowOwnerAddBooking] = useState(false)
   const [ownerWalkInName, setOwnerWalkInName] = useState('')
   const [ownerWalkInPhone, setOwnerWalkInPhone] = useState('')
@@ -1424,7 +1425,7 @@ const renderStaffScheduleCell = (barber, hour) => {
       <button
         type="button"
         className="staff-blocked-slot"
-        onClick={() => handleToggleScheduleBlock(barber.id, hour)}
+        onClick={() => isOwner ? setSelectedScheduleAction({ barber, hour, blocked: true }) : handleToggleScheduleBlock(barber.id, hour)}
         disabled={loading}
         title={tr('กดเพื่อปลด Block', 'Click to unblock this time')}
       >
@@ -1442,7 +1443,7 @@ const renderStaffScheduleCell = (barber, hour) => {
     <button
       type="button"
       className="staff-open-slot"
-      onClick={() => handleToggleScheduleBlock(barber.id, hour)}
+      onClick={() => isOwner ? setSelectedScheduleAction({ barber, hour, blocked: false }) : handleToggleScheduleBlock(barber.id, hour)}
       disabled={loading}
       title={tr('กดเพื่อ Block เวลานี้', 'Click to block this time')}
     >
@@ -1848,7 +1849,7 @@ const renderStaffScheduleCell = (barber, hour) => {
                 </button>
               </div>
               {showOwnerAddBooking && (
-                <form className="customer-edit-form owner-add-booking-form" onSubmit={handleOwnerAddWalkInBooking}>
+                <form id="owner-add-booking-form" className="customer-edit-form owner-add-booking-form" onSubmit={handleOwnerAddWalkInBooking}>
                   <label>{tr('ชื่อลูกค้า', 'Customer name')}
                     <input value={ownerWalkInName} onChange={event => setOwnerWalkInName(event.target.value)} placeholder={tr('กรอกชื่อลูกค้า', 'Enter customer name')} required maxLength={120} disabled={ownerWalkInSaving} />
                   </label>
@@ -1903,7 +1904,7 @@ const renderStaffScheduleCell = (barber, hour) => {
               <div className="staff-schedule-heading">
                 <div>
                   <h2>{tr('ตารางคิวช่างและคิวร้าน', 'Shop & Barber Schedule')}</h2>
-                  <p>{tr('รวมคิวทุกคนไว้หน้าเดียว โดยแถวเป็นเวลาและคอลัมน์เป็นช่าง · คลิกคิวเพื่อจัดการ หรือกด + เพื่อ Block เวลา', 'All barbers in one view: time rows and barber columns. Select a booking to manage it, or press + to block a time.')}</p>
+                  <p>{tr('รวมคิวทุกคนไว้หน้าเดียว โดยแถวเป็นเวลาและคอลัมน์เป็นช่าง · คลิกคิวเพื่อจัดการ หรือกด + เพื่อ Block เวลา', 'All barbers in one view: time rows and barber columns. Select a booking to manage it, or press + to choose an action.')}</p>
                 </div>
                 <label>{tr('วันที่', 'Date')}
                   <input type="date" value={scheduleDate} onChange={(event) => setScheduleDate(event.target.value)} />
@@ -2709,6 +2710,26 @@ const renderStaffScheduleCell = (barber, hour) => {
           </>
         )}
         {user && !isOwner && customer && ['/products', '/cart'].includes(route) && <CustomerShopPage tr={tr} navigate={navigate} route={route} onLogout={() => setShowLogoutConfirm(true)} />}
+
+        {isOwner && selectedScheduleAction && (
+          <div className="staff-booking-overlay" onClick={(event) => { if (event.target === event.currentTarget) setSelectedScheduleAction(null) }}>
+            <section className="staff-booking-modal" role="dialog" aria-modal="true" aria-label="Manage time slot">
+              <button className="staff-modal-close" type="button" onClick={() => setSelectedScheduleAction(null)}>{'\u00D7'}</button>
+              <span className="gold-text">SCHEDULE ACTIONS</span>
+              <h2>{selectedScheduleAction.barber.full_name}</h2>
+              <p>{scheduleDate} ? {String(selectedScheduleAction.hour).padStart(2, '0')}:00</p>
+              {selectedScheduleAction.blocked ? (
+                <button type="button" disabled={loading} onClick={async () => { await handleToggleScheduleBlock(selectedScheduleAction.barber.id, selectedScheduleAction.hour); setSelectedScheduleAction(null) }}>Unblock this time</button>
+              ) : (
+                <div className="staff-modal-actions">
+                  {scheduleDate === bangkokDate() && <button type="button" onClick={() => { setOwnerWalkInBarber(selectedScheduleAction.barber.id); setOwnerWalkInTime(String(selectedScheduleAction.hour).padStart(2, '0') + ':00'); setShowOwnerAddBooking(true); setSelectedScheduleAction(null); document.getElementById('owner-add-booking-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }}>Add Walk-in Booking</button>}
+                  <button type="button" className="secondary" disabled={loading} onClick={async () => { await handleToggleScheduleBlock(selectedScheduleAction.barber.id, selectedScheduleAction.hour); setSelectedScheduleAction(null) }}>Block this time</button>
+                </div>
+              )}
+              <button type="button" className="secondary" onClick={() => setSelectedScheduleAction(null)}>Close</button>
+            </section>
+          </div>
+        )}
 
         {selectedStaffBooking && (
           <div className="staff-booking-overlay" onClick={(event) => { if (event.target === event.currentTarget) setSelectedStaffBooking(null) }}>
